@@ -11,7 +11,8 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := "admin:12345678@tcp(localhost:3306)/simoldes_db?charset=utf8mb4&parseTime=True&loc=Local"
+	// usuario: admin | senha: 12345678 | ip original | porta 3306
+	dsn := "admin:12345678@tcp(192.168.100.8:3306)/simoldes_db?charset=utf8mb4&parseTime=True&loc=Local"
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
