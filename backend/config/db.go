@@ -1,18 +1,27 @@
 package config
 
 import (
-	"fmt"
 	"log"
+	"os"
 
+	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
+func LoadEnv() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Erro ao carregar o arquivo .env")
+	}
+}
+
 func ConnectDatabase() {
-	// usuario: admin | senha: 12345678 | ip original | porta 3306
-	dsn := "admin:12345678@tcp(192.168.100.8:3306)/simoldes_db?charset=utf8mb4&parseTime=True&loc=Local"
+	LoadEnv()
+
+	dsn := os.Getenv("DATABASE_URL")
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
@@ -20,5 +29,5 @@ func ConnectDatabase() {
 	}
 
 	DB = database
-	fmt.Println("Banco de dados conectado com sucesso!")
+	log.Println("Banco de dados conectado com sucesso!")
 }
