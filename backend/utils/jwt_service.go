@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -21,7 +23,7 @@ func GenerateJWT(userID int, role string) (string, error) {
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(2 * time.Hour)), // Expira em 2h
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(4 * time.Hour)), // Expira em 4h
 		},
 	}
 
@@ -31,17 +33,19 @@ func GenerateJWT(userID int, role string) (string, error) {
 }
 
 func ValidateJWT(tokenString string) (*Claims, error) {
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
 
-	if err != nil {
-		return nil, err
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid token")
 	}
 
 	claims, ok := token.Claims.(*Claims)
-	if !ok || !token.Valid {
-		return nil, jwt.ErrSignatureInvalid
+	if !ok {
+		return nil, errors.New("invalid token claims")
 	}
 
 	return claims, nil

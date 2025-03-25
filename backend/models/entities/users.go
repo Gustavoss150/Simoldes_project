@@ -7,7 +7,7 @@ import (
 type User struct {
 	gorm.Model
 	Registration int    `gorm:"uniqueIndex" json:"registration"` // Matrícula
-	Name         string `json:"name"`                            // Email único
+	Name         string `json:"name"`                            // Nome do usuário
 	Password     string `json:"-"`                               // Nunca expor a senha no JSON
 	Role         string `json:"role"`                            // "user", "admin"
 	Department   string `json:"department,omitempty"`            // Setor do usuário

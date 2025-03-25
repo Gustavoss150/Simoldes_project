@@ -2,11 +2,13 @@ package main
 
 import (
 	"github.com/Gustavoss150/simoldes-backend/config"
+	"github.com/Gustavoss150/simoldes-backend/migrations"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	config.ConnectDatabase()
+	migrations.Migrate()
 
 	r := gin.Default()
 

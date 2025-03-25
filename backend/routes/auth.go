@@ -1,11 +1,14 @@
 package routes
 
 import (
-	"simoldes-project/backend/controllers"
-
+	"github.com/Gustavoss150/simoldes-backend/controllers"
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRoutes(r *gin.Engine) {
-	r.POST("/login", controllers.Login)
+func SetupRouter() *gin.Engine {
+	r := gin.Default()
+
+	r.POST("/login", controllers.LoginHandler)
+
+	return r
 }
