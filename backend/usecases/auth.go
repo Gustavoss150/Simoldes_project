@@ -9,6 +9,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+func CreateUser(user entities.User) error {
+	if err := config.DB.Create(&user).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func Login(registration int, password string) (string, error) {
 	var user entities.User
 

@@ -5,7 +5,7 @@ import (
 )
 
 type User struct {
-	gorm.Model
+	gorm.Model          // gorm adiciona campos padrão: ID, CreatedAt, UpdatedAt, DeletedAt (não usar nas próximas)
 	Registration int    `gorm:"uniqueIndex" json:"registration"` // Matrícula
 	Name         string `json:"name"`                            // Nome do usuário
 	Password     string `json:"-"`                               // Nunca expor a senha no JSON
