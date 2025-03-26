@@ -8,10 +8,13 @@ import (
 )
 
 func main() {
+
 	config.ConnectDatabase()
 	migrations.Migrate()
 
-	r := routes.SetupRouter()
+	r := gin.Default()
+
+	routes.AuthRoutes(r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "API working"})

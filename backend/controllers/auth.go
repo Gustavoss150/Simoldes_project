@@ -17,9 +17,14 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	if user.Password == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Password is required"})
+		return
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error hashing password"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating password hash"})
 		return
 	}
 

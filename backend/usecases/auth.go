@@ -22,6 +22,7 @@ func Login(registration int, password string) (string, error) {
 	if err := config.DB.Where("registration = ?", registration).First(&user).Error; err != nil {
 		return "", errors.New("user not found")
 	}
+
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return "", errors.New("incorrect password")
 	}
