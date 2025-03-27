@@ -3,15 +3,15 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/Gustavoss150/simoldes-backend/models/contracts"
-	"github.com/Gustavoss150/simoldes-backend/models/entities"
+	"github.com/Gustavoss150/simoldes-backend/contracts"
+	"github.com/Gustavoss150/simoldes-backend/models"
 	"github.com/Gustavoss150/simoldes-backend/usecases"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func RegisterUser(c *gin.Context) {
-	var user entities.User
+	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return

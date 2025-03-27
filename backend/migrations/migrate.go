@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"github.com/Gustavoss150/simoldes-backend/config"
-	"github.com/Gustavoss150/simoldes-backend/models/entities"
+	"github.com/Gustavoss150/simoldes-backend/models"
 )
 
 func Migrate() {
-	err := config.DB.AutoMigrate(&entities.User{})
+	err := config.DB.AutoMigrate(&models.User{})
 	if err != nil {
 		log.Fatal("error migrating: " + err.Error())
 	}

@@ -14,7 +14,8 @@ func main() {
 
 	r := gin.Default()
 
-	routes.AuthRoutes(r)
+	routes.AuthRouter(r)
+	routes.UserRouter(r)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "API working"})
