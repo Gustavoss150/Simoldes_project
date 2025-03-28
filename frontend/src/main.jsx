@@ -1,3 +1,5 @@
+console.log("O React está rodando!");
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./routes"; // Importando as rotas de "routes/index.jsx"

@@ -3,7 +3,7 @@ package middleware
 import (
 	"net/http"
 
-	auth "github.com/Gustavoss150/simoldes-backend/utils"
+	"github.com/Gustavoss150/simoldes-backend/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,7 +21,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := auth.ValidateJWT(tokenString)
+		claims, err := utils.ValidateJWT(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			c.Abort()

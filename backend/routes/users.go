@@ -6,10 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func UserRouter(r *gin.Engine) *gin.Engine {
-	r.Use(middleware.AuthMiddleware()) // Aplica o middleware de autenticação
+func UserRouter(router *gin.Engine) {
+	r := router.Group("/api/users")
 	{
-		r.PUT("/users/:id", controllers.UpdateUser)
+		r.Use(middleware.AuthMiddleware()) // Aplica o middleware de autenticação
+
+		r.PUT("/:id", controllers.UpdateUser)
 	}
-	return r
 }
