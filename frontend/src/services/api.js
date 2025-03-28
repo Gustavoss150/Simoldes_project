@@ -3,6 +3,8 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const TOKEN_KEY = import.meta.env.VITE_TOKEN_KEY;
 
+console.log("🔍 API Base URL carregada:", API_BASE_URL);
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

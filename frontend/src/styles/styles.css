@@ -1,0 +1,48 @@
+body {
+    background-color:#A3D1C6;
+    font-family:Josefin Sans, sans-serif;
+    color: rgb(73, 73, 73);
+}
+
+.navBar {
+    font-family: Josefin Sans, sans-serif;
+    font-size: 30px;
+    text-align: center;
+    background-color: #3D8D7A;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.container {
+    text-align: center;
+    margin-top: 50px;
+}
+
+h1 {
+    font-size: 40px;
+    color: #3D8D7A;
+}
+
+p {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.btn {
+    font-size: 20px;
+    text-decoration: none;
+    background-color: #3D8D7A;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background-color: #2B6B5F;
+}
