@@ -1,6 +1,6 @@
 ﻿# Simoldes_project
 
 <div>
-    <h1>**go run main.go** Para rodar o backend</h1>
-    <h2>**npm run dev** Para rodar o frontend</h2>
+    <p><strong>go run main.go</strong> Para rodar o backend</p>
+    <p><strong>npm run dev</strong>  Para rodar o frontend</p>
 </div>
