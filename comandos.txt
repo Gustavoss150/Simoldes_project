@@ -1,0 +1,9 @@
+git status // Confere estado atual da branch
+git add . // Para adicionar mudanças 
+git commit -m "Mensagem" // Para salvar com uma mensagem 
+git push origin <branch> // Envia mudanças para determinada branch 
+git pull origin <branch> // Puxa mudanças de determinada branch 
+git checkout <branch> // Troca para uma branch existente 
+git checkout -b <branch> // Cria uma nova branch e ja troca para ela 
+cd <diretorio> // Acessa em determinado diretorio 
+cd .. // Volta para o diretorio anterior
