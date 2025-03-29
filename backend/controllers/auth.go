@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
@@ -42,9 +44,12 @@ func LoginUser(c *gin.Context) {
 	var req contracts.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
+		fmt.Println("Erro ao vincular dados JSON:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
+
+	log.Printf("Tentando login com registration: %d e password: %s", req.Registration, req.Password)
 
 	token, err := usecases.Login(req.Registration, req.Password)
 	if err != nil {

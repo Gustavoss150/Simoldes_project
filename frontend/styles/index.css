@@ -1,0 +1,80 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: Josefin Sans, sans-serif;
+    color: rgb(54, 54, 54);
+    height: 100vh;
+}
+
+/* Container vertical para páginas de autenticação */
+.authDesign {
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+}
+
+.authDesign .left,
+.authDesign .right {
+    height: 100%;
+    width: 50%; /* Cada lado ocupa 50% da largura */
+    padding: 20px;
+    margin: 0;
+}
+
+.authDesign .left {
+    background-color: #267a40; /* Cor do lado esquerdo */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.authDesign .left h1 {
+    font-size: 50px;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.authDesign .left p {
+    font-size: 25px;
+    margin-bottom: 20px;
+}
+
+.authDesign .right {
+    background-color: #ffffff; /* Cor do lado direito */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.authDesign .right p {
+    padding: 20px;
+    font-size: 30px;
+}
+
+/* Botões e formulários aplicados no container */
+.btn {
+    font-size: 20px;
+    text-decoration: none;
+    background-color: #267a40;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 200px;
+    text-align: center;
+}
+  
+.btn:hover {
+    background-color: #2b6b5f;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

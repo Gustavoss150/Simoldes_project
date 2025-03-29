@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #c5dfc7;
+    font-family: "Josefin Sans", sans-serif;
+    color: rgb(54, 54, 54);
+    padding: 30px;
+    height: 100vh;
+}
+
+html, body {
+    height: 100%;
+}
+
+/* Navbar global */
+.navbar {
+    background-color: #267a40;
+    padding: 15px 0;
+    text-align: center;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar h1 {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+button {
+    background-color: #267a40;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    height: 8vh;
+    
+}
+  
+button:hover {
+    background-color: #2B6B5F;
+    transform: translateY(-2px);
+}
+  
+button:active {
+    transform: translateY(0);
+}
+  
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    width: 50%;
+    margin-bottom: 10px;
+    transition: border-color 0.3s ease;
+}
+  
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+    border-color: #267a40;
+    outline: none;
+}
+
+select {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 2px solid #ccc;
+    width: 100%;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+} 
+
+select:focus {
+    border-color: #267a40;
+    background-color: #fff;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+
+select:hover {
+    border-color: #2B6B5F;
+    background-color: #e5f4e1;
+}
+  
+option {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #333;
+    transition: background-color 0.3s ease;
+}
+  
+option:hover {
+    background-color: #267a40;
+    color: white;
+}
