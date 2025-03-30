@@ -23,7 +23,7 @@ func GenerateJWT(userID int, role string) (string, error) {
 		Role:   role,
 		RegisteredClaims: jwt.RegisteredClaims{
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(4 * time.Hour)), // Expira em 4h
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(9 * time.Hour)), // Expira em 9h
 		},
 	}
 

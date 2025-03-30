@@ -42,7 +42,7 @@ func UpdateUser(
 		user.Department = *updateRequest.Department
 	}
 
-	if err = usersRepo.UpdateUser(user); err != nil {
+	if err = usersRepo.SaveUser(user); err != nil {
 		return errors.New("error updating user")
 	}
 

@@ -2,11 +2,11 @@ package controllers
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
 	"github.com/Gustavoss150/simoldes-backend/models"
+	usersrepo "github.com/Gustavoss150/simoldes-backend/repositories/users_repository"
 	"github.com/Gustavoss150/simoldes-backend/usecases"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -29,11 +29,16 @@ func RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error generating password hash"})
 		return
 	}
-
 	user.Password = string(hashedPassword)
 
-	if err := usecases.CreateUser(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving user"})
+	usersRepo, err := usersrepo.InitUsersDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing user database"})
+		return
+	}
+
+	if err := usecases.CreateUser(usersRepo, user); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving user: " + err.Error()})
 		return
 	}
 
@@ -49,9 +54,19 @@ func LoginUser(c *gin.Context) {
 		return
 	}
 
-	log.Printf("Tentando login com registration: %d e password: %s", req.Registration, req.Password)
+	registration := req.Registration
+	if registration == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Registration number is required"})
+		return
+	}
 
-	token, err := usecases.Login(req.Registration, req.Password)
+	usersRepo, err := usersrepo.InitUsersDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing user database"})
+		return
+	}
+
+	token, err := usecases.Login(usersRepo, req.Registration, req.Password)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
