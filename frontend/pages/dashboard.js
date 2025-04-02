@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import api from "../utils/axios";
 import Sidebar from "../components/Sidebar";
-import Link from "next/link"; // Certifique-se de importar o Link
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
@@ -24,13 +23,6 @@ export default function Dashboard() {
                 });
                 setUserData(response.data);
 
-                // Se o usuário for admin, carregue a lista de todos os usuários
-                if (response.data.role === 'admin') {
-                    const usersResponse = await api.get(`/users/`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    setUsersList(usersResponse.data);
-                }
             } catch (err) {
                 setError("Erro ao carregar os dados do usuário.");
                 console.error("Erro na API:", err);
@@ -61,23 +53,6 @@ export default function Dashboard() {
                 <section className="dashboard-content mt-4">
                     <h2 className="text-xl font-semibold">Simoldes PCP</h2>
                     {error && <p className="text-red-500">{error}</p>}
-
-                    {/* Lista de usuários para admins */}
-                    {userData?.role === 'admin' && (
-                        <div className="mt-4">
-                            <h3 className="text-lg font-medium">Lista de Usuários</h3>
-                            <ul>
-                                {usersList.map((user) => (
-                                    <li key={user.id} className="my-2">
-                                        <span>{user.name} - {user.registration}</span>
-                                        <Link href={`/users/${user.id}`} className="ml-4 text-blue-600">
-                                            Editar
-                                        </Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
                 </section>
             </main>
         </div>
