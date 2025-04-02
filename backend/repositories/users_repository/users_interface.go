@@ -7,5 +7,6 @@ import (
 type UsersRepository interface {
 	GetUserByRegistration(registration int) (*models.User, error)
 	GetUserByID(userID int) (*models.User, error)
+	GetAllUsers() ([]*models.User, error)
 	SaveUser(user *models.User) error
 }

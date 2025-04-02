@@ -10,6 +10,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func GetUserProfile(c *gin.Context) {
+	userID, exists := c.Get("userID") // Pega o ID do token JWT
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	usersRepo, err := usersrepo.InitUsersDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to initialize repository"})
+		return
+	}
+
+	user, err := usecases.GetUserProfile(usersRepo, userID.(int))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+func GetAllUsers(c *gin.Context) {
+	role, _ := c.Get("role")
+
+	if role != "admin" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "access denied"})
+		return
+	}
+
+	usersRepo, err := usersrepo.InitUsersDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to initialize repository"})
+		return
+	}
+
+	users, err := usersRepo.GetAllUsers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch users"})
+		return
+	}
+
+	c.JSON(http.StatusOK, users)
+}
+
 func UpdateUser(c *gin.Context) {
 	// Recupera o valor de "userID" do contexto, que já é um int
 	tokenUserIDInterface, exists := c.Get("userID")
