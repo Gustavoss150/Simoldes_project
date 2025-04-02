@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "../utils/axios";
 
-const UserUpdateForm = ({ user, isAdmin }) => {
+const UserUpdateForm = ({ user, isAdmin, onClose, onUpdateSuccess }) => {
     const [updatedUser, setUpdatedUser] = useState(user);
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [newPasswordSuccess, setNewPasswordSuccess] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [isFormOpen, setIsFormOpen] = useState(false); // Estado para controlar visibilidade do formulário de dados
-    const [isPasswordFormOpen, setIsPasswordFormOpen] = useState(false); // Estado para controlar visibilidade do formulário de senha
+    const [activeForm, setActiveForm] = useState(null); // 'data' ou 'password'
+
+    // Atualiza o estado quando o user prop muda
+    useEffect(() => {
+        setUpdatedUser(user);
+        setPassword("");
+        setConfirmPassword("");
+        setError("");
+        setSuccess("");
+    }, [user]);
 
     const handleChange = (e) => {
         setUpdatedUser({
@@ -26,139 +33,170 @@ const UserUpdateForm = ({ user, isAdmin }) => {
         setConfirmPassword(e.target.value);
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmitData = async (e) => {
         e.preventDefault();
+        setError("");
+        setSuccess("");
 
-        // Se for um usuário comum, ele só pode atualizar seus próprios dados
-        if (!isAdmin && updatedUser.id !== user.id) {
-            setError("Você não pode editar dados de outro usuário.");
+        try {
+            const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY);
+            
+            // Remove a senha do objeto se existir (não queremos enviar no update de dados)
+            const { password: _, ...userData } = updatedUser;
+            
+            await api.put(`/users/${updatedUser.id}`, userData, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            setSuccess("Dados atualizados com sucesso!");
+            onUpdateSuccess && onUpdateSuccess();
+        } catch (err) {
+            setError("Erro ao atualizar os dados.");
+            console.error("Erro ao atualizar usuário:", err);
+        }
+    };
+
+    const handleSubmitPassword = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        if (!password || !confirmPassword) {
+            setError("Por favor, preencha ambos os campos de senha.");
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError("As senhas não coincidem.");
             return;
         }
 
         try {
             const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY);
-
-            // Se a senha foi informada, inclui na atualização do usuário
-            if (password || confirmPassword) {
-                if (!password || !confirmPassword) {
-                    setError("Por favor, preencha ambos os campos de senha.");
-                    return;
-                }
-
-                if (password !== confirmPassword) {
-                    setError("As senhas não coincidem.");
-                    return;
-                }
-
-                updatedUser.password = password;
-            }
-
-            // Envia os dados atualizados (dados gerais + senha, caso tenha sido preenchida)
-            await api.put(`/users/${updatedUser.id}`, updatedUser, {
+            
+            await api.put(`/users/${updatedUser.id}`, {
+                ...updatedUser,
+                password: password
+            }, {
                 headers: { Authorization: `Bearer ${token}` },
             });
 
-            setSuccess("Usuário atualizado com sucesso!");
-            setError("");  // Limpa erro anterior
-            setIsFormOpen(false); // Fecha o formulário de dados
+            setSuccess("Senha atualizada com sucesso!");
+            setPassword("");
+            setConfirmPassword("");
+            onUpdateSuccess && onUpdateSuccess();
         } catch (err) {
-            setError("Erro ao atualizar o usuário.");
-            console.error("Erro ao atualizar usuário:", err);
+            setError("Erro ao atualizar a senha.");
+            console.error("Erro ao atualizar senha:", err);
         }
     };
 
     return (
-        <div>
-            {/* Botão de editar (exibido quando o formulário de dados estiver fechado) */}
-            {!isFormOpen && !isPasswordFormOpen && (
+        <div className="bg-white p-4 rounded shadow-md mb-4">
+            <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-semibold">{user.name}</h3>
+                {onClose && (
+                    <button 
+                        onClick={onClose}
+                        className="text-gray-500 hover:text-gray-700"
+                    >
+                        ×
+                    </button>
+                )}
+            </div>
+
+            {/* Botões de ação */}
+            <div className="flex gap-2 mb-4">
                 <button
-                    className="bg-blue-600 text-white p-2 rounded mt-4"
-                    onClick={() => setIsFormOpen(true)} // Abre o formulário de dados
+                    className={`px-4 py-2 rounded ${activeForm === 'data' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setActiveForm('data')}
                 >
                     Editar Dados
                 </button>
-            )}
+                <button
+                    className={`px-4 py-2 rounded ${activeForm === 'password' ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
+                    onClick={() => setActiveForm('password')}
+                >
+                    Editar Senha
+                </button>
+            </div>
+
+            {/* Mensagens de status */}
+            {error && <p className="text-red-500 mb-2">{error}</p>}
+            {success && <p className="text-green-500 mb-2">{success}</p>}
 
             {/* Formulário de edição de dados */}
-            {isFormOpen && (
-                <form onSubmit={handleSubmit} className="mt-4">
-                    <h3 className="text-lg font-semibold">Editar {user.name}</h3>
-                    {error && <p className="text-red-500">{error}</p>}
-                    {success && <p className="text-green-500">{success}</p>}
+            {activeForm === 'data' && (
+                <form onSubmit={handleSubmitData}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nome</label>
+                            <input
+                                type="text"
+                                name="name"
+                                value={updatedUser.name || ''}
+                                onChange={handleChange}
+                                className="w-full p-2 border rounded mt-1"
+                            />
+                        </div>
 
-                    <div className="mt-2">
-                        <label htmlFor="name" className="block">Nome</label>
-                        <input
-                            type="text"
-                            name="name"
-                            value={updatedUser.name}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded mt-1"
-                        />
+                        <div>
+                            <label htmlFor="department" className="block text-sm font-medium text-gray-700">Departamento</label>
+                            <input
+                                type="text"
+                                name="department"
+                                value={updatedUser.department || ''}
+                                onChange={handleChange}
+                                className="w-full p-2 border rounded mt-1"
+                            />
+                        </div>
                     </div>
 
-                    <div className="mt-2">
-                        <label htmlFor="department" className="block">Departamento</label>
-                        <input
-                            type="text"
-                            name="department"
-                            value={updatedUser.department}
-                            onChange={handleChange}
-                            className="w-full p-2 border rounded mt-1"
-                        />
-                    </div>
-
-                    {/* Botão de confirmação */}
                     <div className="mt-4">
-                        <button type="submit" className="bg-blue-600 text-white p-2 rounded">
+                        <button 
+                            type="submit" 
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
                             Salvar Dados
                         </button>
                     </div>
                 </form>
             )}
 
-            {/* Botão para editar senha */}
-            {!isPasswordFormOpen && (
-                <button
-                    className="bg-green-600 text-white p-2 rounded mt-4"
-                    onClick={() => setIsPasswordFormOpen(true)} // Abre o formulário de senha
-                >
-                    Editar Senha
-                </button>
-            )}
-
             {/* Formulário de alteração de senha */}
-            {isPasswordFormOpen && (
-                <form onSubmit={handleSubmit} className="mt-4">
-                    <h3 className="text-lg font-semibold">Alterar Senha</h3>
-                    {error && <p className="text-red-500">{error}</p>}
-                    {newPasswordSuccess && <p className="text-green-500">{newPasswordSuccess}</p>}
+            {activeForm === 'password' && (
+                <form onSubmit={handleSubmitPassword}>
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Nova Senha</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={password}
+                                onChange={handlePasswordChange}
+                                className="w-full p-2 border rounded mt-1"
+                                placeholder="Nova senha"
+                            />
+                        </div>
 
-                    <div className="mt-2">
-                        <label htmlFor="password" className="block">Nova Senha</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            className="w-full p-2 border rounded mt-1"
-                            placeholder="Nova senha"
-                        />
+                        <div>
+                            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Confirmar Nova Senha</label>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                value={confirmPassword}
+                                onChange={handleConfirmPasswordChange}
+                                className="w-full p-2 border rounded mt-1"
+                                placeholder="Confirme a nova senha"
+                            />
+                        </div>
                     </div>
 
-                    <div className="mt-2">
-                        <label htmlFor="confirmPassword" className="block">Confirmar Nova Senha</label>
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            value={confirmPassword}
-                            onChange={handleConfirmPasswordChange}
-                            className="w-full p-2 border rounded mt-1"
-                            placeholder="Confirme a nova senha"
-                        />
-                    </div>
                     <div className="mt-4">
-                        <button type="submit" className="bg-green-600 text-white p-2 rounded">
+                        <button 
+                            type="submit" 
+                            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                        >
                             Salvar Senha
                         </button>
                     </div>

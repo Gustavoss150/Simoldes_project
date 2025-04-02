@@ -67,7 +67,7 @@ const Sidebar = () => {
                     top: 0;
                     width: 250px;
                     height: 100vh;
-                    background: #267a40;
+                    background:rgba(38, 122, 65, 0.96);
                     color: white;
                     padding: 20px;
                     transition: left 0.3s ease-in-out;

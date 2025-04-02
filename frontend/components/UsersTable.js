@@ -1,24 +1,23 @@
+// components/UsersTable.js
 const UsersTable = ({ users, onUserSelect }) => {
     return (
-        <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead className="bg-gray-800 text-white">
+        <table className="userTable">
+            <thead>
                 <tr>
-                    <th className="py-3 px-4 text-left">Nome</th>
-                    <th className="py-3 px-4 text-left">Matrícula</th>
-                    <th className="py-3 px-4 text-left">Departamento</th>
-                    <th className="py-3 px-4 text-left">Ações</th>
+                    <th>Nome</th>
+                    <th>Departamento</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {users.map((user) => (
-                    <tr key={user.id} className="border-b hover:bg-gray-100">
-                        <td className="py-3 px-4">{user.name}</td>
-                        <td className="py-3 px-4">{user.registration}</td>
-                        <td className="py-3 px-4">{user.department}</td>
-                        <td className="py-3 px-4">
-                            <button 
-                                onClick={() => onUserSelect(user.id)} 
-                                className="text-blue-600 hover:text-blue-800"
+                    <tr key={user.id}>
+                        <td>{user.name}</td>
+                        <td>{user.department}</td>
+                        <td>
+                            <button
+                                onClick={() => onUserSelect(user.id)}
+                                className="actionButton bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-3 py-1 rounded text-sm"
                             >
                                 Editar
                             </button>

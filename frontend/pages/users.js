@@ -9,8 +9,9 @@ import styles from '../styles/Users.module.css';
 export default function Users() {
     const [userData, setUserData] = useState(null);
     const [usersList, setUsersList] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null); // Estado para armazenar o usuário selecionado para edição
+    const [selectedUser, setSelectedUser] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [updateSuccess, setUpdateSuccess] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -23,7 +24,6 @@ export default function Users() {
                 setUserData(response.data);
                 setIsAdmin(response.data.role === "admin");
 
-                // Se for admin, carrega a lista de usuários
                 if (response.data.role === "admin") {
                     const usersResponse = await api.get("/users/", {
                         headers: { Authorization: `Bearer ${token}` },
@@ -37,11 +37,19 @@ export default function Users() {
         };
 
         fetchUserData();
-    }, [router]);
+    }, [router, updateSuccess]);
 
     const handleUserSelect = (userId) => {
         const user = usersList.find((user) => user.id === userId);
-        setSelectedUser(user); // Atualiza o estado com o usuário selecionado
+        setSelectedUser(user);
+    };
+
+    const handleCloseForm = () => {
+        setSelectedUser(null);
+    };
+
+    const handleUpdateSuccess = () => {
+        setUpdateSuccess(prev => !prev); // Alterna o estado para forçar atualização
     };
 
     return (
@@ -50,26 +58,40 @@ export default function Users() {
             <div className={styles.mainContent}>
                 <h2 className={styles.title}>Gerenciamento de Usuários</h2>
 
-                {userData && <UserUpdateForm user={userData} />}
-
-                {isAdmin && (
-                    <div className={styles.tableContainer}>
-                        <h3 className={styles.title}>Lista de Usuários</h3>
-                        <UsersTable 
-                            users={usersList} 
-                            onUserSelect={handleUserSelect}  
+                {userData && (
+                    <div className={styles.userSection}>
+                        <h3 className={styles.subtitle}>Meus Dados</h3>
+                        <UserUpdateForm 
+                            user={userData} 
+                            onUpdateSuccess={handleUpdateSuccess}
                         />
                     </div>
                 )}
 
-                {selectedUser && (
-                    <div className={styles.editContainer}>
-                        <h3 className={styles.title}>Editar Usuário: {selectedUser.name}</h3>
-                        <UserUpdateForm user={selectedUser} />
+                {isAdmin && (
+                    <div className={styles.tableSection}>
+                        <div className={styles.tableContainer}>
+                            <h3 className={styles.title}>Lista de Usuários</h3>
+                            <UsersTable 
+                                users={usersList} 
+                                onUserSelect={handleUserSelect}  
+                            />
+                        </div>
+                        
+                        {/* Container de edição à direita */}
+                        {selectedUser && (
+                            <div className={styles.editFormContainer}>
+                                <UserUpdateForm 
+                                    user={selectedUser} 
+                                    isAdmin={true}
+                                    onClose={handleCloseForm}
+                                    onUpdateSuccess={handleUpdateSuccess}
+                                />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </div>
     );
 }
-
