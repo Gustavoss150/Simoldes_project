@@ -16,22 +16,71 @@ html, body {
     height: 100%;
 }
 
-/* Navbar global */
-.navbar {
+.sidebar {
+    width: 250px;
     background-color: #267a40;
-    padding: 15px 0;
-    text-align: center;
-    width: 100%;
+    color: white;
+    padding: 20px;
+    height: 100vh;
     position: fixed;
-    top: 0;
     left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    list-style: none;
+    width: 100%;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s;
+}
+
+.sidebar li:hover {
+    background: #2B6B5F;
+}
+
+.dashboard-container {
+    display: flex;
+    width: 100%;
+}
+
+.dashboard-main {
+    margin-left: 250px;
+    padding: 20px;
+    width: calc(100% - 250px);
+}
+
+.dashboard-header {
+    background-color: #e5f4e1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.dashboard-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.navbar h1 {
-    color: white;
-    font-size: 24px;
+.error-message {
+    color: rgba(255, 0, 0, 0.705);
     font-weight: bold;
+    margin-top: 10px;
 }
 
 button {

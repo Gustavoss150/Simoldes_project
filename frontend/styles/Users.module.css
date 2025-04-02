@@ -1,0 +1,64 @@
+/* Ajuste para ocupar toda a tela */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Estiliza o conteúdo principal */
+.mainContent {
+    flex: 1;
+    padding: 70px;
+    background-color: #f5f5f5;
+}
+
+.title {
+    margin: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.tableContainer {
+    margin-top: 20px;
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Estilização da tabela */
+.userTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.userTable th, 
+.userTable td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+.userTable th {
+    background-color: #267a40;
+    color: white;
+}
+
+.userTable tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.userTable tr:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilização do formulário de edição */
+.editContainer {
+    margin-top: 20px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
