@@ -8,7 +8,15 @@ import (
 )
 
 func Migrate() {
-	err := config.DB.AutoMigrate(&models.User{})
+	err := config.DB.AutoMigrate(
+		&models.User{},
+		&models.Moldes{},
+		&models.Componentes{},
+		&models.Processos{},
+		&models.Maquinas{},
+		&models.Programacao{},
+		&models.ChegadaAcos{},
+	)
 	if err != nil {
 		log.Fatal("error migrating: " + err.Error())
 	}
