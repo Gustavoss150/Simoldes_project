@@ -14,7 +14,7 @@ func Migrate() {
 		&models.Componentes{},
 		&models.Processos{},
 		&models.Maquinas{},
-		&models.Programacao{},
+		&models.Programacoes{},
 		&models.ChegadaAcos{},
 	)
 	if err != nil {

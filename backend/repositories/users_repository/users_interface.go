@@ -1,8 +1,6 @@
 package usersrepo
 
-import (
-	"github.com/Gustavoss150/simoldes-backend/models"
-)
+import "github.com/Gustavoss150/simoldes-backend/models"
 
 type UsersRepository interface {
 	GetUserByRegistration(registration int) (*models.User, error)
