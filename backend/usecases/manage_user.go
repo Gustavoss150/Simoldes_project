@@ -48,3 +48,17 @@ func UpdateUser(
 
 	return nil
 }
+
+func DeleteUser(usersRepo usersrepo.UsersRepository, targetUserID int) error {
+	user, err := usersRepo.GetUserByID(targetUserID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
+	if !user.IsActive {
+		return errors.New("user is already inactive")
+	}
+
+	user.IsActive = false // Soft delete
+	return usersRepo.SaveUser(user)
+}

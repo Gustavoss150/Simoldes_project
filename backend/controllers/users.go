@@ -98,3 +98,33 @@ func UpdateUser(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "User updated successfully"})
 }
+
+func DeleteUserByID(c *gin.Context) {
+	userIDParam := c.Param("id")
+	targetUserID, err := strconv.Atoi(userIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user ID"})
+		return
+	}
+
+	userRole := c.GetString("role")
+
+	if userRole != "admin" {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "only administrators can delete users"})
+		return
+	}
+
+	usersRepo, err := usersrepo.InitUsersDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to initialize users repository"})
+		return
+	}
+
+	err = usecases.DeleteUser(usersRepo, targetUserID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}

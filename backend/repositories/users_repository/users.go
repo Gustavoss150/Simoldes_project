@@ -42,8 +42,8 @@ func (r *usersRepository) GetUserByID(userID int) (*models.User, error) {
 
 func (r *usersRepository) GetAllUsers() ([]*models.User, error) {
 	var users []*models.User
-	if err := r.DB.Find(&users).Error; err != nil {
-		return nil, errors.New("error retrieving all users: " + err.Error())
+	if err := r.DB.Where("is_active = ?", true).Find(&users).Error; err != nil {
+		return nil, errors.New("error retrieving active users: " + err.Error())
 	}
 	return users, nil
 }

@@ -31,3 +31,11 @@ func (r *moldsRepository) Get(moldCode string) (*models.Moldes, error) {
 	}
 	return &mold, nil
 }
+
+func (r *moldsRepository) GetAll() ([]*models.Moldes, error) {
+	var molds []*models.Moldes
+	if err := r.DB.Find(&molds).Error; err != nil {
+		return nil, errors.New("error retrieving all molds: " + err.Error())
+	}
+	return molds, nil
+}
