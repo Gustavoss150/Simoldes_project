@@ -1,6 +1,9 @@
+import 'primereact/resources/themes/lara-light-green/theme.css'; // ou outra theme
+import 'primereact/resources/primereact.min.css';
+import 'primeicons/primeicons.css';
 import '../styles/globals.css';  // Importando estilos globais
 import '../styles/index.css';    // Importando estilos principais
-import '../styles/Users.module.css'
+import '../styles/sidebar.css';
 
 import { useRouter } from 'next/router';
 

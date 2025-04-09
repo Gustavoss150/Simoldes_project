@@ -16,6 +16,7 @@ html, body {
     height: 100%;
 }
 
+/* Sidebar e dashboard */
 .sidebar {
     width: 250px;
     background-color: #267a40;
@@ -81,84 +82,4 @@ html, body {
     color: rgba(255, 0, 0, 0.705);
     font-weight: bold;
     margin-top: 10px;
-}
-
-button {
-    background-color: #267a40;
-    color: white;
-    font-size: 16px;
-    padding: 12px 24px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    height: 8vh;
-    
-}
-  
-button:hover {
-    background-color: #2B6B5F;
-    transform: translateY(-2px);
-}
-  
-button:active {
-    transform: translateY(0);
-}
-  
-input[type="text"],
-input[type="password"],
-input[type="email"],
-textarea {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 50%;
-    margin-bottom: 10px;
-    transition: border-color 0.3s ease;
-}
-  
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-textarea:focus {
-    border-color: #267a40;
-    outline: none;
-}
-
-select {
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 2px solid #ccc;
-    width: 100%;
-    background-color: #fff;
-    color: #333;
-    transition: all 0.3s ease;
-    margin-bottom: 10px;
-} 
-
-select:focus {
-    border-color: #267a40;
-    background-color: #fff;
-    color: #333;
-    transition: background-color 0.3s ease;
-}
-
-select:hover {
-    border-color: #2B6B5F;
-    background-color: #e5f4e1;
-}
-  
-option {
-    padding: 10px;
-    font-size: 16px;
-    background-color: #fff;
-    color: #333;
-    transition: background-color 0.3s ease;
-}
-  
-option:hover {
-    background-color: #267a40;
-    color: white;
 }
