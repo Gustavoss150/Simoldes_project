@@ -30,6 +30,7 @@ type Componentes struct {
 	Name           string    `json:"name"`
 	Material       string    `json:"material"`
 	Quantity       int       `json:"quantity"`
+	Steps          int       `json:"steps,omitempty"`
 	Status         bool      `json:"status"`                     // true para concluído
 	Archive3DModel string    `json:"archive_3d_model,omitempty"` // URL or path to the 3D model file
 	CreatedAt      time.Time `json:"created_at"`
@@ -41,7 +42,7 @@ type Processos struct {
 	MoldeCodigo   string        `gorm:"size:12;index" json:"molde_codigo"`   // foreign key to Moldes
 	ComponentesID string        `gorm:"size:12;index" json:"componentes_id"` // foreign key to Componentes
 	Description   string        `json:"description"`
-	Step          string        `json:"step"`
+	StepID        string        `gorm:"size:12;index" json:"step_id"`
 	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','completed');not null" json:"status"`
 	MaquinaID     string        `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
 	BeginDate     time.Time     `json:"begin_date"`
@@ -49,6 +50,16 @@ type Processos struct {
 	Notes         string        `json:"notes,omitempty"`
 	CreatedAt     time.Time     `json:"created_at"`
 	UpdatedAt     time.Time     `json:"updated_at"`
+}
+
+type Etapas struct {
+	ID          string    `gorm:"size:12;primaryKey" json:"id"`
+	Name        string    `json:"name"` // Ex: "Corte bruto", "Acabamento", etc.
+	Description string    `json:"description"`
+	Order       int       `json:"order"`     // Número da etapa na sequência
+	IsActive    bool      `json:"is_active"` // Etapas descontinuadas, etc
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 type Maquinas struct {
@@ -65,11 +76,12 @@ type Programacoes struct {
 	MoldeCodigo   string    `gorm:"size:12;index" json:"molde_codigo"`         // foreign key to Moldes
 	ComponentesID string    `gorm:"size:12;index" json:"componentes_id"`       // foreign key to Componentes
 	MaquinaID     string    `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
-	Step          string    `json:"step,omitempty"`
+	StepID        string    `gorm:"size:12;index" json:"step_id"`              // foreign key para Etapas
 	Description   string    `json:"description,omitempty"`
 	Date          time.Time `json:"date"`        // data da programação
 	Programmer    string    `json:"programador"` // nome do programador
 	UpdatedAt     time.Time `json:"updated_at"`
+	Script        string    `json:"script,omitempty"` // URL or path to CNC script
 }
 
 type ChegadaAcos struct {

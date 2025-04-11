@@ -42,12 +42,13 @@ CREATE TABLE `maquinas` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Tabela: processos
+-- simoldes_db.processos definição
+
 CREATE TABLE `processos` (
   `id` varchar(12) NOT NULL,
   `molde_codigo` varchar(12) DEFAULT NULL,
   `componentes_id` varchar(12) DEFAULT NULL,
   `description` longtext,
-  `step` longtext,
   `status` enum('not started','in process','completed') NOT NULL,
   `maquina_id` varchar(12) DEFAULT NULL,
   `begin_date` datetime(3) DEFAULT NULL,
@@ -55,13 +56,28 @@ CREATE TABLE `processos` (
   `notes` longtext,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `step_id` varchar(12) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_processos_molde_codigo` (`molde_codigo`),
   KEY `idx_processos_componentes_id` (`componentes_id`),
   KEY `idx_processos_maquina_id` (`maquina_id`),
+  KEY `idx_processos_step_id` (`step_id`),
   CONSTRAINT `fk_processos_componente` FOREIGN KEY (`componentes_id`) REFERENCES `componentes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_processos_etapa` FOREIGN KEY (`step_id`) REFERENCES `etapas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_processos_maquina` FOREIGN KEY (`maquina_id`) REFERENCES `maquinas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_processos_molde` FOREIGN KEY (`molde_codigo`) REFERENCES `moldes` (`codigo`) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- Tabela: etapas
+CREATE TABLE `etapas` (
+  `id` varchar(12) NOT NULL,
+  `name` longtext,
+  `description` longtext,
+  `order` bigint DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `created_at` datetime(3) DEFAULT NULL,
+  `updated_at` datetime(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Tabela: programacoes
@@ -70,19 +86,23 @@ CREATE TABLE `programacoes` (
   `molde_codigo` varchar(12) DEFAULT NULL,
   `componentes_id` varchar(12) DEFAULT NULL,
   `maquina_id` varchar(12) DEFAULT NULL,
-  `step` longtext,
   `description` longtext,
   `date` datetime(3) DEFAULT NULL,
   `programmer` longtext,
   `updated_at` datetime(3) DEFAULT NULL,
+  `step_id` varchar(12) DEFAULT NULL,
+  `script` longtext,
   PRIMARY KEY (`id`),
   KEY `idx_programacoes_maquina_id` (`maquina_id`),
   KEY `idx_programacoes_molde_codigo` (`molde_codigo`),
   KEY `idx_programacoes_componentes_id` (`componentes_id`),
+  KEY `idx_programacoes_step_id` (`step_id`),
   CONSTRAINT `fk_programacoes_componentes` FOREIGN KEY (`componentes_id`) REFERENCES `componentes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_programacoes_etapa` FOREIGN KEY (`step_id`) REFERENCES `etapas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_programacoes_maquina` FOREIGN KEY (`maquina_id`) REFERENCES `maquinas` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_programacoes_molde` FOREIGN KEY (`molde_codigo`) REFERENCES `moldes` (`codigo`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 -- Tabela: chegada_acos
 CREATE TABLE `chegada_acos` (
   `id` varchar(12) NOT NULL,

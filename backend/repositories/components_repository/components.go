@@ -1,4 +1,4 @@
-package componentsRepo
+package componentsrepo
 
 import (
 	"errors"

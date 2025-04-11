@@ -13,6 +13,7 @@ func Migrate() {
 		&models.Moldes{},
 		&models.Componentes{},
 		&models.Processos{},
+		&models.Etapas{},
 		&models.Maquinas{},
 		&models.Programacoes{},
 		&models.ChegadaAcos{},

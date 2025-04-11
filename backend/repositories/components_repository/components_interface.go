@@ -1,4 +1,4 @@
-package componentsRepo
+package componentsrepo
 
 import "github.com/Gustavoss150/simoldes-backend/models"
 
