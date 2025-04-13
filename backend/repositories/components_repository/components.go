@@ -43,12 +43,29 @@ func (r *componentsRepository) GetByID(id string) (*models.Componentes, error) {
 	return &component, nil
 }
 
-func (r *componentsRepository) GetByMold(moldCode string) ([]*models.Componentes, error) {
+func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error) {
 	var components []*models.Componentes
-	if err := r.DB.Where("molde_codigo = ?", moldCode).Find(&components).Error; err != nil {
-		return nil, err
+	if err := r.DB.
+		Where("molde_codigo = ?", moldCode).
+		Find(&components).
+		Limit(limit).
+		Offset(offset).
+		Error; err != nil {
+		return nil, errors.New("error retrieving all mold components: " + err.Error())
 	}
 	return components, nil
+}
+
+func (r *componentsRepository) CountByMold(moldCode string) (int64, error) {
+	var count int64
+	if err := r.DB.
+		Model(&models.Componentes{}).
+		Where("molde_codigo = ?", moldCode).
+		Count(&count).
+		Error; err != nil {
+		return 0, errors.New("error counting components by mold: " + err.Error())
+	}
+	return count, nil
 }
 
 func (r *componentsRepository) Delete(id string) error {

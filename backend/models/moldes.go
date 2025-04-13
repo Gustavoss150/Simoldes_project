@@ -22,6 +22,7 @@ type Moldes struct {
 	DeliveryDate time.Time     `json:"delivery_date"`
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`
+	IsActive     bool          `json:"is_active"`
 }
 
 type Componentes struct {

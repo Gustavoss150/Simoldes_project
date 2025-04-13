@@ -37,8 +37,8 @@ func CreateMoldProject(
 		}
 
 		// 3. Criar componentes
+		validComponentIDs := make(map[string]bool)
 		for _, compReq := range moldProjectRequest.Componentes {
-			// Verificar se os dados essenciais estão presentes
 			if compReq.ID == "" || compReq.Name == "" {
 				return fmt.Errorf("missing required field in component")
 			}
@@ -48,11 +48,12 @@ func CreateMoldProject(
 				Material:       compReq.Material,
 				Quantity:       compReq.Quantity,
 				Archive3DModel: compReq.Archive3DModel,
-				MoldeCodigo:    mold.Codigo, // associação automática
+				MoldeCodigo:    mold.Codigo,
 			}
 			if err := tx.Save(&component).Error; err != nil {
 				return fmt.Errorf("error creating component: %w", err)
 			}
+			validComponentIDs[component.ID] = true
 		}
 
 		// 4. Criar processos
@@ -61,6 +62,15 @@ func CreateMoldProject(
 			if procReq.ComponentesID == "" {
 				return fmt.Errorf("missing ComponentesID in process")
 			}
+
+			if _, exists := validComponentIDs[procReq.ComponentesID]; !exists {
+				return fmt.Errorf("component %s is not linked to mold %s", procReq.ComponentesID, mold.Codigo)
+			}
+
+			if err := ValidateOrCreateStep(processRepo, procReq.StepID, procReq.StepName); err != nil {
+				return err
+			}
+
 			process := models.Processos{
 				ID:            procReq.ID,
 				ComponentesID: procReq.ComponentesID,
@@ -73,6 +83,7 @@ func CreateMoldProject(
 				Notes:         procReq.Notes,
 				MoldeCodigo:   mold.Codigo, // associação automática
 			}
+
 			if err := tx.Save(&process).Error; err != nil {
 				return fmt.Errorf("error creating process: %w", err)
 			}
