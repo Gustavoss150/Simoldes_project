@@ -40,10 +40,6 @@ func (r *cncRepository) GetAllMachs() ([]*models.Maquinas, error) {
 	return machines, nil
 }
 
-func (r *cncRepository) DeleteMach(id string) error {
-	return r.DB.Delete(&models.Maquinas{}, "id = ?", id).Error
-}
-
 func (r *cncRepository) SaveProgramming(programming *models.Programacoes) error {
 	return r.DB.Save(programming).Error
 }
@@ -72,6 +68,14 @@ func (r *cncRepository) GetProgrammingByComponent(componentCode string) ([]*mode
 	return programming, nil
 }
 
-func (r *cncRepository) DeleteProgramming(id string) error {
-	return r.DB.Delete(&models.Programacoes{}, "id = ?", id).Error
+func (r *cncRepository) ValidateComponentWithMold(componentID string, moldCode string) (bool, error) {
+	var count int64
+	if err := r.DB.
+		Model(&models.Componentes{}).
+		Where("id = ? AND molde_codigo = ?", componentID, moldCode).
+		Count(&count).
+		Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

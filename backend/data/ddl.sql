@@ -4,13 +4,14 @@
 CREATE TABLE `moldes` (
   `codigo` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `description` longtext,
-  `status` enum('not started','in process','completed') NOT NULL,
+  `status` enum('not started','in process','paused','completed') NOT NULL,
   `steps` bigint DEFAULT NULL,
   `current_step` bigint DEFAULT NULL,
   `begin_date` datetime(3) DEFAULT NULL,
   `delivery_date` datetime(3) DEFAULT NULL,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`codigo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -25,6 +26,8 @@ CREATE TABLE `componentes` (
   `archive3_d_model` longtext,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
+  `steps` bigint DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_componentes_molde_codigo` (`molde_codigo`),
   CONSTRAINT `fk_componentes_molde` FOREIGN KEY (`molde_codigo`) REFERENCES `moldes` (`codigo`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -32,24 +35,22 @@ CREATE TABLE `componentes` (
 
 -- Tabela: maquinas
 CREATE TABLE `maquinas` (
-  `id` varchar(12) NOT NULL,
+  `id` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `name` longtext,
   `description` longtext,
   `type` longtext,
   `department` longtext,
   `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- Tabela: processos
--- simoldes_db.processos definição
-
 CREATE TABLE `processos` (
-  `id` varchar(12) NOT NULL,
+  `id` varchar(36) NOT NULL,
   `molde_codigo` varchar(12) DEFAULT NULL,
   `componentes_id` varchar(12) DEFAULT NULL,
   `description` longtext,
-  `status` enum('not started','in process','completed') NOT NULL,
+  `status` enum('not started','in process','paused','completed') NOT NULL,
   `maquina_id` varchar(12) DEFAULT NULL,
   `begin_date` datetime(3) DEFAULT NULL,
   `delivery_date` datetime(3) DEFAULT NULL,
@@ -57,6 +58,8 @@ CREATE TABLE `processos` (
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
   `step_id` varchar(12) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT NULL,
+  `order` bigint DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_processos_molde_codigo` (`molde_codigo`),
   KEY `idx_processos_componentes_id` (`componentes_id`),
@@ -70,10 +73,9 @@ CREATE TABLE `processos` (
 
 -- Tabela: etapas
 CREATE TABLE `etapas` (
-  `id` varchar(12) NOT NULL,
+  `id` varchar(36) NOT NULL,
   `name` longtext,
   `description` longtext,
-  `order` bigint DEFAULT NULL,
   `is_active` tinyint(1) DEFAULT NULL,
   `created_at` datetime(3) DEFAULT NULL,
   `updated_at` datetime(3) DEFAULT NULL,
@@ -92,6 +94,7 @@ CREATE TABLE `programacoes` (
   `updated_at` datetime(3) DEFAULT NULL,
   `step_id` varchar(12) DEFAULT NULL,
   `script` longtext,
+  `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_programacoes_maquina_id` (`maquina_id`),
   KEY `idx_programacoes_molde_codigo` (`molde_codigo`),
@@ -113,9 +116,10 @@ CREATE TABLE `chegada_acos` (
   `arrival_date` datetime(3) DEFAULT NULL,
   `is_arrived` tinyint(1) DEFAULT NULL,
   `supplier` longtext,
+  `is_active` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_chegada_acos_componentes_id` (`componentes_id`),
   KEY `idx_chegada_acos_molde_codigo` (`molde_codigo`),
   CONSTRAINT `fk_acos_componente` FOREIGN KEY (`componentes_id`) REFERENCES `componentes` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `fk_acos_molde` FOREIGN KEY (`molde_codigo`) REFERENCES `moldes` (`codigo`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

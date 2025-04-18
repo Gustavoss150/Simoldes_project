@@ -7,10 +7,9 @@ type ProcessRepository interface {
 	SaveManyProcess(processes []*models.Processos) error
 	GetProcessByID(id string) (*models.Processos, error)
 	GetProcessByMold(moldCode string) ([]*models.Processos, error)
-	DeleteProcess(id string) error
 	SaveStep(step *models.Etapas) error
 	SaveManySteps(steps []*models.Etapas) error
 	GetStepByID(id string) (*models.Etapas, error)
+	GetStepByName(name string) (*models.Etapas, error)
 	GetAllSteps() ([]*models.Etapas, error)
-	DeleteStep(id string) error
 }

@@ -34,26 +34,11 @@ func ListComponentsByMold(
 		return nil, total, errors.New("error fetching mold components: " + err.Error())
 	}
 
-	totalComponents, err := componentsRepo.CountByMold(moldCode)
+	totalComponents, err := componentsRepo.CountActiveByMold(moldCode)
 	if err != nil {
-		return nil, total, errors.New("error counting mold components: " + err.Error())
+		return nil, total, errors.New("error counting active mold components: " + err.Error())
 	}
 	total = int(totalComponents)
 
 	return components, total, err
-}
-
-func ListInactiveMolds(moldsRepo moldsrepo.MoldsRepository, limit int, offset int) (projects []*models.Moldes, total int, err error) {
-	projects, err = moldsRepo.GetAllInactive(limit, offset)
-	if err != nil {
-		return nil, total, errors.New("error fetching inactive molds: " + err.Error())
-	}
-
-	totalMolds, err := moldsRepo.CountInactive()
-	if err != nil {
-		return nil, total, errors.New("error counting inactive molds: " + err.Error())
-	}
-	total = int(totalMolds)
-
-	return projects, total, err
 }

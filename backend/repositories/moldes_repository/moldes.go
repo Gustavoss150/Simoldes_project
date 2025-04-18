@@ -62,7 +62,7 @@ func (r *moldsRepository) GetAllInactive(limit int, offset int) ([]*models.Molde
 		Limit(limit).
 		Offset(offset).
 		Find(&molds).Error; err != nil {
-		return nil, errors.New("error retrieving active molds: " + err.Error())
+		return nil, errors.New("error retrieving inactive molds: " + err.Error())
 	}
 	return molds, nil
 }
@@ -73,7 +73,7 @@ func (r *moldsRepository) CountInactive() (int64, error) {
 		Model(&models.Moldes{}).
 		Where("is_active = ?", false).
 		Count(&count).Error; err != nil {
-		return 0, errors.New("error counting active molds: " + err.Error())
+		return 0, errors.New("error counting inactive molds: " + err.Error())
 	}
 	return count, nil
 }

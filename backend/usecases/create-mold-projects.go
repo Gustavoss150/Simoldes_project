@@ -9,6 +9,7 @@ import (
 	componentsrepo "github.com/Gustavoss150/simoldes-backend/repositories/components_repository"
 	moldsrepo "github.com/Gustavoss150/simoldes-backend/repositories/moldes_repository"
 	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -24,70 +25,110 @@ func CreateMoldProject(
 			return fmt.Errorf("mold with code %s already exists", moldProjectRequest.Molde.Codigo)
 		}
 
-		// 2. Criar o molde
-		mold := models.Moldes{
-			Codigo:       moldProjectRequest.Molde.Codigo,
-			Description:  moldProjectRequest.Molde.Description,
-			Status:       moldProjectRequest.Molde.Status,
-			BeginDate:    moldProjectRequest.Molde.BeginDate,
-			DeliveryDate: moldProjectRequest.Molde.DeliveryDate,
-		}
-		if err := tx.Save(&mold).Error; err != nil {
-			return fmt.Errorf("error creating mold: %w", err)
+		// 2. Criar molde
+		if err := createMold(moldsRepo, moldProjectRequest.Molde); err != nil {
+			return err
 		}
 
 		// 3. Criar componentes
-		validComponentIDs := make(map[string]bool)
-		for _, compReq := range moldProjectRequest.Componentes {
-			if compReq.ID == "" || compReq.Name == "" {
-				return fmt.Errorf("missing required field in component")
-			}
-			component := models.Componentes{
-				ID:             compReq.ID,
-				Name:           compReq.Name,
-				Material:       compReq.Material,
-				Quantity:       compReq.Quantity,
-				Archive3DModel: compReq.Archive3DModel,
-				MoldeCodigo:    mold.Codigo,
-			}
-			if err := tx.Save(&component).Error; err != nil {
-				return fmt.Errorf("error creating component: %w", err)
-			}
-			validComponentIDs[component.ID] = true
+		if err := createComponents(componentsRepo, moldProjectRequest.Molde.Codigo, moldProjectRequest.Componentes); err != nil {
+			return err
 		}
 
 		// 4. Criar processos
-		for _, procReq := range moldProjectRequest.Processos {
-			// Verificação: certifique-se de que o ComponentesID esteja preenchido
-			if procReq.ComponentesID == "" {
-				return fmt.Errorf("missing ComponentesID in process")
-			}
-
-			if _, exists := validComponentIDs[procReq.ComponentesID]; !exists {
-				return fmt.Errorf("component %s is not linked to mold %s", procReq.ComponentesID, mold.Codigo)
-			}
-
-			if err := ValidateOrCreateStep(processRepo, procReq.StepID, procReq.StepName); err != nil {
-				return err
-			}
-
-			process := models.Processos{
-				ID:            procReq.ID,
-				ComponentesID: procReq.ComponentesID,
-				Description:   procReq.Description,
-				StepID:        procReq.StepID,
-				Status:        procReq.Status,
-				MaquinaID:     procReq.MaquinaID,
-				BeginDate:     procReq.BeginDate,
-				DeliveryDate:  procReq.DeliveryDate,
-				Notes:         procReq.Notes,
-				MoldeCodigo:   mold.Codigo, // associação automática
-			}
-
-			if err := tx.Save(&process).Error; err != nil {
-				return fmt.Errorf("error creating process: %w", err)
-			}
+		if err := createProcesses(processRepo, moldProjectRequest.Processos, moldProjectRequest.Molde.Codigo); err != nil {
+			return err
 		}
+
 		return nil
 	})
+}
+
+func createMold(moldsRepo moldsrepo.MoldsRepository, req contracts.CreateMoldRequest) error {
+	m := &models.Moldes{
+		Codigo:       req.Codigo,
+		Description:  req.Description,
+		Status:       req.Status,
+		Steps:        req.Steps,
+		BeginDate:    req.BeginDate,
+		DeliveryDate: req.DeliveryDate,
+		IsActive:     true,
+	}
+	if err := moldsRepo.Save(m); err != nil {
+		return fmt.Errorf("error creating mold %s: %w", req.Codigo, err)
+	}
+	return nil
+}
+
+func createComponents(
+	componentsRepo componentsrepo.ComponentsRepository,
+	moldCode string,
+	list []contracts.CreateComponentRequest,
+) error {
+	for _, c := range list {
+		if c.ID == "" || c.Name == "" {
+			return fmt.Errorf("missing required field in component")
+		}
+
+		comp := &models.Componentes{
+			ID:             c.ID,
+			MoldeCodigo:    moldCode,
+			Name:           c.Name,
+			Material:       c.Material,
+			Quantity:       c.Quantity,
+			Steps:          c.Steps,
+			Status:         false, // inicia não concluído
+			Archive3DModel: c.Archive3DModel,
+			IsActive:       true,
+		}
+		if err := componentsRepo.Save(comp); err != nil {
+			return fmt.Errorf("error creating component %s: %w", c.ID, err)
+		}
+	}
+	return nil
+}
+
+func createProcesses(
+	processRepo processrepo.ProcessRepository,
+	list []contracts.CreateProcessRequest,
+	moldCode string,
+) error {
+	// coleta IDs válidos (você já salvou todos os componentes acima)
+	valid := make(map[string]bool)
+	for _, p := range list {
+		valid[p.ComponentesID] = true
+	}
+
+	for _, p := range list {
+		if p.ComponentesID == "" {
+			return fmt.Errorf("missing ComponentesID in process")
+		}
+		if !valid[p.ComponentesID] {
+			return fmt.Errorf("component %s is not linked to mold %s", p.ComponentesID, moldCode)
+		}
+
+		stepID, err := ValidateOrCreateStep(processRepo, p.StepID, p.StepName)
+		if err != nil {
+			return fmt.Errorf("error validating or creating step: %w", err)
+		}
+
+		proc := &models.Processos{
+			ID:            uuid.NewString(),
+			MoldeCodigo:   moldCode,
+			ComponentesID: p.ComponentesID,
+			Description:   p.Description,
+			StepID:        stepID,
+			Status:        p.Status,
+			MaquinaID:     p.MaquinaID,
+			BeginDate:     p.BeginDate,
+			DeliveryDate:  p.DeliveryDate,
+			Notes:         p.Notes,
+			Order:         p.Order,
+			IsActive:      true,
+		}
+		if err := processRepo.SaveProcess(proc); err != nil {
+			return fmt.Errorf("error creating process for component %s: %w", p.ComponentesID, err)
+		}
+	}
+	return nil
 }

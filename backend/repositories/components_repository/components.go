@@ -46,7 +46,7 @@ func (r *componentsRepository) GetByID(id string) (*models.Componentes, error) {
 func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error) {
 	var components []*models.Componentes
 	if err := r.DB.
-		Where("molde_codigo = ?", moldCode).
+		Where("molde_codigo = ? AND is_active = ?", moldCode, true).
 		Find(&components).
 		Limit(limit).
 		Offset(offset).
@@ -56,18 +56,39 @@ func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int)
 	return components, nil
 }
 
-func (r *componentsRepository) CountByMold(moldCode string) (int64, error) {
+func (r *componentsRepository) CountActiveByMold(moldCode string) (int64, error) {
 	var count int64
 	if err := r.DB.
 		Model(&models.Componentes{}).
-		Where("molde_codigo = ?", moldCode).
+		Where("molde_codigo = ? AND is_active = ?", moldCode, true).
 		Count(&count).
 		Error; err != nil {
-		return 0, errors.New("error counting components by mold: " + err.Error())
+		return 0, errors.New("error counting active components by mold: " + err.Error())
 	}
 	return count, nil
 }
 
-func (r *componentsRepository) Delete(id string) error {
-	return r.DB.Delete(&models.Componentes{}, "id = ?", id).Error
+func (r *componentsRepository) GetInactiveByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error) {
+	var components []*models.Componentes
+	if err := r.DB.
+		Where("molde_codigo = ? AND is_active = ?", moldCode, false).
+		Find(&components).
+		Limit(limit).
+		Offset(offset).
+		Error; err != nil {
+		return nil, errors.New("error retrieving all inactive mold components: " + err.Error())
+	}
+	return components, nil
+}
+
+func (r *componentsRepository) CountInactiveByMold(moldCode string) (int64, error) {
+	var count int64
+	if err := r.DB.
+		Model(&models.Componentes{}).
+		Where("molde_codigo = ? AND is_active = ?", moldCode, false).
+		Count(&count).
+		Error; err != nil {
+		return 0, errors.New("error counting inactive components by mold: " + err.Error())
+	}
+	return count, nil
 }

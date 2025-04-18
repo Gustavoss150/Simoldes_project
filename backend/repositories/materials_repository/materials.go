@@ -47,7 +47,3 @@ func (r *materialsRepository) GetAcoByComponent(componentCode string) ([]*models
 	}
 	return aco, nil
 }
-
-func (r *materialsRepository) DeleteAco(id string) error {
-	return r.DB.Delete(&models.ChegadaAcos{}, "id = ?", id).Error
-}

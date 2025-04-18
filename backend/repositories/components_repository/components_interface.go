@@ -7,6 +7,7 @@ type ComponentsRepository interface {
 	SaveMany(components []*models.Componentes) error
 	GetByID(id string) (*models.Componentes, error)
 	GetByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error)
-	CountByMold(moldCode string) (int64, error)
-	Delete(id string) error
+	CountActiveByMold(moldCode string) (int64, error)
+	GetInactiveByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error)
+	CountInactiveByMold(moldCode string) (int64, error)
 }

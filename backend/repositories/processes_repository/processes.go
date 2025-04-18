@@ -51,10 +51,6 @@ func (r *processRepository) GetProcessByMold(moldCode string) ([]*models.Process
 	return processes, nil
 }
 
-func (r *processRepository) DeleteProcess(id string) error {
-	return r.DB.Delete(&models.Processos{}, "id = ?", id).Error
-}
-
 func (r *processRepository) SaveStep(step *models.Etapas) error {
 	return r.DB.Save(step).Error
 }
@@ -78,14 +74,18 @@ func (r *processRepository) GetStepByID(id string) (*models.Etapas, error) {
 	return &step, nil
 }
 
+func (r *processRepository) GetStepByName(name string) (*models.Etapas, error) {
+	var step models.Etapas
+	if err := config.DB.Where("name = ?", name).First(&step).Error; err != nil {
+		return nil, err
+	}
+	return &step, nil
+}
+
 func (r *processRepository) GetAllSteps() ([]*models.Etapas, error) {
 	var steps []*models.Etapas
 	if err := r.DB.Find(&steps).Error; err != nil {
 		return nil, errors.New("error retrieving all molds: " + err.Error())
 	}
 	return steps, nil
-}
-
-func (r *processRepository) DeleteStep(id string) error {
-	return r.DB.Delete(&models.Etapas{}, "id = ?", id).Error
 }
