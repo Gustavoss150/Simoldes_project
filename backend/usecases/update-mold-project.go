@@ -10,36 +10,6 @@ import (
 	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
 )
 
-func updateComponentFields(component *models.Componentes, dto contracts.UpdateComponentOperationDTO) {
-	if dto.Quantity != nil {
-		component.Quantity = *dto.Quantity
-	}
-	if dto.Archive3DModel != nil {
-		component.Archive3DModel = *dto.Archive3DModel
-	}
-	if dto.Material != nil {
-		component.Material = *dto.Material
-	}
-	if dto.Steps != nil {
-		component.Steps = *dto.Steps
-	}
-}
-
-func updateProcessFields(process *models.Processos, dto contracts.UpdateProcessOperationDTO) {
-	if dto.ComponentesID != nil {
-		process.ComponentesID = *dto.ComponentesID
-	}
-	if dto.StepID != nil {
-		process.StepID = *dto.StepID
-	}
-	if dto.Status != nil {
-		process.Status = models.ProcessStatus(*dto.Status)
-	}
-	if dto.Order != nil {
-		process.Order = *dto.Order
-	}
-}
-
 func UpdateMoldOperation(
 	moldsRepo moldsrepo.MoldsRepository,
 	componentsRepo componentsrepo.ComponentsRepository,
@@ -115,4 +85,34 @@ func UpdateMoldOperation(
 	}
 
 	return nil
+}
+
+func updateComponentFields(component *models.Componentes, dto contracts.UpdateComponentOperationDTO) {
+	if dto.Quantity != nil {
+		component.Quantity = *dto.Quantity
+	}
+	if dto.Archive3DModel != nil {
+		component.Archive3DModel = *dto.Archive3DModel
+	}
+	if dto.Material != nil {
+		component.Material = *dto.Material
+	}
+	if dto.Steps != nil {
+		component.Steps = *dto.Steps
+	}
+}
+
+func updateProcessFields(process *models.Processos, dto contracts.UpdateProcessOperationDTO) {
+	if dto.ComponentesID != nil {
+		process.ComponentesID = *dto.ComponentesID
+	}
+	if dto.StepID != nil {
+		process.StepID = *dto.StepID
+	}
+	if dto.Status != nil {
+		process.Status = models.ProcessStatus(*dto.Status)
+	}
+	if dto.Order != nil {
+		process.Order = *dto.Order
+	}
 }
