@@ -12,6 +12,7 @@ func InitRoutes(router *gin.Engine) {
 
 	routes.AuthRouter(router)
 	routes.UserRouter(router)
+	routes.ProjectsRouter(router)
 
 	router.GET("/api", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "API working"})
