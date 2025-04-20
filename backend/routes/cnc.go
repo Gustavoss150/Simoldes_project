@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ProjectsRouter(router *gin.Engine) {
-	r := router.Group("/api/projects")
+func CNCRouter(router *gin.Engine) {
+	r := router.Group("/api/cnc")
 	{
 		r.Use(middleware.AuthMiddleware())
 
-		r.POST("/register", controllers.RegisterMoldProject)
-		r.POST("/create_steps", controllers.RegisterSteps)
+		r.POST("/register_mach", controllers.RegisterMachine)
+
 	}
 }

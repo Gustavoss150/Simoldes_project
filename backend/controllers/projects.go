@@ -45,3 +45,23 @@ func RegisterMoldProject(c *gin.Context) {
 		"message": "Mold project created successfully",
 	})
 }
+
+func RegisterSteps(c *gin.Context) {
+	var steps []contracts.CreateStepRequest
+
+	if err := c.BindJSON(&steps); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+	}
+
+	if err := usecases.CreateManySteps(processRepo, steps); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering steps: " + err.Error()})
+	}
+
+	c.JSON(http.StatusCreated, steps)
+}
