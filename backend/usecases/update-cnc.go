@@ -7,7 +7,7 @@ import (
 	cncrepo "github.com/Gustavoss150/simoldes-backend/repositories/cnc_repository"
 )
 
-func UpdateMach(cncRepo cncrepo.CNCRepository, req contracts.UpdateMach, machID string) error {
+func UpdateMach(cncRepo cncrepo.CNCRepository, req contracts.UpdateMachRequest, machID string) error {
 	mach, err := cncRepo.GetMachByID(machID)
 	if err != nil || mach == nil {
 		return errors.New("machine not found")

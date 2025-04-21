@@ -80,7 +80,7 @@ type Programacoes struct {
 	MoldeCodigo  string    `gorm:"size:12;index" json:"molde_codigo"`         // foreign key to Moldes
 	ComponenteID string    `gorm:"size:12;index" json:"componente_id"`        // foreign key to Componentes
 	MaquinaID    string    `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
-	StepID       string    `gorm:"size:12;index" json:"step_id"`              // foreign key para Etapas
+	StepID       string    `gorm:"size:36;index" json:"step_id"`              // foreign key para Etapas
 	Description  string    `json:"description,omitempty"`
 	Date         time.Time `json:"date"`        // data da programação
 	Programmer   string    `json:"programador"` // nome do programador

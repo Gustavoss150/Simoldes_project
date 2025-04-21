@@ -1,6 +1,6 @@
 package contracts
 
-type UpdateMach struct {
+type UpdateMachRequest struct {
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Type        *string `json:"type,omitempty"`
