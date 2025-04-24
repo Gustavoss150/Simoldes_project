@@ -90,15 +90,14 @@ func ListMoldProjects(c *gin.Context) {
 
 // NECESSITA DE AJUSTES NO PARÂMETRO
 func ListMoldComponents(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
 	componentsRepo, err := componentsrepo.InitComponentsDatabase()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
-		return
-	}
-
-	moldCode := c.Query("moldCode")
-	if moldCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
 		return
 	}
 
@@ -118,15 +117,14 @@ func ListMoldComponents(c *gin.Context) {
 
 // NECESSITA DE AJUSTES NO PARÂMETRO
 func ListMoldProcesses(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
 	processRepo, err := processrepo.InitProcessDatabase()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
-		return
-	}
-
-	moldCode := c.Query("moldCode")
-	if moldCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
 		return
 	}
 
@@ -146,14 +144,14 @@ func getPaginationParams(c *gin.Context) (int, int) {
 	offset := 0 // Valor padrão
 
 	// Obtém o parâmetro "limit" da query string
-	if l := c.Query("limit"); l != "" {
+	if l := c.Param("limit"); l != "" {
 		if parsedLimit, err := strconv.Atoi(l); err == nil {
 			limit = parsedLimit
 		}
 	}
 
 	// Obtém o parâmetro "offset" da query string
-	if o := c.Query("offset"); o != "" {
+	if o := c.Param("offset"); o != "" {
 		if parsedOffset, err := strconv.Atoi(o); err == nil {
 			offset = parsedOffset
 		}
