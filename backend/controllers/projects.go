@@ -88,7 +88,7 @@ func ListMoldProjects(c *gin.Context) {
 	})
 }
 
-/*
+// NECESSITA DE AJUSTES NO PARÂMETRO
 func ListMoldComponents(c *gin.Context) {
 	componentsRepo, err := componentsrepo.InitComponentsDatabase()
 	if err != nil {
@@ -116,6 +116,7 @@ func ListMoldComponents(c *gin.Context) {
 	})
 }
 
+// NECESSITA DE AJUSTES NO PARÂMETRO
 func ListMoldProcesses(c *gin.Context) {
 	processRepo, err := processrepo.InitProcessDatabase()
 	if err != nil {
@@ -139,7 +140,6 @@ func ListMoldProcesses(c *gin.Context) {
 		"processes": processes,
 	})
 }
-*/
 
 func getPaginationParams(c *gin.Context) (int, int) {
 	limit := 10 // Valor padrão
