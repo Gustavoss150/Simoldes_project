@@ -13,5 +13,8 @@ func ProjectsRouter(router *gin.Engine) {
 
 		r.POST("/register", controllers.RegisterMoldProject)
 		r.POST("/create_steps", controllers.RegisterSteps)
+		r.GET("/", controllers.ListMoldProjects)
+		r.GET("/components", controllers.ListMoldComponents)
+		r.GET("/processes", controllers.ListMoldProcesses)
 	}
 }

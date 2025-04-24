@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
 	componentsrepo "github.com/Gustavoss150/simoldes-backend/repositories/components_repository"
@@ -64,4 +65,99 @@ func RegisterSteps(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, steps)
+}
+
+func ListMoldProjects(c *gin.Context) {
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	limit, offset := getPaginationParams(c)
+
+	molds, total, err := usecases.ListAllMolds(moldsRepo, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing molds: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"molds": molds,
+		"total": total,
+	})
+}
+
+/*
+func ListMoldComponents(c *gin.Context) {
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	moldCode := c.Query("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+
+	limit, offset := getPaginationParams(c)
+
+	components, total, err := usecases.ListComponentsByMold(componentsRepo, moldCode, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing components: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"components": components,
+		"total":      total,
+	})
+}
+
+func ListMoldProcesses(c *gin.Context) {
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	moldCode := c.Query("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+
+	processes, err := usecases.ListProcessesWithStepsByMold(processRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing processes: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"processes": processes,
+	})
+}
+*/
+
+func getPaginationParams(c *gin.Context) (int, int) {
+	limit := 10 // Valor padrão
+	offset := 0 // Valor padrão
+
+	// Obtém o parâmetro "limit" da query string
+	if l := c.Query("limit"); l != "" {
+		if parsedLimit, err := strconv.Atoi(l); err == nil {
+			limit = parsedLimit
+		}
+	}
+
+	// Obtém o parâmetro "offset" da query string
+	if o := c.Query("offset"); o != "" {
+		if parsedOffset, err := strconv.Atoi(o); err == nil {
+			offset = parsedOffset
+		}
+	}
+
+	return limit, offset
 }
