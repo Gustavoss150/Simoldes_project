@@ -29,7 +29,7 @@ type CreateProcessRequest struct {
 	ComponentesID string               `json:"componentes_id"`
 	Description   string               `json:"description,omitempty"`
 	StepID        string               `json:"step_id"`
-	StepName      string               `json:"step_name"`
+	StepName      string               `json:"step_name,omitempty"`
 	Status        models.ProcessStatus `json:"status"`
 	MaquinaID     string               `json:"maquina_id,omitempty"`
 	BeginDate     time.Time            `json:"begin_date"`
@@ -40,6 +40,11 @@ type CreateProcessRequest struct {
 
 type CreateMoldProjectRequest struct {
 	Molde       CreateMoldRequest        `json:"molde"`
+	Componentes []CreateComponentRequest `json:"componentes"`
+	Processos   []CreateProcessRequest   `json:"processos"`
+}
+
+type CreateComponentsAndProcessesRequest struct {
 	Componentes []CreateComponentRequest `json:"componentes"`
 	Processos   []CreateProcessRequest   `json:"processos"`
 }
@@ -55,6 +60,7 @@ type UpdateComponentOperationDTO struct {
 	ComponenteID   string  `json:"componente_id"` // obrigatório para localizar o componente
 	Quantity       *int    `json:"quantity,omitempty"`
 	Steps          *int    `json:"steps,omitempty"`
+	Status         *bool   `json:"status,omitempty"`
 	Archive3DModel *string `json:"archive_3d_model,omitempty"`
 	Material       *string `json:"material,omitempty"`
 }
@@ -68,7 +74,6 @@ type UpdateProcessOperationDTO struct {
 }
 
 type UpdateMoldOperationRequest struct {
-	MoldeCodigo string                        `json:"molde_codigo"`
 	Molde       *UpdateMoldOperationDTO       `json:"molde,omitempty"`
 	Componentes []UpdateComponentOperationDTO `json:"componentes,omitempty"`
 	Processos   []UpdateProcessOperationDTO   `json:"processos,omitempty"`

@@ -15,16 +15,13 @@ func UpdateMoldOperation(
 	componentsRepo componentsrepo.ComponentsRepository,
 	processRepo processrepo.ProcessRepository,
 	dto contracts.UpdateMoldOperationRequest,
+	moldCode string, // Usar o código do molde diretamente
 ) error {
-	mold, err := moldsRepo.Get(dto.MoldeCodigo)
-	if err != nil {
-		return fmt.Errorf("failed to fetch mold: %w", err)
-	}
-	if mold == nil {
-		return fmt.Errorf("mold with code %s not found", dto.MoldeCodigo)
+	mold, err := moldsRepo.Get(moldCode)
+	if err != nil || mold == nil {
+		return fmt.Errorf("mold with code %s not found", moldCode)
 	}
 
-	// atualizar o molde em si
 	if dto.Molde != nil {
 		if dto.Molde.Description != nil {
 			mold.Description = *dto.Molde.Description
@@ -43,6 +40,7 @@ func UpdateMoldOperation(
 		}
 	}
 
+	// Atualizar componentes
 	for _, compDTO := range dto.Componentes {
 		component, err := componentsRepo.GetByID(compDTO.ComponenteID)
 		if err != nil {
@@ -68,12 +66,12 @@ func UpdateMoldOperation(
 			return fmt.Errorf("process with ID %s not found", procDTO.ProcessoID)
 		}
 
-		// valida componente, se mudou
+		// Validar componente, se mudou
 		if procDTO.ComponentesID != nil {
 			comp, err := componentsRepo.GetByID(*procDTO.ComponentesID)
-			if err != nil || comp == nil || comp.MoldeCodigo != dto.MoldeCodigo {
+			if err != nil || comp == nil || comp.MoldeCodigo != moldCode {
 				return fmt.Errorf("component ID %s does not belong to mold %s",
-					*procDTO.ComponentesID, dto.MoldeCodigo)
+					*procDTO.ComponentesID, moldCode)
 			}
 		}
 
@@ -99,6 +97,9 @@ func updateComponentFields(component *models.Componentes, dto contracts.UpdateCo
 	}
 	if dto.Steps != nil {
 		component.Steps = *dto.Steps
+	}
+	if dto.Status != nil {
+		component.IsActive = *dto.Status
 	}
 }
 

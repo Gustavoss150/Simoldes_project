@@ -16,6 +16,24 @@ func ListProcessesWithStepsByMold(processRepo processrepo.ProcessRepository, mol
 	return stepsByComponent, nil
 }
 
+func ListProcessesByComponent(processRepo processrepo.ProcessRepository, componentID string) ([]*models.Processos, error) {
+	processes, err := processRepo.GetProcessByComponent(componentID)
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving processes for component %s: %w", componentID, err)
+	}
+	return processes, nil
+}
+
+func ListAllSteps(processRepo processrepo.ProcessRepository) ([]*models.Etapas, int64, error) {
+	steps, err := processRepo.GetAllSteps()
+	if err != nil {
+		return nil, 0, fmt.Errorf("error retrieving all steps: %w", err)
+	}
+
+	total := int64(len(steps))
+	return steps, total, nil
+}
+
 func ListInactiveProcessesByMold(processRepo processrepo.ProcessRepository, moldCode string) ([]*models.Processos, error) {
 	inactiveProcesses, err := processRepo.GetInactiveProcessByMold(moldCode)
 	if err != nil {

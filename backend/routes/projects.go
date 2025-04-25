@@ -11,10 +11,14 @@ func ProjectsRouter(router *gin.Engine) {
 	{
 		r.Use(middleware.AuthMiddleware())
 
-		r.POST("/register", controllers.RegisterMoldProject)
-		r.POST("/create_steps", controllers.RegisterSteps)
+		r.POST("/", controllers.RegisterMoldProject)
+		r.POST("/new/:moldCode", controllers.RegisterNewComponentsAndProcesses)
 		r.GET("/", controllers.ListMoldProjects)
 		r.GET("/components/:moldCode", controllers.ListMoldComponents)
-		r.GET("/processes/:moldCode", controllers.ListMoldProcesses)
+		r.PUT("/:moldCode", controllers.UpdateMoldOperation)
+		r.DELETE("/:moldCode", controllers.DeleteMoldProject)
+		r.DELETE("/components/:componentID", controllers.DeleteComponent)
+		r.GET("/inactive_projects", controllers.ListInactiveMoldProjects)
+		r.GET("/inactive_components/:moldCode", controllers.ListInactiveComponentsByMold)
 	}
 }

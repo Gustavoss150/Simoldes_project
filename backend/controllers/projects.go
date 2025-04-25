@@ -47,24 +47,45 @@ func RegisterMoldProject(c *gin.Context) {
 	})
 }
 
-func RegisterSteps(c *gin.Context) {
-	var steps []contracts.CreateStepRequest
+func RegisterNewComponentsAndProcesses(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Project mold code is required"})
+		return
+	}
 
-	if err := c.BindJSON(&steps); err != nil {
+	var request contracts.CreateComponentsAndProcessesRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
 		return
 	}
 
 	processRepo, err := processrepo.InitProcessDatabase()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing processes database: " + err.Error()})
+		return
 	}
 
-	if err := usecases.CreateManySteps(processRepo, steps); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering steps: " + err.Error()})
+	if err := usecases.CreateMoldComponentsAndProcesses(moldsRepo, componentsRepo, processRepo, request, moldCode); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering updates: " + err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusCreated, steps)
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "New components and processes added successfully",
+	})
 }
 
 func ListMoldProjects(c *gin.Context) {
@@ -88,7 +109,6 @@ func ListMoldProjects(c *gin.Context) {
 	})
 }
 
-// NECESSITA DE AJUSTES NO PARÂMETRO
 func ListMoldComponents(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {
@@ -115,27 +135,133 @@ func ListMoldComponents(c *gin.Context) {
 	})
 }
 
-// NECESSITA DE AJUSTES NO PARÂMETRO
-func ListMoldProcesses(c *gin.Context) {
+func UpdateMoldOperation(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
 		return
 	}
-	processRepo, err := processrepo.InitProcessDatabase()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+
+	var project contracts.UpdateMoldOperationRequest
+	if err := c.ShouldBindJSON(&project); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
 		return
 	}
 
-	processes, err := usecases.ListProcessesWithStepsByMold(processRepo, moldCode)
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing processes: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.UpdateMoldOperation(moldsRepo, componentsRepo, processRepo, project, moldCode); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating project: " + err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"processes": processes,
+		"message": "Mold project updated successfully",
+	})
+}
+
+func DeleteMoldProject(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Mold ID is required"})
+		return
+	}
+
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.SoftDeleteMold(moldsRepo, moldCode); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting mold project: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"message": "Mold deleted succesfully"})
+}
+
+func DeleteComponent(c *gin.Context) {
+	componentID := c.Param("componentID")
+	if componentID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Component ID is required"})
+		return
+	}
+
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.SoftDeleteComponents(componentsRepo, componentID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting component: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"message": "Component deleted successfully"})
+}
+
+func ListInactiveMoldProjects(c *gin.Context) {
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	limit, offset := getPaginationParams(c)
+
+	molds, total, err := usecases.ListInactiveMolds(moldsRepo, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing inactive molds: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"molds": molds,
+		"total": total,
+	})
+}
+
+func ListInactiveComponentsByMold(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	limit, offset := getPaginationParams(c)
+
+	components, total, err := usecases.ListInactiveComponents(componentsRepo, moldCode, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing inactive components: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"components": components,
+		"total":      total,
 	})
 }
 

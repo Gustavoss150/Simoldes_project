@@ -70,6 +70,14 @@ func createComponents(
 			return fmt.Errorf("missing required field in component")
 		}
 
+		existing, err := componentsRepo.GetByID(c.ID)
+		if err != nil {
+			return fmt.Errorf("error checking component ID %s: %w", c.ID, err)
+		}
+		if existing != nil {
+			return fmt.Errorf("component with ID %s already exists", c.ID)
+		}
+
 		comp := &models.Componentes{
 			ID:             c.ID,
 			MoldeCodigo:    moldCode,
@@ -105,6 +113,14 @@ func createProcesses(
 		}
 		if !valid[p.ComponentesID] {
 			return fmt.Errorf("component %s is not linked to mold %s", p.ComponentesID, moldCode)
+		}
+
+		existing, err := processRepo.GetProcessByID(p.ID)
+		if err != nil {
+			return fmt.Errorf("error fetching process ID %s: %w", p.ID, err)
+		}
+		if existing != nil {
+			return fmt.Errorf("process with ID %s already exists", p.ID)
 		}
 
 		stepID, err := ValidateOrCreateStep(processRepo, p.StepID, p.StepName)

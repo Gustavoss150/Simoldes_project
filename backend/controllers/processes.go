@@ -1,0 +1,205 @@
+package controllers
+
+import (
+	"net/http"
+
+	"github.com/Gustavoss150/simoldes-backend/contracts"
+	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
+	"github.com/Gustavoss150/simoldes-backend/usecases"
+	"github.com/gin-gonic/gin"
+)
+
+func RegisterSteps(c *gin.Context) {
+	var steps []contracts.CreateStepRequest
+
+	if err := c.BindJSON(&steps); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+	}
+
+	if err := usecases.CreateManySteps(processRepo, steps); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error registering steps: " + err.Error()})
+	}
+
+	c.JSON(http.StatusCreated, steps)
+}
+
+func ListMoldProcesses(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	processes, err := usecases.ListProcessesWithStepsByMold(processRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing processes: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"processes": processes,
+	})
+}
+
+func ListProcessesByComponent(c *gin.Context) {
+	componentID := c.Param("componentID")
+	if componentID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "componentID is required"})
+		return
+	}
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	processes, err := usecases.ListProcessesByComponent(processRepo, componentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing processes: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"processes": processes,
+	})
+}
+
+func ListAllSteps(c *gin.Context) {
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	steps, total, err := usecases.ListAllSteps(processRepo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing steps: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"steps": steps,
+		"total": total,
+	})
+}
+
+func ListInactiveSteps(c *gin.Context) {
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	inactiveSteps, err := usecases.ListAllInactiveSteps(processRepo)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing inactive steps: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"inactive_steps": inactiveSteps,
+	})
+}
+
+func ListInactiveProcessesByMold(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	inactiveProcesses, err := usecases.ListInactiveProcessesByMold(processRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing inactive processes: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"inactive_processes": inactiveProcesses,
+	})
+}
+
+func UpdateSteps(c *gin.Context) {
+	stepID := c.Param("stepID")
+	if stepID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Step ID is required"})
+		return
+	}
+
+	var step contracts.UpdateStepsRequest
+	if err := c.ShouldBindJSON(&step); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing processes repository: " + err.Error()})
+		return
+	}
+
+	if err := usecases.UpdateSteps(processRepo, step, stepID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error updating step: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, step)
+}
+
+func DeleteProcess(c *gin.Context) {
+	processID := c.Param("processID")
+	if processID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Process ID is required"})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing processes database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.SoftDeleteProcess(processRepo, processID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting process: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"message": "Process deleted successfully"})
+}
+
+func DeleteStep(c *gin.Context) {
+	stepID := c.Param("stepID")
+	if stepID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Step ID is required"})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing processes database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.SoftDeleteStep(processRepo, stepID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting step: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{"message": "Step deleted successfully"})
+}
