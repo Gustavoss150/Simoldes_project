@@ -20,4 +20,6 @@ type ProcessRepository interface {
 	GetProcessAndStepsByMold(moldCode string) ([]contracts.StepsByComponent, error)
 	GetProcessByComponent(componentID string) ([]*models.Processos, error)
 	ExistsByID(id string) (bool, error)
+	CountProcessesByMold(moldCode string) (int64, error)
+	CountCompletedProcessesByMold(moldCode string) (int64, error)
 }

@@ -4,129 +4,71 @@ import (
 	"fmt"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
-	"github.com/Gustavoss150/simoldes-backend/models"
 	componentsrepo "github.com/Gustavoss150/simoldes-backend/repositories/components_repository"
 	moldsrepo "github.com/Gustavoss150/simoldes-backend/repositories/moldes_repository"
 	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
 )
 
+// UpdateMoldOperation unifica atualização de molde, componentes e processos
 func UpdateMoldOperation(
 	moldsRepo moldsrepo.MoldsRepository,
 	componentsRepo componentsrepo.ComponentsRepository,
 	processRepo processrepo.ProcessRepository,
 	dto contracts.UpdateMoldOperationRequest,
-	moldCode string, // Usar o código do molde diretamente
+	moldCode string,
 ) error {
-	mold, err := moldsRepo.Get(moldCode)
-	if err != nil || mold == nil {
-		return fmt.Errorf("mold with code %s not found", moldCode)
-	}
+	// inicializa service
+	svc := NewMoldService(moldsRepo, componentsRepo, processRepo)
 
+	// 1) atualizar dados do molde se houver
 	if dto.Molde != nil {
+		m, err := moldsRepo.Get(moldCode)
+		if err != nil || m == nil {
+			return fmt.Errorf("mold %s not found", moldCode)
+		}
 		if dto.Molde.Description != nil {
-			mold.Description = *dto.Molde.Description
+			m.Description = *dto.Molde.Description
 		}
 		if dto.Molde.Status != nil {
-			mold.Status = *dto.Molde.Status
-		}
-		if dto.Molde.Steps != nil {
-			mold.Steps = *dto.Molde.Steps
+			m.Status = *dto.Molde.Status
 		}
 		if dto.Molde.DeliveryDate != nil {
-			mold.DeliveryDate = *dto.Molde.DeliveryDate
+			m.DeliveryDate = *dto.Molde.DeliveryDate
 		}
-		if err := moldsRepo.Save(mold); err != nil {
-			return fmt.Errorf("error updating mold %s: %w", mold.Codigo, err)
+		if err := moldsRepo.Save(m); err != nil {
+			return fmt.Errorf("error updating mold: %w", err)
 		}
 	}
 
+	// 2) atualizar componentes individuais (campo, nome, material, quantidade)
 	for _, compDTO := range dto.Componentes {
-		component, err := componentsRepo.GetByID(compDTO.ComponenteID)
-		if err != nil {
-			return fmt.Errorf("error fetching component ID %s: %w", compDTO.ComponenteID, err)
+		// carregar componente
+		comp, err := componentsRepo.GetByID(compDTO.ComponenteID)
+		if err != nil || comp == nil {
+			return fmt.Errorf("component %s not found", compDTO.ComponenteID)
 		}
-		if component == nil {
-			return fmt.Errorf("component with ID %s not found", compDTO.ComponenteID)
+		// aplicar campos
+		if compDTO.Quantity != nil {
+			comp.Quantity = *compDTO.Quantity
 		}
-
-		if component.MoldeCodigo != moldCode {
-			return fmt.Errorf("component ID %s does not belong to mold %s", compDTO.ComponenteID, moldCode)
+		if compDTO.Material != nil {
+			comp.Material = *compDTO.Material
 		}
-
-		updateComponentFields(component, compDTO)
-
-		if err := componentsRepo.Save(component); err != nil {
-			return fmt.Errorf("error updating component ID %s: %w", component.ID, err)
+		if compDTO.Archive3DModel != nil {
+			comp.Archive3DModel = *compDTO.Archive3DModel
+		}
+		// persiste modificação
+		if err := componentsRepo.Save(comp); err != nil {
+			return fmt.Errorf("error saving component %s: %w", comp.ID, err)
 		}
 	}
 
+	// 3) atualizar processos via service (inclui recalc componente e mold)
 	for _, procDTO := range dto.Processos {
-		process, err := processRepo.GetProcessByID(procDTO.ProcessoID)
-		if err != nil {
-			return fmt.Errorf("error fetching process ID %s: %w", procDTO.ProcessoID, err)
-		}
-		if process == nil {
-			return fmt.Errorf("process with ID %s not found", procDTO.ProcessoID)
-		}
-
-		currentComponent, err := componentsRepo.GetByID(process.ComponentesID)
-		if err != nil || currentComponent == nil {
-			return fmt.Errorf("error validating current component ID %s: %w", process.ComponentesID, err)
-		}
-		if currentComponent.MoldeCodigo != moldCode {
-			return fmt.Errorf("process ID %s is linked to component %s which does not belong to mold %s",
-				procDTO.ProcessoID, process.ComponentesID, moldCode)
-		}
-
-		if procDTO.ComponentesID != nil {
-			newComp, err := componentsRepo.GetByID(*procDTO.ComponentesID)
-			if err != nil || newComp == nil {
-				return fmt.Errorf("new component ID %s not found", *procDTO.ComponentesID)
-			}
-			if newComp.MoldeCodigo != moldCode {
-				return fmt.Errorf("new component ID %s does not belong to mold %s", *procDTO.ComponentesID, moldCode)
-			}
-		}
-
-		updateProcessFields(process, procDTO)
-
-		if err := processRepo.SaveProcess(process); err != nil {
-			return fmt.Errorf("error updating process ID %s: %w", process.ID, err)
+		if err := svc.UpdateProcessAndRefresh(procDTO, moldCode); err != nil {
+			return err
 		}
 	}
 
 	return nil
-}
-
-func updateComponentFields(component *models.Componentes, dto contracts.UpdateComponentOperationDTO) {
-	if dto.Quantity != nil {
-		component.Quantity = *dto.Quantity
-	}
-	if dto.Archive3DModel != nil {
-		component.Archive3DModel = *dto.Archive3DModel
-	}
-	if dto.Material != nil {
-		component.Material = *dto.Material
-	}
-	if dto.Steps != nil {
-		component.Steps = *dto.Steps
-	}
-	if dto.Status != nil {
-		component.Status = *dto.Status
-	}
-}
-
-func updateProcessFields(process *models.Processos, dto contracts.UpdateProcessOperationDTO) {
-	if dto.ComponentesID != nil {
-		process.ComponentesID = *dto.ComponentesID
-	}
-	if dto.StepID != nil {
-		process.StepID = *dto.StepID
-	}
-	if dto.Status != nil {
-		process.Status = models.ProcessStatus(*dto.Status)
-	}
-	if dto.Order != nil {
-		process.Order = *dto.Order
-	}
 }

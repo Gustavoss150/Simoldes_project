@@ -197,3 +197,19 @@ func (r *processRepository) ExistsByID(id string) (bool, error) {
 	}
 	return count > 0, nil
 }
+
+func (r *processRepository) CountProcessesByMold(moldCode string) (int64, error) {
+	var c int64
+	err := r.DB.Model(&models.Processos{}).
+		Where("molde_codigo = ? AND is_active = ?", moldCode, true).
+		Count(&c).Error
+	return c, err
+}
+
+func (r *processRepository) CountCompletedProcessesByMold(moldCode string) (int64, error) {
+	var c int64
+	err := r.DB.Model(&models.Processos{}).
+		Where("molde_codigo = ? AND status = ? AND is_active = ?", moldCode, models.StatusConcluido, true).
+		Count(&c).Error
+	return c, err
+}

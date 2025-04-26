@@ -10,7 +10,6 @@ type CreateMoldRequest struct {
 	Codigo       string               `json:"codigo"`
 	Description  string               `json:"description"`
 	Status       models.ProcessStatus `json:"status"`
-	Steps        int                  `json:"steps,omitempty"`
 	BeginDate    time.Time            `json:"begin_date"`
 	DeliveryDate time.Time            `json:"delivery_date"`
 }
@@ -20,7 +19,6 @@ type CreateComponentRequest struct {
 	Name           string `json:"name"`
 	Material       string `json:"material"`
 	Quantity       int    `json:"quantity"`
-	Steps          int    `json:"steps,omitempty"`
 	Archive3DModel string `json:"archive_3d_model,omitempty"`
 }
 
@@ -52,25 +50,23 @@ type CreateComponentsAndProcessesRequest struct {
 type UpdateMoldOperationDTO struct {
 	Description  *string               `json:"description"`
 	Status       *models.ProcessStatus `json:"status"`
-	Steps        *int                  `json:"steps,omitempty"`
 	DeliveryDate *time.Time            `json:"delivery_date"`
 }
 
 type UpdateComponentOperationDTO struct {
 	ComponenteID   string  `json:"componente_id"` // obrigatório para localizar o componente
 	Quantity       *int    `json:"quantity,omitempty"`
-	Steps          *int    `json:"steps,omitempty"`
 	Status         *bool   `json:"status,omitempty"`
 	Archive3DModel *string `json:"archive_3d_model,omitempty"`
 	Material       *string `json:"material,omitempty"`
 }
 
 type UpdateProcessOperationDTO struct {
-	ProcessoID    string  `json:"processo_id"`
-	ComponentesID *string `json:"componentes_id,omitempty"`
-	StepID        *string `json:"step_id,omitempty"`
-	Status        *string `json:"status,omitempty"`
-	Order         *int    `json:"order,omitempty"`
+	ProcessoID    string                `json:"processo_id"`
+	ComponentesID *string               `json:"componentes_id,omitempty"`
+	StepID        *string               `json:"step_id,omitempty"`
+	Status        *models.ProcessStatus `json:"status,omitempty"`
+	Order         *int                  `json:"order,omitempty"`
 }
 
 type UpdateMoldOperationRequest struct {

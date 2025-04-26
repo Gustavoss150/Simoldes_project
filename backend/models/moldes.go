@@ -9,14 +9,14 @@ type ProcessStatus string
 const (
 	StatusNaoIniciado ProcessStatus = "not started"
 	StatusEmProcesso  ProcessStatus = "in process"
-	StatusConcluido   ProcessStatus = "completed"
 	StatusParalisado  ProcessStatus = "paused"
+	StatusConcluido   ProcessStatus = "completed"
 )
 
 type Moldes struct {
 	Codigo       string        `gorm:"size:12;primaryKey" json:"codigo"` // Ex: "1678", "PROVA-A01"
 	Description  string        `json:"description"`
-	Status       ProcessStatus `gorm:"type:ENUM('not started','in process','paused,'completed');not null" json:"status"`
+	Status       ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`
 	Steps        int           `json:"steps,omitempty"` // Número de etapas do molde
 	CurrentStep  int           `json:"current_step,omitempty"`
 	BeginDate    time.Time     `json:"begin_date"`
@@ -32,7 +32,6 @@ type Componentes struct {
 	Name           string    `json:"name"`
 	Material       string    `json:"material"`
 	Quantity       int       `json:"quantity"`
-	Steps          int       `json:"steps,omitempty"`
 	Status         bool      `json:"status"`                     // true para concluído
 	Archive3DModel string    `json:"archive_3d_model,omitempty"` // URL or path to the 3D model file
 	CreatedAt      time.Time `json:"created_at"`
@@ -46,7 +45,7 @@ type Processos struct {
 	ComponentesID string        `gorm:"size:12;index" json:"componentes_id"` // foreign key to Componentes
 	Description   string        `json:"description"`
 	StepID        string        `gorm:"size:36;index" json:"step_id"`
-	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','paused,'completed');not null" json:"status"`
+	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`
 	MaquinaID     string        `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
 	BeginDate     time.Time     `json:"begin_date"`
 	DeliveryDate  time.Time     `json:"delivery_date"`

@@ -17,49 +17,48 @@ func CreateMoldProject(
 	moldsRepo moldsrepo.MoldsRepository,
 	componentsRepo componentsrepo.ComponentsRepository,
 	processRepo processrepo.ProcessRepository,
-	moldProjectRequest contracts.CreateMoldProjectRequest,
+	req contracts.CreateMoldProjectRequest,
 ) error {
 	return config.DB.Transaction(func(tx *gorm.DB) error {
-		// 1. Verificar se o molde já existe
-		if existing, _ := moldsRepo.Get(moldProjectRequest.Molde.Codigo); existing != nil {
-			return fmt.Errorf("mold with code %s already exists", moldProjectRequest.Molde.Codigo)
+		// 1. Verificar existência
+		if existing, _ := moldsRepo.Get(req.Molde.Codigo); existing != nil {
+			return fmt.Errorf("mold with code %s already exists", req.Molde.Codigo)
 		}
 
 		// 2. Criar molde
-		if err := createMold(moldsRepo, moldProjectRequest.Molde); err != nil {
-			return err
+		m := &models.Moldes{
+			Codigo:       req.Molde.Codigo,
+			Description:  req.Molde.Description,
+			Status:       req.Molde.Status,
+			BeginDate:    req.Molde.BeginDate,
+			DeliveryDate: req.Molde.DeliveryDate,
+			IsActive:     true,
+		}
+		if err := moldsRepo.Save(m); err != nil {
+			return fmt.Errorf("error creating mold %s: %w", req.Molde.Codigo, err)
 		}
 
 		// 3. Criar componentes
-		if err := createComponents(componentsRepo, moldProjectRequest.Molde.Codigo, moldProjectRequest.Componentes); err != nil {
+		if err := createComponents(componentsRepo, req.Molde.Codigo, req.Componentes); err != nil {
 			return err
 		}
 
 		// 4. Criar processos
-		if err := createProcesses(processRepo, moldProjectRequest.Processos, moldProjectRequest.Molde.Codigo); err != nil {
+		if err := createProcesses(processRepo, req.Processos, req.Molde.Codigo); err != nil {
 			return err
+		}
+
+		// 5. Recalcular Steps e CurrentStep
+		svc := NewMoldService(moldsRepo, componentsRepo, processRepo)
+		if err := svc.recalc(req.Molde.Codigo); err != nil {
+			return fmt.Errorf("error recalculating mold steps: %w", err)
 		}
 
 		return nil
 	})
 }
 
-func createMold(moldsRepo moldsrepo.MoldsRepository, req contracts.CreateMoldRequest) error {
-	m := &models.Moldes{
-		Codigo:       req.Codigo,
-		Description:  req.Description,
-		Status:       req.Status,
-		Steps:        req.Steps,
-		BeginDate:    req.BeginDate,
-		DeliveryDate: req.DeliveryDate,
-		IsActive:     true,
-	}
-	if err := moldsRepo.Save(m); err != nil {
-		return fmt.Errorf("error creating mold %s: %w", req.Codigo, err)
-	}
-	return nil
-}
-
+// createComponents cria múltiplos componentes (sem atribuir Steps)
 func createComponents(
 	componentsRepo componentsrepo.ComponentsRepository,
 	moldCode string,
@@ -70,11 +69,7 @@ func createComponents(
 			return fmt.Errorf("missing required field in component")
 		}
 
-		existing, err := componentsRepo.GetByID(c.ID)
-		if err != nil {
-			return fmt.Errorf("error checking component ID %s: %w", c.ID, err)
-		}
-		if existing != nil {
+		if existing, _ := componentsRepo.GetByID(c.ID); existing != nil {
 			return fmt.Errorf("component with ID %s already exists", c.ID)
 		}
 
@@ -84,8 +79,7 @@ func createComponents(
 			Name:           c.Name,
 			Material:       c.Material,
 			Quantity:       c.Quantity,
-			Steps:          c.Steps,
-			Status:         false, // inicia não concluído
+			Status:         false,
 			Archive3DModel: c.Archive3DModel,
 			IsActive:       true,
 		}
@@ -101,7 +95,6 @@ func createProcesses(
 	list []contracts.CreateProcessRequest,
 	moldCode string,
 ) error {
-	// coleta IDs válidos (você já salvou todos os componentes acima)
 	valid := make(map[string]bool)
 	for _, p := range list {
 		valid[p.ComponentesID] = true
@@ -115,11 +108,7 @@ func createProcesses(
 			return fmt.Errorf("component %s is not linked to mold %s", p.ComponentesID, moldCode)
 		}
 
-		existing, err := processRepo.GetProcessByID(p.ID)
-		if err != nil {
-			return fmt.Errorf("error fetching process ID %s: %w", p.ID, err)
-		}
-		if existing != nil {
+		if existing, _ := processRepo.GetProcessByID(p.ID); existing != nil {
 			return fmt.Errorf("process with ID %s already exists", p.ID)
 		}
 

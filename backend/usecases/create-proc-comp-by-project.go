@@ -22,68 +22,46 @@ func CreateMoldComponentsAndProcesses(
 	moldCode string,
 ) error {
 	return config.DB.Transaction(func(tx *gorm.DB) error {
-		// 1. Verificar se o molde existe
-		mold, err := moldsRepo.Get(moldCode)
-		if err != nil || mold == nil {
-			return fmt.Errorf("mold with code %s not found", moldCode)
+		m, err := moldsRepo.Get(moldCode)
+		if err != nil || m == nil {
+			return fmt.Errorf("mold %s not found", moldCode)
 		}
-
-		// 2. Criar componentes
-		createdComponents := make(map[string]bool)
+		// criar novos componentes
+		batch := make(map[string]bool)
 		for _, c := range dto.Componentes {
 			if c.ID == "" || c.Name == "" {
-				return fmt.Errorf("missing required field in component")
+				return fmt.Errorf("missing component field")
 			}
-
-			exists, err := componentsRepo.ExistsByID(c.ID)
-			if err != nil {
-				return fmt.Errorf("error checking component ID %s: %w", c.ID, err)
-			}
+			exists, _ := componentsRepo.ExistsByID(c.ID)
 			if exists {
-				return fmt.Errorf("component with ID %s already exists", c.ID)
+				return fmt.Errorf("component %s already exists", c.ID)
 			}
-
-			newComponent := &models.Componentes{
+			comp := &models.Componentes{
 				ID:             c.ID,
 				MoldeCodigo:    moldCode,
 				Name:           c.Name,
 				Material:       c.Material,
 				Quantity:       c.Quantity,
-				Steps:          c.Steps,
 				Archive3DModel: c.Archive3DModel,
 				IsActive:       true,
 				CreatedAt:      time.Now(),
 				UpdatedAt:      time.Now(),
 			}
-			if err := componentsRepo.Save(newComponent); err != nil {
-				return fmt.Errorf("error saving component ID %s: %w", c.ID, err)
+			if err := componentsRepo.Save(comp); err != nil {
+				return err
 			}
-			createdComponents[c.ID] = true
+			batch[c.ID] = true
 		}
-
-		// 3. Criar processos
+		// criar novos processos
 		for _, p := range dto.Processos {
-			if p.ComponentesID == "" {
-				return fmt.Errorf("missing ComponentesID in process")
+			if !batch[p.ComponentesID] {
+				return fmt.Errorf("component %s not part of batch", p.ComponentesID)
 			}
-			if _, ok := createdComponents[p.ComponentesID]; !ok {
-				return fmt.Errorf("component %s is not part of the new batch", p.ComponentesID)
+			if exists, _ := processRepo.ExistsByID(p.ID); exists {
+				return fmt.Errorf("process %s already exists", p.ID)
 			}
-
-			exists, err := processRepo.ExistsByID(p.ID)
-			if err != nil {
-				return fmt.Errorf("error checking process ID %s: %w", p.ID, err)
-			}
-			if exists {
-				return fmt.Errorf("process with ID %s already exists", p.ID)
-			}
-
-			stepID, err := ValidateOrCreateStep(processRepo, p.StepID, p.StepName)
-			if err != nil {
-				return fmt.Errorf("error validating or creating step: %w", err)
-			}
-
-			newProcess := &models.Processos{
+			stepID, _ := ValidateOrCreateStep(processRepo, p.StepID, p.StepName)
+			proc := &models.Processos{
 				ID:            uuid.NewString(),
 				MoldeCodigo:   moldCode,
 				ComponentesID: p.ComponentesID,
@@ -99,12 +77,12 @@ func CreateMoldComponentsAndProcesses(
 				CreatedAt:     time.Now(),
 				UpdatedAt:     time.Now(),
 			}
-
-			if err := processRepo.SaveProcess(newProcess); err != nil {
-				return fmt.Errorf("error saving process for component %s: %w", p.ComponentesID, err)
+			if err := processRepo.SaveProcess(proc); err != nil {
+				return err
 			}
 		}
-
-		return nil
+		// recalc após adicionar
+		svc := NewMoldService(moldsRepo, componentsRepo, processRepo)
+		return svc.recalc(moldCode)
 	})
 }
