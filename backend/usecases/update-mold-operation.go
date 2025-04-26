@@ -40,7 +40,6 @@ func UpdateMoldOperation(
 		}
 	}
 
-	// Atualizar componentes
 	for _, compDTO := range dto.Componentes {
 		component, err := componentsRepo.GetByID(compDTO.ComponenteID)
 		if err != nil {
@@ -48,6 +47,10 @@ func UpdateMoldOperation(
 		}
 		if component == nil {
 			return fmt.Errorf("component with ID %s not found", compDTO.ComponenteID)
+		}
+
+		if component.MoldeCodigo != moldCode {
+			return fmt.Errorf("component ID %s does not belong to mold %s", compDTO.ComponenteID, moldCode)
 		}
 
 		updateComponentFields(component, compDTO)
@@ -66,12 +69,22 @@ func UpdateMoldOperation(
 			return fmt.Errorf("process with ID %s not found", procDTO.ProcessoID)
 		}
 
-		// Validar componente, se mudou
+		currentComponent, err := componentsRepo.GetByID(process.ComponentesID)
+		if err != nil || currentComponent == nil {
+			return fmt.Errorf("error validating current component ID %s: %w", process.ComponentesID, err)
+		}
+		if currentComponent.MoldeCodigo != moldCode {
+			return fmt.Errorf("process ID %s is linked to component %s which does not belong to mold %s",
+				procDTO.ProcessoID, process.ComponentesID, moldCode)
+		}
+
 		if procDTO.ComponentesID != nil {
-			comp, err := componentsRepo.GetByID(*procDTO.ComponentesID)
-			if err != nil || comp == nil || comp.MoldeCodigo != moldCode {
-				return fmt.Errorf("component ID %s does not belong to mold %s",
-					*procDTO.ComponentesID, moldCode)
+			newComp, err := componentsRepo.GetByID(*procDTO.ComponentesID)
+			if err != nil || newComp == nil {
+				return fmt.Errorf("new component ID %s not found", *procDTO.ComponentesID)
+			}
+			if newComp.MoldeCodigo != moldCode {
+				return fmt.Errorf("new component ID %s does not belong to mold %s", *procDTO.ComponentesID, moldCode)
 			}
 		}
 
@@ -99,7 +112,7 @@ func updateComponentFields(component *models.Componentes, dto contracts.UpdateCo
 		component.Steps = *dto.Steps
 	}
 	if dto.Status != nil {
-		component.IsActive = *dto.Status
+		component.Status = *dto.Status
 	}
 }
 

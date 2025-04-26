@@ -187,3 +187,13 @@ func (r *processRepository) GetProcessByComponent(componentID string) ([]*models
 	}
 	return processes, nil
 }
+
+func (r *processRepository) ExistsByID(id string) (bool, error) {
+	var count int64
+	if err := r.DB.Model(&models.Processos{}).
+		Where("id = ?", id).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

@@ -56,6 +56,16 @@ func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int)
 	return components, nil
 }
 
+func (r *componentsRepository) ExistsByID(id string) (bool, error) {
+	var count int64
+	if err := r.DB.Model(&models.Componentes{}).
+		Where("id = ?", id).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
 func (r *componentsRepository) CountActiveByMold(moldCode string) (int64, error) {
 	var count int64
 	if err := r.DB.
