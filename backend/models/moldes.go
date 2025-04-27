@@ -41,8 +41,8 @@ type Componentes struct {
 
 type Processos struct {
 	ID            string        `gorm:"size:36;primaryKey" json:"id"`
-	MoldeCodigo   string        `gorm:"size:12;index" json:"molde_codigo"`   // foreign key to Moldes
-	ComponentesID string        `gorm:"size:12;index" json:"componentes_id"` // foreign key to Componentes
+	MoldeCodigo   string        `gorm:"size:12;index" json:"molde_codigo"`  // foreign key to Moldes
+	ComponentesID string        `gorm:"size:12;index" json:"componente_id"` // foreign key to Componentes
 	Description   string        `json:"description"`
 	StepID        string        `gorm:"size:36;index" json:"step_id"`
 	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`

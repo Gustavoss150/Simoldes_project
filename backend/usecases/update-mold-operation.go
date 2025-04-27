@@ -47,7 +47,10 @@ func UpdateMoldOperation(
 		if err != nil || comp == nil {
 			return fmt.Errorf("component %s not found", compDTO.ComponenteID)
 		}
-		// aplicar campos
+
+		if comp.MoldeCodigo != moldCode {
+			return fmt.Errorf("component %s does not belong to mold %s", compDTO.ComponenteID, moldCode)
+		}
 		if compDTO.Quantity != nil {
 			comp.Quantity = *compDTO.Quantity
 		}

@@ -24,7 +24,7 @@ type CreateComponentRequest struct {
 
 type CreateProcessRequest struct {
 	ID            string               `json:"id,omitempty"`
-	ComponentesID string               `json:"componentes_id"`
+	ComponentesID string               `json:"componente_id"`
 	Description   string               `json:"description,omitempty"`
 	StepID        string               `json:"step_id"`
 	StepName      string               `json:"step_name,omitempty"`
@@ -63,7 +63,7 @@ type UpdateComponentOperationDTO struct {
 
 type UpdateProcessOperationDTO struct {
 	ProcessoID    string                `json:"processo_id"`
-	ComponentesID *string               `json:"componentes_id,omitempty"`
+	ComponentesID *string               `json:"componente_id,omitempty"`
 	StepID        *string               `json:"step_id,omitempty"`
 	Status        *models.ProcessStatus `json:"status,omitempty"`
 	Order         *int                  `json:"order,omitempty"`
