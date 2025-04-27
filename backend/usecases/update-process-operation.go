@@ -28,24 +28,48 @@ func NewMoldService(
 
 // recalc recalcula Steps e CurrentStep de um molde e persiste
 func (s *MoldService) recalc(moldCode string) error {
-	total, err := s.processRepo.CountProcessesByMold(moldCode)
+	// buscar todos componentes ativos do molde
+	activeComponents, err := s.componentsRepo.SearchActiveByMold(moldCode)
 	if err != nil {
-		return err
+		return fmt.Errorf("error fetching active components for mold %s: %w", moldCode, err)
 	}
-	done, err := s.processRepo.CountCompletedProcessesByMold(moldCode)
-	if err != nil {
-		return err
+
+	total := 0
+	done := 0
+	inProcess := false
+
+	for _, comp := range activeComponents {
+		procs, err := s.processRepo.GetProcessByComponent(comp.ID)
+		if err != nil {
+			return fmt.Errorf("error fetching processes for component %s: %w", comp.ID, err)
+		}
+		for _, p := range procs {
+			total++
+			if p.Status == models.StatusConcluido {
+				done++
+			}
+			if p.Status == models.StatusEmProcesso {
+				inProcess = true
+			}
+		}
 	}
+
 	m, err := s.moldsRepo.Get(moldCode)
 	if err != nil {
 		return err
 	}
-	m.Steps = int(total)
-	m.CurrentStep = int(done)
-	// opcional: se current == total, m.Status = StatusConcluido
-	if m.CurrentStep > 0 && m.CurrentStep == m.Steps {
+
+	m.Steps = total
+	m.CurrentStep = done
+
+	switch {
+	case m.CurrentStep > 0 && m.CurrentStep == m.Steps:
 		m.Status = models.StatusConcluido
+	case inProcess:
+		m.Status = models.StatusEmProcesso
+		// opcional: senão, poderia ser not_started ou paused dependendo da regra
 	}
+
 	return s.moldsRepo.Save(m)
 }
 

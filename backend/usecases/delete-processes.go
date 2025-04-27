@@ -2,22 +2,35 @@ package usecases
 
 import (
 	"errors"
+	"fmt"
 
 	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
 )
 
-func SoftDeleteProcess(processRepo processrepo.ProcessRepository, processId string) error {
-	process, err := processRepo.GetProcessByID(processId)
-	if err != nil || process == nil {
-		return errors.New("process not found")
+func (s *MoldService) SoftDeleteProcess(processID, moldCode string) error {
+	proc, err := s.processRepo.GetProcessByID(processID)
+	if err != nil || proc == nil {
+		return fmt.Errorf("process %s not found", processID)
+	}
+	if !proc.IsActive {
+		return fmt.Errorf("process %s is already inactive", processID)
+	}
+	if proc.MoldeCodigo != moldCode {
+		return fmt.Errorf("process %s does not belong to mold %s", processID, moldCode)
 	}
 
-	if !process.IsActive {
-		return errors.New("process is already inactive")
+	proc.IsActive = false
+	if err := s.processRepo.SaveProcess(proc); err != nil {
+		return fmt.Errorf("error saving process %s: %w", processID, err)
 	}
 
-	process.IsActive = false
-	return processRepo.SaveProcess(process)
+	// após deletar processo, atualizar componente
+	if err := s.refreshComponentStatus(proc.ComponentesID, moldCode); err != nil {
+		return err
+	}
+
+	// e recalcular molde
+	return s.recalc(moldCode)
 }
 
 func SoftDeleteStep(processRepo processrepo.ProcessRepository, stepId string) error {

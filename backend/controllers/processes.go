@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
+	componentsrepo "github.com/Gustavoss150/simoldes-backend/repositories/components_repository"
+	moldsrepo "github.com/Gustavoss150/simoldes-backend/repositories/moldes_repository"
 	processrepo "github.com/Gustavoss150/simoldes-backend/repositories/processes_repository"
 	"github.com/Gustavoss150/simoldes-backend/usecases"
 	"github.com/gin-gonic/gin"
@@ -164,8 +166,17 @@ func UpdateSteps(c *gin.Context) {
 
 func DeleteProcess(c *gin.Context) {
 	processID := c.Param("processID")
-	if processID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Process ID is required"})
+	moldCode := c.Query("moldCode") // moldCode vem pela query string
+
+	if processID == "" || moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Process ID and Mold Code are required"})
+		return
+	}
+
+	// Inicializar repositórios
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
 		return
 	}
 
@@ -175,7 +186,16 @@ func DeleteProcess(c *gin.Context) {
 		return
 	}
 
-	if err := usecases.SoftDeleteProcess(processRepo, processID); err != nil {
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	// Criar o MoldService
+	moldService := usecases.NewMoldService(moldsRepo, componentsRepo, processRepo)
+
+	if err := moldService.SoftDeleteProcess(processID, moldCode); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting process: " + err.Error()})
 		return
 	}

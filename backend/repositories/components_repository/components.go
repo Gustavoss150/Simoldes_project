@@ -43,6 +43,16 @@ func (r *componentsRepository) GetByID(id string) (*models.Componentes, error) {
 	return &component, nil
 }
 
+func (r *componentsRepository) SearchActiveByMold(moldCode string) ([]*models.Componentes, error) {
+	var components []*models.Componentes
+	if err := r.DB.
+		Where("molde_codigo = ? AND is_active = ?", moldCode, true).
+		Find(&components).Error; err != nil {
+		return nil, errors.New("error retrieving all mold components: " + err.Error())
+	}
+	return components, nil
+}
+
 func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int) ([]*models.Componentes, error) {
 	var components []*models.Componentes
 	if err := r.DB.

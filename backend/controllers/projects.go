@@ -112,7 +112,7 @@ func ListMoldProjects(c *gin.Context) {
 func ListMoldComponents(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mold code is required"})
 		return
 	}
 	componentsRepo, err := componentsrepo.InitComponentsDatabase()
@@ -138,7 +138,7 @@ func ListMoldComponents(c *gin.Context) {
 func UpdateMoldOperation(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mold code is required"})
 		return
 	}
 
@@ -199,8 +199,10 @@ func DeleteMoldProject(c *gin.Context) {
 
 func DeleteComponent(c *gin.Context) {
 	componentID := c.Param("componentID")
-	if componentID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Component ID is required"})
+	moldCode := c.Query("moldCode") // supondo que você envie o molde no query param (pode ajustar aqui)
+
+	if componentID == "" || moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Component ID and Mold Code are required"})
 		return
 	}
 
@@ -210,7 +212,24 @@ func DeleteComponent(c *gin.Context) {
 		return
 	}
 
-	if err := usecases.SoftDeleteComponents(componentsRepo, componentID); err != nil {
+	// Agora precisa também dos outros repos para criar MoldService
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	// Criar o MoldService
+	moldService := usecases.NewMoldService(moldsRepo, componentsRepo, processRepo)
+
+	// Agora sim, chamar o método correto
+	if err := moldService.SoftDeleteComponents(componentID, moldCode); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting component: " + err.Error()})
 		return
 	}

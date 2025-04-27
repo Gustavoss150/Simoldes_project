@@ -18,7 +18,7 @@ func ProcessesRouter(router *gin.Engine) {
 		r.GET("/inactive_steps", controllers.ListInactiveSteps)
 		r.GET("/inactive_processes/:moldCode", controllers.ListInactiveProcessesByMold)
 		r.PUT("/:stepID", controllers.UpdateSteps)
-		r.DELETE("/:processID", controllers.DeleteProcess)
+		r.DELETE("/:processID", controllers.DeleteProcess) // ex: /processes/{processID}?moldCode={codigo}
 		r.DELETE("/steps/:stepID", controllers.DeleteStep)
 	}
 }
