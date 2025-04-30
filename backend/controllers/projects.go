@@ -96,8 +96,9 @@ func ListMoldProjects(c *gin.Context) {
 	}
 
 	limit, offset := getPaginationParams(c)
+	status := c.Query("status")
 
-	molds, total, err := usecases.ListAllMolds(moldsRepo, limit, offset)
+	molds, total, err := usecases.ListMoldsByStatus(moldsRepo, status, limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing molds: " + err.Error()})
 		return

@@ -44,6 +44,20 @@ func (r *moldsRepository) GetAllActive(limit int, offset int) ([]*models.Moldes,
 	return molds, nil
 }
 
+func (r *moldsRepository) GetByStatus(status string, limit int, offset int) ([]*models.Moldes, error) {
+	var molds []*models.Moldes
+	err := r.DB.
+		Where("is_active = ? AND status = ?", true, status).
+		Limit(limit).
+		Offset(offset).
+		Find(&molds).Error
+
+	if err != nil {
+		return nil, errors.New("error retrieving molds by status: " + err.Error())
+	}
+	return molds, nil
+}
+
 func (r *moldsRepository) CountActive() (int64, error) {
 	var count int64
 	if err := r.DB.
@@ -51,6 +65,19 @@ func (r *moldsRepository) CountActive() (int64, error) {
 		Where("is_active = ?", true).
 		Count(&count).Error; err != nil {
 		return 0, errors.New("error counting active molds: " + err.Error())
+	}
+	return count, nil
+}
+
+func (r *moldsRepository) CountByStatus(status string) (int64, error) {
+	var count int64
+	err := r.DB.
+		Model(&models.Moldes{}).
+		Where("is_active = ? AND status = ?", true, status).
+		Count(&count).Error
+
+	if err != nil {
+		return 0, errors.New("error counting molds by status: " + err.Error())
 	}
 	return count, nil
 }

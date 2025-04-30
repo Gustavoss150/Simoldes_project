@@ -1,3 +1,8 @@
+:root {
+    --base: #013932;
+    --hover: #2B6B5F;
+  }
+
 body {
     padding: 0;
     margin: 0;
@@ -23,7 +28,7 @@ body {
 }
 
 .authDesign .left {
-    background-color: #267a40;
+    background-color: var(--base);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -39,6 +44,7 @@ body {
 .authDesign .left p {
     font-size: 25px;
     margin-bottom: 20px;
+    color: white;
 }
 
 .authDesign .right {
@@ -64,7 +70,7 @@ body {
 .btn {
     font-size: 20px;
     text-decoration: none;
-    background-color: #267a40;
+    background-color: var(--base);
     color: white;
     padding: 15px 30px;
     border-radius: 5px;
@@ -76,7 +82,7 @@ body {
 }
 
 .btn:hover {
-    background-color: #2b6b5f;
+    background-color: var(--hover);
 }
 
 input[type="text"],
@@ -96,7 +102,7 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
 textarea:focus {
-    border-color: #267a40;
+    border-color: var(--base);
     outline: none;
 }
 
@@ -113,13 +119,13 @@ select {
 }
 
 select:focus {
-    border-color: #267a40;
+    border-color: var(--base);
     background-color: #fff;
     color: #333;
 }
 
 select:hover {
-    border-color: #2B6B5F;
+    border-color: var(--hover);
     background-color: #e5f4e1;
 }
 
@@ -132,6 +138,6 @@ option {
 }
 
 option:hover {
-    background-color: #267a40;
+    background-color: var(--base);
     color: white;
 }

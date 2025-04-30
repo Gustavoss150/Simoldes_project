@@ -8,19 +8,38 @@ import (
 	moldsrepo "github.com/Gustavoss150/simoldes-backend/repositories/moldes_repository"
 )
 
-func ListAllMolds(moldsRepo moldsrepo.MoldsRepository, limit int, offset int) (projects []*models.Moldes, total int, err error) {
-	projects, err = moldsRepo.GetAllActive(limit, offset)
-	if err != nil {
-		return nil, total, errors.New("error fetching active molds: " + err.Error())
+func ListMoldsByStatus(moldsRepo moldsrepo.MoldsRepository, status string, limit int, offset int) ([]*models.Moldes, int, error) {
+	validStatuses := map[string]string{
+		"not started": "not started",
+		"in process":  "in process",
+		"paused":      "paused",
+		"completed":   "completed",
 	}
 
-	totalMolds, err := moldsRepo.CountActive()
-	if err != nil {
-		return nil, total, errors.New("error counting active molds: " + err.Error())
+	statusEnum, ok := validStatuses[status]
+	if !ok && status != "" {
+		return nil, 0, errors.New("invalid status filter")
 	}
-	total = int(totalMolds)
 
-	return projects, total, err
+	var (
+		molds []*models.Moldes
+		count int64
+		err   error
+	)
+
+	if statusEnum != "" {
+		molds, err = moldsRepo.GetByStatus(statusEnum, limit, offset)
+		count, _ = moldsRepo.CountByStatus(statusEnum)
+	} else {
+		molds, err = moldsRepo.GetAllActive(limit, offset)
+		count, _ = moldsRepo.CountActive()
+	}
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return molds, int(count), nil
 }
 
 func ListComponentsByMold(

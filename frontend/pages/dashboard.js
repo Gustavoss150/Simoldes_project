@@ -2,16 +2,33 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import api from "../utils/axios";
 import Sidebar from "../components/Sidebar";
+import { Card } from "primereact/card";
+import { Dropdown } from "primereact/dropdown";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { ProgressSpinner } from "primereact/progressspinner";
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
     const [error, setError] = useState("");
-    const [usersList, setUsersList] = useState([]);  // Para armazenar os usuários (para admins)
+    const [loading, setLoading] = useState(true);
+    const [molds, setMolds] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [selectedStatus, setSelectedStatus] = useState(null);
     const router = useRouter();
+
+    const statusOptions = [
+        { label: "Todos", value: null },
+        { label: "Não iniciado", value: "not started" },
+        { label: "Em processo", value: "in process" },
+        { label: "Pausado", value: "paused" },
+        { label: "Completo", value: "completed" }
+    ];
 
     useEffect(() => {
         const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY);
         if (!token) {
+            setError("Token não encontrado. Redirecionando para login...");
             router.push("/auth/login");
             return;
         }
@@ -22,7 +39,6 @@ export default function Dashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUserData(response.data);
-
             } catch (err) {
                 setError("Erro ao carregar os dados do usuário.");
                 console.error("Erro na API:", err);
@@ -33,26 +49,74 @@ export default function Dashboard() {
         fetchUserData();
     }, [router]);
 
+    useEffect(() => {
+        const fetchMolds = async () => {
+            setLoading(true);
+            setError("");
+            try {
+                const token = localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY);
+                if (!token) {
+                    setError("Token não encontrado. Redirecionando para login...");
+                    router.push("/auth/login");
+                    return;
+                }
+
+                const params = selectedStatus ? { status: selectedStatus } : {};
+                const response = await api.get(`/projects/`, { params });
+                console.log("[fetchMolds] response.data:", response.data);
+                setMolds(response.data.molds);
+                setTotal(response.data.total);
+            } catch (err) {
+                setError("Erro ao carregar moldes.");
+                console.error("Erro ao buscar moldes:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMolds();
+    }, [selectedStatus, router]);
+
     return (
         <div className="dashboard-container flex">
             <Sidebar />
             <main className="dashboard-main flex-1 p-6">
-                <header className="dashboard-header">
+                <header className="dashboard-header mb-4">
                     {userData ? (
-                        <div>
-                            <h3 className="text-2xl font-bold">{userData.name}</h3>
-                            <p>Matrícula: {userData.registration}</p>
+                        <Card title={userData.name} subTitle={`Matrícula: ${userData.registration}`}>
                             <p>Departamento: {userData.department}</p>
                             <p>Role: {userData.role}</p>
-                        </div>
+                        </Card>
                     ) : (
-                        <p>Carregando...</p>
+                        <ProgressSpinner />
                     )}
                 </header>
 
                 <section className="dashboard-content mt-4">
-                    <h2 className="text-xl font-semibold">Simoldes PCP</h2>
-                    {error && <p className="text-red-500">{error}</p>}
+                    <h2 className="text-xl font-semibold mb-2">Moldes</h2>
+                    <Dropdown
+                        value={selectedStatus}
+                        options={statusOptions}
+                        onChange={(e) => setSelectedStatus(e.value)}
+                        placeholder="Filtrar por status"
+                        className="mb-4"
+                    />
+
+                    {loading ? (
+                        <ProgressSpinner />
+                    ) : (
+                        <DataTable value={molds} paginator rows={5} totalRecords={total} className="p-datatable-sm">
+                            <Column field="codigo" header="Código" sortable />
+                            <Column field="description" header="Descrição" />
+                            <Column field="status" header="Status" sortable />
+                            <Column field="steps" header="Etapas" />
+                            <Column field="current_step" header="Etapa Atual" />
+                            <Column field="begin_date" header="Início" />
+                            <Column field="delivery_date" header="Entrega" />
+                        </DataTable>
+                    )}
+
+                    {error && <p className="text-red-500 mt-2">{error}</p>}
                 </section>
             </main>
         </div>
