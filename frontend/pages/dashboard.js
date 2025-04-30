@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import api from "../utils/axios";
 import Sidebar from "../components/Sidebar";
-import { Card } from "primereact/card";
 import { Dropdown } from "primereact/dropdown";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -81,26 +80,30 @@ export default function Dashboard() {
         <div className="dashboard-container flex">
             <Sidebar />
             <main className="dashboard-main flex-1 p-6">
-                <header className="dashboard-header mb-4">
+                <header className="dashboard-header">
                     {userData ? (
-                        <Card title={userData.name} subTitle={`Matrícula: ${userData.registration}`}>
+                        <div>
+                            <h1 className="text-2xl font-bold">{userData.name}</h1>
+                            <p>Matrícula: {userData.registration}</p>
                             <p>Departamento: {userData.department}</p>
                             <p>Role: {userData.role}</p>
-                        </Card>
+                        </div>
                     ) : (
                         <ProgressSpinner />
                     )}
                 </header>
 
                 <section className="dashboard-content mt-4">
-                    <h2 className="text-xl font-semibold mb-2">Moldes</h2>
-                    <Dropdown
-                        value={selectedStatus}
-                        options={statusOptions}
-                        onChange={(e) => setSelectedStatus(e.value)}
-                        placeholder="Filtrar por status"
-                        className="mb-4"
-                    />
+                    <div className="flex items-center gap-4">
+                        <h2 className="text-xl font-semibold">Moldes</h2>
+                        <Dropdown
+                            value={selectedStatus}
+                            options={statusOptions}
+                            onChange={(e) => setSelectedStatus(e.value)}
+                            placeholder="Filtrar por status"
+                        />
+                    </div>
+
 
                     {loading ? (
                         <ProgressSpinner />
@@ -109,10 +112,10 @@ export default function Dashboard() {
                             <Column field="codigo" header="Código" sortable />
                             <Column field="description" header="Descrição" />
                             <Column field="status" header="Status" sortable />
-                            <Column field="steps" header="Etapas" />
                             <Column field="current_step" header="Etapa Atual" />
+                            <Column field="steps" header="Etapas" />
                             <Column field="begin_date" header="Início" />
-                            <Column field="delivery_date" header="Entrega" />
+                            <Column field="delivery_date" header="Entrega Prevista" />
                         </DataTable>
                     )}
 
