@@ -16,10 +16,10 @@ func ListProcessesWithStepsByMold(processRepo processrepo.ProcessRepository, mol
 	return stepsByComponent, nil
 }
 
-func ListProcessesByComponent(processRepo processrepo.ProcessRepository, componentID string) ([]*models.Processos, error) {
-	processes, err := processRepo.GetProcessByComponent(componentID)
+func ListStepsByComponent(processRepo processrepo.ProcessRepository, componentID string) ([]*contracts.ProcessWithStep, error) {
+	processes, err := processRepo.GetProcessWithStepsByComponent(componentID)
 	if err != nil {
-		return nil, fmt.Errorf("error retrieving processes for component %s: %w", componentID, err)
+		return nil, fmt.Errorf("erro ao buscar processos com etapas para o componente %s: %w", componentID, err)
 	}
 	return processes, nil
 }

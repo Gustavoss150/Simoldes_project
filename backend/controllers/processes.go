@@ -66,7 +66,7 @@ func ListProcessesByComponent(c *gin.Context) {
 		return
 	}
 
-	processes, err := usecases.ListProcessesByComponent(processRepo, componentID)
+	processes, err := usecases.ListStepsByComponent(processRepo, componentID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing processes: " + err.Error()})
 		return

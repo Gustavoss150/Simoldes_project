@@ -1,9 +1,17 @@
 :root {
     --base: #013932;
     --hover: #2B6B5F;
-  }
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
 
 body {
+    position: absolute;
     padding: 0;
     margin: 0;
     font-family: "Josefin Sans", sans-serif;
@@ -13,10 +21,14 @@ body {
 
 /* Container vertical para páginas de autenticação */
 .authDesign {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
-    height: 100vh;
-    align-items: center;
-    justify-content: center;
+    margin: 0;
+    padding: 0;
 }
 
 .authDesign .left,
@@ -33,12 +45,13 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin: 0;
 }
 
 .authDesign .left h1 {
     font-size: 50px;
     color: white;
-    margin-bottom: 10px;
+    margin-bottom: 0px;
 }
 
 .authDesign .left p {

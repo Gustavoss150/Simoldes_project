@@ -1,0 +1,24 @@
+:root {
+    --base: #02463e;
+    --hover: #2B6B5F;
+    --light-bg: #e5f4e1;
+    --text-dark: #2b2a2a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #c5dfc7;
+    font-family: "Josefin Sans", sans-serif;
+    color: var(--text-dark);
+    padding: 30px;
+    height: 100vh;
+}
+
+html, body {
+    height: 100%;
+}

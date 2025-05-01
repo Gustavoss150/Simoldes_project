@@ -180,6 +180,31 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 	return result, nil
 }
 
+func (r *processRepository) GetProcessWithStepsByComponent(componentID string) ([]*contracts.ProcessWithStep, error) {
+	var results []*contracts.ProcessWithStep
+
+	err := r.DB.
+		Table("processos").
+		Select(`
+            processos.id           AS process_id,
+			processos.order        AS process_order,
+			processos.status       AS process_status,
+			processos.notes        AS process_notes,
+			etapas.id              AS step_id,
+			etapas.name            AS step_name,
+			etapas.description     AS step_description
+        `).
+		Joins("JOIN etapas ON processos.step_id = etapas.id").
+		Where("processos.componentes_id = ? AND processos.is_active = ?", componentID, true).
+		Order("processos.order ASC").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 func (r *processRepository) GetProcessByComponent(componentID string) ([]*models.Processos, error) {
 	var processes []*models.Processos
 	if err := r.DB.Where("componentes_id = ? AND is_active = ?", componentID, true).Find(&processes).Error; err != nil {

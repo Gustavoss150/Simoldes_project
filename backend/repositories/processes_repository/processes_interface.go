@@ -18,6 +18,7 @@ type ProcessRepository interface {
 	GetAllSteps() ([]*models.Etapas, error)
 	GetAllInactiveSteps() ([]*models.Etapas, error)
 	GetProcessAndStepsByMold(moldCode string) ([]contracts.StepsByComponent, error)
+	GetProcessWithStepsByComponent(componentID string) ([]*contracts.ProcessWithStep, error)
 	GetProcessByComponent(componentID string) ([]*models.Processos, error)
 	ExistsByID(id string) (bool, error)
 	CountProcessesByMold(moldCode string) (int64, error)
