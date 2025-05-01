@@ -1,0 +1,168 @@
+/* Projects.module.css */
+.container {
+    display: flex;
+    width: 100%;
+}
+
+.mainContent {
+    margin-left: 20px;
+    padding: 30px;
+    width: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.flex.justify-between {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light-bg);
+}
+
+h1.text-2xl {
+    color: var(--base);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Expansão de Linha (específico para esta página) */
+.row-expansion {
+    background-color: #f9f9f9;
+    border-left: 3px solid var(--base);
+}
+
+.row-expansion h3 {
+    color: var(--base);
+    margin-bottom: 0.5rem;
+}
+
+/* Ajustes específicos para os botões */
+.p-button-success {
+    background-color: var(--base);
+    border-color: var(--base);
+}
+
+.p-button-success:hover {
+    background-color: var(--hover);
+    border-color: var(--hover);
+}
+
+/* Mensagem de erro específica */
+.text-red-500 {
+    color: var(--danger);
+    background-color: #ffebee;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    border-left: 3px solid var(--danger);
+}
+
+.header {
+    background-color: var(--light-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    line-height: 2.2;
+    gap: 10px;
+}
+
+.title {
+    color: var(--base);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+/* Estilos da tabela */
+.dataTable {
+    font-size: 0.9rem;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dataTable thead tr th {
+    background-color: var(--base);
+    color: white;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+    padding: 0.75rem 1rem;
+}
+
+.dataTable tbody tr {
+    transition: background-color 0.2s;
+}
+
+.dataTable tbody tr:hover {
+    background-color: var(--light-bg);
+}
+
+.dataTable tbody tr td {
+    padding: 0.75rem 1rem;
+    border-color: #eee;
+}
+
+/* Expansão de Linha */
+.rowExpansion {
+    background-color: #f9f9f9;
+    border-left: 3px solid var(--base);
+    padding: 1rem;
+}
+
+.rowExpansion h3 {
+    color: var(--base);
+    margin-bottom: 0.5rem;
+    transition: 3s;
+}
+
+/* Status Badges */
+.statusBadge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.notStarted {
+    background-color: #e0e0e0;
+    color: #616161;
+}
+
+.inProcess {
+    background-color: #fff3e0;
+    color: #ff6d00;
+}
+
+.paused {
+    background-color: #ffebee;
+    color: var(--danger);
+}
+
+.completed {
+    background-color: #e8f5e9;
+    color: var(--success);
+}
+
+/* Mensagens de Erro */
+.error {
+    color: var(--danger);
+    background-color: #ffebee;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    border-left: 3px solid var(--danger);
+}

@@ -1,4 +1,4 @@
-// /components/projects/ComponentList.js
+// File: /components/projects/ComponentList.js
 import React, { useEffect, useState } from 'react';
 import api from '../../utils/axios';
 import { DataTable } from 'primereact/datatable';
@@ -16,14 +16,12 @@ export default function ComponentList({ moldCode }) {
 
   const fetchComponents = async () => {
     setLoading(true);
-    // Ajuste na rota: usa /projects/components/:moldCode ou /projects/inactive_components/:moldCode
-    const url = showInactive
-      ? `/projects/inactive_components/${moldCode}`
-      : `/projects/components/${moldCode}`;
+    const url = showInactive ? `/projects/inactive_components/${moldCode}` : `/projects/components/${moldCode}`;
     const res = await api.get(url);
     setComponents(res.data.components || []);
     setLoading(false);
   };
+
   useEffect(() => { fetchComponents(); }, [moldCode, showInactive]);
 
   const handleDelete = async (id) => {
@@ -70,11 +68,7 @@ export default function ComponentList({ moldCode }) {
         <Column
           header="3D Model"
           body={(row) => row.archive_3d_model ? (
-            <Button
-              icon="pi pi-external-link"
-              className="p-button-text"
-              onClick={() => view3D(row.archive_3d_model)}
-            />
+            <Button icon="pi pi-external-link" className="p-button-text" onClick={() => view3D(row.archive_3d_model)} />
           ) : null}
         />
         <Column field="status" header="Status" />

@@ -1,3 +1,130 @@
+/* MoldForm.module.css */
+
 .dialog {
-    width: 450px;
-  }
+  min-width: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.dialog .p-dialog-header {
+  background-color: var(--base);
+  color: white;
+  border-bottom: 1px solid var(--hover);
+}
+
+.dialog .p-dialog-content {
+  padding: 1.5rem;
+  background-color: var(--light-bg);
+}
+
+.dialog .p-dialog-footer {
+  background-color: var(--light-bg);
+  border-top: 1px solid #ddd;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* Campos do formulário */
+.p-field {
+  margin-bottom: 1.5rem;
+}
+
+.p-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--base);
+}
+
+.p-inputtext {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: all 0.3s;
+}
+
+.p-inputtext:enabled:hover {
+  border-color: var(--hover);
+}
+
+.p-inputtext:enabled:focus {
+  border-color: var(--base);
+  box-shadow: 0 0 0 0.2rem rgba(2, 70, 62, 0.2);
+}
+
+/* Dropdown */
+.p-dropdown {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.p-dropdown:not(.p-disabled).p-focus {
+  box-shadow: 0 0 0 0.2rem rgba(2, 70, 62, 0.2);
+  border-color: var(--base);
+}
+
+.p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  background-color: var(--base);
+}
+
+/* Calendar */
+.p-calendar {
+  width: 100%;
+}
+
+.p-calendar .p-inputtext {
+  padding-right: 2.5rem;
+}
+
+.p-calendar .p-datepicker {
+  border-radius: 6px;
+}
+
+.p-datepicker .p-datepicker-header {
+  background-color: var(--base);
+  color: white;
+  border-radius: 6px 6px 0 0;
+}
+
+.p-datepicker:not(.p-datepicker-inline) {
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Botões */
+.p-button {
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined) {
+  background-color: var(--base);
+  border-color: var(--base);
+}
+
+.p-button:not(.p-button-text):not(.p-button-outlined):hover {
+  background-color: var(--hover);
+  border-color: var(--hover);
+}
+
+.p-button-text {
+  color: var(--base);
+}
+
+.p-button-text:hover {
+  background-color: rgba(2, 70, 62, 0.1);
+}
+
+/* Validação e estados */
+.p-invalid .p-inputtext {
+  border-color: var(--danger);
+}
+
+.p-error {
+  color: var(--danger);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

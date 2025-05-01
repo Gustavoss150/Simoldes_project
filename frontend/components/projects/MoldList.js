@@ -1,4 +1,4 @@
-// /components/projects/MoldList.js
+// File: /components/projects/MoldList.js
 import React from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';

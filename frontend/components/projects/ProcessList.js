@@ -1,4 +1,3 @@
-// /components/projects/ProcessList.js
 import React, { useEffect, useState } from 'react';
 import api from '../../utils/axios';
 import { DataTable } from 'primereact/datatable';
@@ -14,11 +13,9 @@ export default function ProcessList({ moldCode, componentID }) {
 
   const fetchProcesses = async () => {
     setLoading(true);
-    const url = componentID
-      ? `/processes/components/${componentID}`
-      : showInactive
-        ? `/processes/inactive_processes/${moldCode}`
-        : `/processes/${moldCode}`;
+    let url;
+    if (componentID) url = `/processes/components/${componentID}`;
+    else url = showInactive ? `/processes/inactive_processes/${moldCode}` : `/processes/${moldCode}`;
     try {
       const res = await api.get(url);
       setProcesses(res.data.processes || res.data.inactive_processes || []);
@@ -30,18 +27,14 @@ export default function ProcessList({ moldCode, componentID }) {
     }
   };
 
-  useEffect(() => {
-    if (moldCode || componentID) fetchProcesses();
-  }, [moldCode, componentID, showInactive]);
+  useEffect(() => { if (moldCode || componentID) fetchProcesses(); }, [moldCode, componentID, showInactive]);
 
   const handleDelete = async (id) => {
     if (confirm(`Excluir processo ${id}?`)) {
       try {
         await api.delete(`/processes/${id}?moldCode=${moldCode}`);
         fetchProcesses();
-      } catch (err) {
-        console.error('Erro ao deletar processo:', err);
-      }
+      } catch (err) { console.error('Erro ao deletar processo:', err); }
     }
   };
 
@@ -52,15 +45,13 @@ export default function ProcessList({ moldCode, componentID }) {
       <div className="flex gap-2 mb-2">
         <Dropdown
           value={showInactive}
-          options={[
-            { label: 'Ativos', value: false },
-            { label: 'Inativos', value: true },
-          ]}
+          options={[{ label: 'Ativos', value: false }, { label: 'Inativos', value: true }]}
           onChange={(e) => setShowInactive(e.value)}
           placeholder="Filtrar processos"
         />
       </div>
       <DataTable value={processes} responsiveLayout="scroll">
+        <Column field="process_id" header="Processo ID" />
         <Column field="step_name" header="Etapa" />
         <Column field="notes" header="Descrição" />
         <Column field="order" header="Ordem" />
@@ -68,11 +59,7 @@ export default function ProcessList({ moldCode, componentID }) {
         <Column
           header="Ações"
           body={(row) => (
-            <Button
-              icon="pi pi-trash"
-              className="p-button-text p-button-danger"
-              onClick={() => handleDelete(row.id)}
-            />
+            <Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => handleDelete(row.id)} />
           )}
         />
       </DataTable>
