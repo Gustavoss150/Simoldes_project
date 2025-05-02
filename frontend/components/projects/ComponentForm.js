@@ -6,6 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
 import api from '../../utils/axios';
+import styles from '../../styles/projects/Forms.module.css';
 
 const processStatusOptions = [
   { label: 'Não Iniciado', value: 'not started' },
@@ -99,7 +100,14 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
 
   const handleProcessChange = (index, field, value) => {
     const newProcesses = [...processes];
-    newProcesses[index] = { ...newProcesses[index], [field]: value };
+    newProcesses[index] = { 
+      ...newProcesses[index], 
+      [field]: value,
+      // Gerar description automático se não fornecido
+      description: field === 'step_id' 
+        ? steps.find(s => s.id === value)?.name || ''
+        : newProcesses[index].description
+    };
     setProcesses(newProcesses);
   };
 
@@ -107,7 +115,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
     setProcesses([...processes, {
       step_id: '',
       status: 'not started',
-      maquina_id: '',
+      maquina_id: null,
       order: processes.length + 1,
       isNew: true
     }]);
@@ -143,7 +151,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
       };
 
       if (isNew) {
-        // Criar novo componente com processos
+        // Ajustar tratamento da maquina_id para novos processos
         await api.post(`/projects/new/${moldCode}`, {
           componentes: [{
             id: formData.id,
@@ -156,28 +164,34 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
           processos: newProcesses.map(p => ({
             step_id: p.step_id,
             status: p.status,
-            maquina_id: p.maquina_id,
+            maquina_id: p.maquina_id || null, // Converter string vazia para null
             order: p.order,
             componente_id: formData.id,
             begin_date: new Date().toISOString(),
-            delivery_date: new Date().toISOString()
+            delivery_date: new Date().toISOString(),
+            // Adicionar campos obrigatórios do contract
+            description: p.description || '', 
+            step_name: steps.find(s => s.id === p.step_id)?.name || '',
+            notes: ''
           }))
         });
       } else {
-        // Atualizar componente existente
+        // Ajuste similar para atualização
         await api.put(`/projects/${moldCode}`, updatePayload);
-
-        // Criar novos processos separadamente
+  
         if (newProcesses.length > 0) {
           await api.post(`/projects/new/${moldCode}`, {
             processos: newProcesses.map(p => ({
               step_id: p.step_id,
               status: p.status,
-              maquina_id: p.maquina_id,
+              maquina_id: p.maquina_id || null, // Converter string vazia para null
               order: p.order,
               componente_id: formData.id,
               begin_date: new Date().toISOString(),
-              delivery_date: new Date().toISOString()
+              delivery_date: new Date().toISOString(),
+              description: p.description || '',
+              step_name: steps.find(s => s.id === p.step_id)?.name || '',
+              notes: ''
             }))
           });
         }
@@ -193,168 +207,201 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
 
   return (
     <Dialog
-      header={isNew ? 'Novo Componente' : `Editar Componente ${component?.id}`}
-      visible={visible}
-      onHide={onHide}
-      style={{ width: '80vw' }}
+        header={isNew ? 'Novo Componente' : `Editar Componente ${component?.id}`}
+        visible={visible}
+        onHide={onHide}
+        className={styles.dialog}
+        headerClassName={styles.dialogHeader}
     >
-      <div className="p-fluid">
-        <div className="p-grid p-mb-4">
-          {isNew && (
-            <div className="p-col-4">
-              <label>ID do Componente *</label>
-              <InputText
-                value={formData.id || ''}
-                onChange={(e) => setFormData({...formData, id: e.target.value})}
-                required
-              />
+        <div className={styles.formContent}>
+            <div className={styles.formGrid}>
+                {isNew && (
+                    <div className={styles.formField}>
+                        <label className={styles.formLabel}>ID do Componente *</label>
+                        <InputText
+                            className={styles.formInput}
+                            value={formData.id || ''}
+                            onChange={(e) => setFormData({...formData, id: e.target.value})}
+                            required
+                        />
+                    </div>
+                )}
+
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Nome *</label>
+                    <InputText
+                        className={styles.formInput}
+                        value={formData.name || ''}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        required
+                    />
+                </div>
+                
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Material *</label>
+                    <InputText
+                        className={styles.formInput}
+                        value={formData.material || ''}
+                        onChange={(e) => setFormData({...formData, material: e.target.value})}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Quantidade *</label>
+                    <InputText
+                        className={styles.formInput}
+                        type="number"
+                        value={formData.quantity || 1}
+                        onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})}
+                        required
+                    />
+                </div>
+
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Status Componente</label>
+                    <div className={styles.statusToggle}>
+                        <Checkbox
+                            inputId="status"
+                            checked={formData.status || false}
+                            onChange={(e) => setFormData({...formData, status: e.checked})}
+                        />
+                        <label htmlFor="status">
+                            {formData.status ? 'Concluído' : 'Pendente'}
+                        </label>
+                    </div>
+                </div>
+
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Modelo 3D</label>
+                    <div className={styles.uploadGroup}>
+                        <InputText
+                            className={styles.fileInput}
+                            value={formData.archive3DModel || ''}
+                            placeholder="URL do modelo 3D"
+                            onChange={(e) => setFormData({...formData, archive3DModel: e.target.value})}
+                        />
+                        <Button
+                            icon="pi pi-upload"
+                            className="p-button-outlined"
+                            onClick={() => document.getElementById('fileInput').click()}
+                        />
+                        <input
+                            type="file"
+                            id="fileInput"
+                            hidden
+                            onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])}
+                        />
+                    </div>
+                </div>
             </div>
-          )}
 
-          <div className="p-col-4">
-            <label>Nome *</label>
-            <InputText
-              value={formData.name || ''}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              required
-            />
-          </div>
-          
-          <div className="p-col-4">
-            <label>Material *</label>
-            <InputText
-              value={formData.material || ''}
-              onChange={(e) => setFormData({...formData, material: e.target.value})}
-              required
-            />
-          </div>
+            <div className={styles.processSection}>
+                <div className={styles.processHeader}>
+                    <h3>Processos</h3>
+                </div>
+                
+                <div className={styles.processGrid}>
+                    {processes.map((process, index) => (
+                        <div key={process.id || index} className={styles.processRow}>
+                            <div className={styles.processHeaderRow}>
+                                <h4>Processo {index + 1}</h4>
+                                {/* Mostra botão de cancelar apenas para processos novos */}
+                                {isNew && (
+                                    <Button 
+                                        icon="pi pi-times"
+                                        className="p-button-danger p-button-text"
+                                        onClick={() => {
+                                            const newProcesses = processes.filter((_, i) => i !== index);
+                                            setProcesses(newProcesses);
+                                        }}
+                                        tooltip="Cancelar processo"
+                                    />
+                                )}
+                            </div>
 
-          <div className="p-col-2">
-            <label>Quantidade *</label>
-            <InputText
-              type="number"
-              value={formData.quantity || 1}
-              onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 1})}
-              required
-            />
-          </div>
+                            <div className={styles.formField}>
+                                <label className={styles.formLabel}>Etapa *</label>
+                                <Dropdown
+                                    className={styles.dropdown}
+                                    value={process.step_id}
+                                    options={(steps || []).map(s => ({
+                                        label: `${s.id} - ${s.name}`,
+                                        value: s.id
+                                    }))}
+                                    onChange={(e) => handleProcessChange(index, 'step_id', e.value)}
+                                    placeholder="Selecione a etapa"
+                                    required
+                                />
+                            </div>
 
-          <div className="p-col-2">
-            <label>Status Componente</label>
-            <div className="flex align-items-center">
-              <Checkbox
-                inputId="status"
-                checked={formData.status || false}
-                onChange={(e) => setFormData({...formData, status: e.checked})}
-              />
-              <label htmlFor="status" className="ml-2">
-                {formData.status ? 'Concluído' : 'Pendente'}
-              </label>
+                            <div className={styles.formField}>
+                                <label className={styles.formLabel}>Status *</label>
+                                <Dropdown
+                                    className={styles.dropdown}
+                                    value={process.status}
+                                    options={processStatusOptions}
+                                    onChange={(e) => handleProcessChange(index, 'status', e.value)}
+                                    required
+                                />
+                            </div>
+
+                            <div className={styles.formField}>
+                                <label className={styles.formLabel}>Máquina</label>
+                                <Dropdown
+                                    className={styles.dropdown}
+                                    value={process.maquina_id}
+                                    options={(maquinas || []).map(m => ({
+                                        label: `${m.id} - ${m.name}`,
+                                        value: m.id
+                                    }))}
+                                    onChange={(e) => handleProcessChange(index, 'maquina_id', e.value)}
+                                    placeholder="Selecione a máquina"
+                                />
+                            </div>
+
+                            <div className={styles.formField}>
+                                <label className={styles.formLabel}>Ordem *</label>
+                                <InputText
+                                    className={styles.formInput}
+                                    type="number"
+                                    value={process.order}
+                                    onChange={(e) => handleProcessChange(index, 'order', parseInt(e.target.value) || 1)}
+                                    required
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Mostra botão de adicionar apenas para novo componente */}
+                {isNew && (
+                    <div className={styles.addProcessButton}>
+                        <Button 
+                            icon="pi pi-plus"
+                            label="Adicionar Processo"
+                            className="p-button-success"
+                            onClick={addNewProcess}
+                        />
+                    </div>
+                )}
             </div>
-          </div>
 
-          <div className="p-col-6">
-            <label>Modelo 3D</label>
-            <div className="p-inputgroup">
-              <InputText
-                value={formData.archive3DModel || ''}
-                placeholder="URL do modelo 3D"
-                onChange={(e) => setFormData({...formData, archive3DModel: e.target.value})}
-              />
-              <Button
-                icon="pi pi-upload"
-                tooltip="Anexar arquivo"
-                onClick={() => document.getElementById('fileInput').click()}
-              />
-              <input
-                type="file"
-                id="fileInput"
-                hidden
-                onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])}
-              />
+            <div className={styles.formButtons}>
+                <Button
+                    label="Cancelar"
+                    icon="pi pi-times"
+                    className="p-button-text"
+                    onClick={onHide}
+                />
+                <Button
+                    label="Salvar"
+                    icon="pi pi-check"
+                    className="p-button-success"
+                    onClick={handleSubmit}
+                />
             </div>
-          </div>
         </div>
-
-        <h3>Processos 
-          <Button 
-            icon="pi pi-plus" 
-            className="p-button-sm ml-2" 
-            onClick={addNewProcess} 
-            tooltip="Adicionar novo processo"
-          />
-        </h3>
-        
-        <div className="p-grid">
-          {processes.map((process, index) => (
-            <div key={process.id || index} className="p-col-12 p-mb-3">
-              <div className="p-grid">
-                <div className="p-col-3">
-                  <label>Etapa *</label>
-                  <Dropdown
-                    value={process.step_id}
-                    options={(steps || []).map(s => ({
-                      label: `${s.id} - ${s.name}`,
-                      value: s.id
-                    }))}
-                    onChange={(e) => handleProcessChange(index, 'step_id', e.value)}
-                    placeholder="Selecione a etapa"
-                    required
-                  />
-                </div>
-
-                <div className="p-col-3">
-                  <label>Status *</label>
-                  <Dropdown
-                    value={process.status}
-                    options={processStatusOptions}
-                    onChange={(e) => handleProcessChange(index, 'status', e.value)}
-                    required
-                  />
-                </div>
-
-                <div className="p-col-3">
-                  <label>Máquina</label>
-                  <Dropdown
-                    value={process.maquina_id}
-                    options={(maquinas || []).map(m => ({
-                      label: `${m.id} - ${m.name}`,
-                      value: m.id
-                    }))}
-                    onChange={(e) => handleProcessChange(index, 'maquina_id', e.value)}
-                    placeholder="Selecione a máquina"
-                  />
-                </div>
-
-                <div className="p-col-2">
-                  <label>Ordem *</label>
-                  <InputText
-                    type="number"
-                    value={process.order}
-                    onChange={(e) => handleProcessChange(index, 'order', parseInt(e.target.value) || 1)}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="p-d-flex p-jc-end p-mt-4">
-          <Button
-            label="Cancelar"
-            icon="pi pi-times"
-            className="p-button-text"
-            onClick={onHide}
-          />
-          <Button
-            label="Salvar"
-            icon="pi pi-check"
-            className="p-button-success"
-            onClick={handleSubmit}
-          />
-        </div>
-      </div>
     </Dialog>
   );
 }

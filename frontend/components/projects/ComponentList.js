@@ -8,6 +8,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Dropdown } from 'primereact/dropdown';
 import ComponentForm from './ComponentForm';
 import ProcessList from './ProcessList';
+import styles from '../../styles/projects/ComponentList.module.css'; 
 
 export default function ComponentList({ moldCode }) {
   const [components, setComponents] = useState([]);
@@ -47,10 +48,15 @@ export default function ComponentList({ moldCode }) {
 
   const rowExpansionTemplate = (data) => (
     <div className="p-4">
-      <h5 className="font-semibold mb-2">Processos do Componente {data.name}</h5>
-      <ProcessList moldCode={moldCode} componentID={data.id} />
+        <div className={styles.processSection}>
+            <h5>Processos do Componente {data.name}</h5>
+            <ProcessList 
+                moldCode={moldCode} 
+                componentID={data.id} 
+            />
+        </div>
     </div>
-  );
+);
 
   return (
     <div>

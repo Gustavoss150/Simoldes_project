@@ -57,12 +57,25 @@ export default function ProjectsPage() {
 
     const rowExpansionTemplate = (data) => (
         <div className={styles.rowExpansion}>
-            <h3>Componentes</h3>
-            <ComponentList moldCode={data.codigo} />
-            <h4>Processos do Molde</h4>
-            <ProcessList moldCode={data.codigo} />
+            <div className={styles.section}>
+                <h3>Componentes</h3>
+                <ComponentList moldCode={data.codigo} />
+            </div>
+            
+            <div className={styles.section}>
+                <div className={styles.processHeader}>
+                    <h3>Processos do Molde</h3>
+                    
+                </div>
+                <ProcessList 
+                    moldCode={data.codigo} 
+                    showInactive={showGlobalInactive} 
+                    isGlobalView 
+                />
+            </div>
         </div>
     );
+    const [showGlobalInactive, setShowGlobalInactive] = useState(false);    
 
     return (
         <div className={styles.container}>
@@ -152,7 +165,10 @@ export default function ProjectsPage() {
                         onHide={() => { 
                             setShowForm(false); 
                             fetchMolds(); 
-                        }} 
+                        }}
+                        visible={showForm}  // Adicione esta linha se não existir
+                        className={styles.dialog}  // Garanta que está passando as classes
+                        headerClassName={styles.dialogHeader}
                     />
                 )}
             </main>

@@ -6,61 +6,122 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
-export default function ProcessList({ moldCode, componentID }) {
+export default function ProcessList({ moldCode, componentID, isGlobalView }) {
     const [processes, setProcesses] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showInactive, setShowInactive] = useState(false);
+    const [statusFilter, setStatusFilter] = useState(null);
+    const [expandedRows, setExpandedRows] = useState(null);
+
+    const statusOptions = [
+        { label: 'Todos', value: null },
+        { label: 'Não Iniciados', value: 'not started' },
+        { label: 'Em Processo', value: 'in process' },
+        { label: 'Completos', value: 'completed' },
+        { label: 'Pausados', value: 'paused' },
+        { label: 'Histórico (Inativos)', value: 'inactive' }
+    ];
 
     const fetchProcesses = async () => {
         setLoading(true);
-        let url;
-        if (componentID) url = `/processes/components/${componentID}`;
-        else url = showInactive ? `/processes/inactive_processes/${moldCode}` : `/processes/${moldCode}`;
         try {
-            const res = await api.get(url);
-            setProcesses(res.data.processes || res.data.inactive_processes || []);
+            let data = [];
+
+            if (statusFilter === 'inactive') {
+                const res = await api.get(`/processes/inactive_processes/${moldCode}`);
+                data = (res.data.inactive_processes || []).map(p => ({
+                    id: p.id, // Adicionado campo único obrigatório
+                    process_id: p.id,
+                    component_id: p.componente_id,
+                    step_name: p.description,
+                    order: p.order,
+                    status: p.status
+                }));
+            } else {
+                const res = componentID 
+                    ? await api.get(`/processes/components/${componentID}`)
+                    : await api.get(`/processes/${moldCode}`);
+
+                data = isGlobalView 
+                    ? (res.data.processes || []).flatMap(component => 
+                        component.processes.map(process => ({
+                            id: process.process_id, // Campo único obrigatório
+                            ...process,
+                            component_id: component.component_id
+                        })) 
+                      )
+                    : (res.data.processes || []).map(p => ({ ...p, id: p.process_id }));
+
+                if (statusFilter) {
+                    data = data.filter(p => p.status === statusFilter);
+                }
+            }
+
+            setProcesses(data);
         } catch (err) {
             console.error('Erro ao buscar processos:', err);
             setProcesses([]);
         } finally {
-        setLoading(false);
+            setLoading(false);
         }
     };
 
-    useEffect(() => { if (moldCode || componentID) fetchProcesses(); }, [moldCode, componentID, showInactive]);
+    useEffect(() => { 
+        if (moldCode || componentID) {
+            fetchProcesses();
+        }
+    }, [moldCode, componentID, statusFilter]);
 
     const handleDelete = async (id) => {
         if (confirm(`Excluir processo ${id}?`)) {
             try {
                 await api.delete(`/processes/${id}?moldCode=${moldCode}`);
                 fetchProcesses();
-            } catch (err) { console.error('Erro ao deletar processo:', err); }
+            } catch (err) { 
+                console.error('Erro ao deletar processo:', err); 
+            }
         }
     };
-
-    if (loading) return <ProgressSpinner />;
 
     return (
         <div>
             <div className="flex gap-2 mb-2">
                 <Dropdown
-                    value={showInactive}
-                    options={[{ label: 'Ativos', value: false }, { label: 'Inativos', value: true }]}
-                    onChange={(e) => setShowInactive(e.value)}
+                    value={statusFilter}
+                    options={statusOptions}
+                    onChange={(e) => setStatusFilter(e.value)}
                     placeholder="Filtrar processos"
+                    className="p-inputtext-sm"
                 />
             </div>
-            <DataTable value={processes} responsiveLayout="scroll">
-                <Column field="process_id" header="Processo ID" />
+
+            <DataTable 
+                value={processes}
+                responsiveLayout="scroll"
+                dataKey="id" // Campo único obrigatório
+                expandedRows={expandedRows}
+                onRowToggle={(e) => setExpandedRows(e.data)}
+            >
+                {isGlobalView && <Column field="component_id" header="Componente" />}
                 <Column field="step_name" header="Etapa" />
-                <Column field="notes" header="Descrição" />
                 <Column field="order" header="Ordem" />
-                <Column fielf="step_id" header="Máquina" />
-                <Column field="status" header="Status" />
+                <Column 
+                    field="status" 
+                    header="Status" 
+                    body={(rowData) => (
+                        <span className={`status-badge ${rowData.status.replace(' ', '-')}`}>
+                            {statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}
+                        </span>
+                    )}
+                />
                 <Column
                     header="Ações"
                     body={(row) => (
-                        <Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => handleDelete(row.id)} />
+                        <Button 
+                            icon="pi pi-trash" 
+                            className="p-button-text p-button-danger" 
+                            onClick={() => handleDelete(row.id)} 
+                            disabled={statusFilter === 'inactive'}
+                        />
                     )}
                 />
             </DataTable>

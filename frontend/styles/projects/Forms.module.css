@@ -1,0 +1,128 @@
+/* Forms.module.css */
+.dialog {
+    min-width: 500px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dialogHeader {
+    background-color: var(--base);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+}
+
+.formContent {
+    padding: 1.5rem;
+    background-color: var(--light-bg);
+}
+
+.formField {
+    margin-bottom: 1.5rem;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--base);
+    font-size: 0.9rem;
+}
+
+.formInput {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-size: 1rem;
+}
+
+.formInput:focus {
+    border-color: var(--base);
+    box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+    outline: none;
+}
+
+.dropdown {
+    width: 100%;
+    border-radius: 6px;
+}
+
+.dropdown:focus {
+    border-color: var(--base);
+    box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+}
+
+.processSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    border-left: 3px solid var(--base);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.uploadGroup {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.fileInput {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.formButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.statusToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.processHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    color: var(--base);
+}
+
+.processGrid {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Mantendo consistência com Projects.module.css */
+.p-button-success {
+    background-color: var(--base) !important;
+    border-color: var(--base) !important;
+}
+
+.p-button-success:hover {
+    background-color: var(--hover) !important;
+    border-color: var(--hover) !important;
+}
+
+.text-red-500 {
+    color: var(--danger);
+    background-color: #ffebee;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    border-left: 3px solid var(--danger);
+}
