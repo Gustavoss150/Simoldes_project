@@ -30,11 +30,35 @@ export default function MoldForm({ mold, onHide }) {
   }, [mold]);
 
   const handleSave = async () => {
-    const payload = { molde: formData, componentes: [], processos: [] };
-    const url = isEdit ? `/api/projects/${formData.codigo}` : '/api/projects/';
-    const method = isEdit ? 'PUT' : 'POST';
-    await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    onHide();
+    // Ajustar payload conforme estrutura do backend
+    const payload = {
+      molde: {
+        codigo: formData.codigo,
+        description: formData.description,
+        status: formData.status,
+        begin_date: formData.begin_date.toISOString(),
+        delivery_date: formData.delivery_date.toISOString()
+      },
+      componentes: [], // Manter array vazio inicial
+      processos: [] // Manter array vazio inicial
+    };
+  
+    try {
+      const url = isEdit ? `/api/projects/${formData.codigo}` : '/api/projects/';
+      const method = isEdit ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+  
+      if (!res.ok) throw new Error(await res.text());
+      onHide();
+    } catch (err) {
+      console.error('Erro ao salvar:', err);
+      alert('Erro ao salvar: ' + err.message);
+    }
   };
 
   return (

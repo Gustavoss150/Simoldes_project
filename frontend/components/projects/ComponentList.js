@@ -5,33 +5,45 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ProgressSpinner } from 'primereact/progressspinner';
-import ProcessList from './ProcessList';
 import { Dropdown } from 'primereact/dropdown';
+import ComponentForm from './ComponentForm';
+import ProcessList from './ProcessList';
 
 export default function ComponentList({ moldCode }) {
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState(null);
   const [showInactive, setShowInactive] = useState(false);
+  const [editingComponent, setEditingComponent] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   const fetchComponents = async () => {
     setLoading(true);
-    const url = showInactive ? `/projects/inactive_components/${moldCode}` : `/projects/components/${moldCode}`;
-    const res = await api.get(url);
-    setComponents(res.data.components || []);
-    setLoading(false);
+    try {
+      const url = showInactive 
+        ? `/projects/inactive_components/${moldCode}`
+        : `/projects/components/${moldCode}`;
+      const res = await api.get(url);
+      setComponents(res.data.components || []);
+    } catch (error) {
+      console.error('Erro ao buscar componentes:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchComponents(); }, [moldCode, showInactive]);
 
   const handleDelete = async (id) => {
     if (confirm(`Excluir componente ${id}?`)) {
-      await api.delete(`/projects/components/${id}?moldCode=${moldCode}`);
-      fetchComponents();
+      try {
+        await api.delete(`/projects/components/${id}?moldCode=${moldCode}`);
+        fetchComponents();
+      } catch (error) {
+        console.error('Erro ao excluir:', error);
+      }
     }
   };
-
-  const view3D = (url) => window.open(url, '_blank');
 
   const rowExpansionTemplate = (data) => (
     <div className="p-4">
@@ -40,21 +52,29 @@ export default function ComponentList({ moldCode }) {
     </div>
   );
 
-  if (loading) return <ProgressSpinner />;
-
   return (
     <div>
       <div className="flex gap-2 mb-2">
+        <Button
+          label="Novo Componente"
+          icon="pi pi-plus"
+          className="p-button-sm"
+          onClick={() => setShowForm(true)}
+        />
         <Dropdown
           value={showInactive}
-          options={[{ label: 'Ativos', value: false }, { label: 'Inativos', value: true }]}
+          options={[
+            { label: 'Ativos', value: false },
+            { label: 'Inativos', value: true }
+          ]}
           onChange={(e) => setShowInactive(e.value)}
           placeholder="Filtrar componentes"
         />
       </div>
+
       <DataTable
         value={components}
-        responsiveLayout="scroll"
+        loading={loading}
         expandedRows={expandedRows}
         onRowToggle={(e) => setExpandedRows(e.data)}
         rowExpansionTemplate={rowExpansionTemplate}
@@ -65,20 +85,47 @@ export default function ComponentList({ moldCode }) {
         <Column field="name" header="Nome" />
         <Column field="material" header="Material" />
         <Column field="quantity" header="Quantidade" />
-        <Column
-          header="3D Model"
-          body={(row) => row.archive_3d_model ? (
-            <Button icon="pi pi-external-link" className="p-button-text" onClick={() => view3D(row.archive_3d_model)} />
-          ) : null}
+        <Column 
+          header="Status"
+          body={rowData => (
+            <span className={rowData.status ? 'text-green-500' : 'text-yellow-500'}>
+              {rowData.status ? 'Concluído' : 'Pendente'}
+            </span>
+          )}
         />
-        <Column field="status" header="Status" />
         <Column
           header="Ações"
-          body={(row) => (
-            <Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => handleDelete(row.id)} />
+          body={rowData => (
+            <div className="flex gap-1">
+              <Button
+                icon="pi pi-pencil"
+                className="p-button-text"
+                onClick={() => {
+                  setEditingComponent(rowData);
+                  setShowForm(true);
+                }}
+              />
+              <Button
+                icon="pi pi-trash"
+                className="p-button-text p-button-danger"
+                onClick={() => handleDelete(rowData.id)}
+              />
+            </div>
           )}
         />
       </DataTable>
+
+      <ComponentForm
+        component={editingComponent}
+        moldCode={moldCode}
+        visible={showForm}
+        onHide={() => {
+          setShowForm(false);
+          setEditingComponent(null);
+        }}
+        onSave={fetchComponents}
+        isNew={!editingComponent}
+      />
     </div>
   );
 }

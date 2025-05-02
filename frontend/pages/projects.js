@@ -59,8 +59,6 @@ export default function ProjectsPage() {
     <div className={styles.rowExpansion}>
       <h3>Componentes</h3>
       <ComponentList moldCode={data.codigo} />
-      <h3>Processos do Molde</h3>
-      <ProcessList moldCode={data.codigo} />
     </div>
   );
 
