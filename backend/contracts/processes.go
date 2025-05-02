@@ -25,3 +25,9 @@ type StepsByComponent struct {
 	ComponentName string            `json:"component_name"`
 	Processes     []ProcessWithStep `json:"processes"`
 }
+
+type InactiveStepsByComponent struct {
+	ComponentID   string            `json:"component_id"`
+	ComponentName string            `json:"component_name"`
+	Processes     []ProcessWithStep `json:"processes"`
+}
