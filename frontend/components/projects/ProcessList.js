@@ -113,6 +113,8 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                         </span>
                     )}
                 />
+                <Column field="maquina_id" header="Maq. ID" />
+                <Column field="maquina_name" header="Maq. Nome" />
                 <Column
                     header="Ações"
                     body={(row) => (

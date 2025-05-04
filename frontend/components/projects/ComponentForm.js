@@ -326,7 +326,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                                     className={styles.dropdown}
                                     value={process.step_id}
                                     options={(steps || []).map(s => ({
-                                        label: `${s.id} - ${s.name}`,
+                                        label: `${s.name} - ${s.id}`,
                                         value: s.id
                                     }))}
                                     onChange={(e) => handleProcessChange(index, 'step_id', e.value)}
@@ -352,7 +352,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                                     className={styles.dropdown}
                                     value={process.maquina_id}
                                     options={(maquinas || []).map(m => ({
-                                        label: `${m.id} - ${m.name}`,
+                                        label: `${m.name} - ${m.id}`,
                                         value: m.id
                                     }))}
                                     onChange={(e) => handleProcessChange(index, 'maquina_id', e.value)}

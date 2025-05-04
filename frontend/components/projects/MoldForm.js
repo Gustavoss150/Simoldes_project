@@ -4,9 +4,9 @@ import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
-import styles from '../../styles/projects/MoldForm.module.css';
+import api from '../../utils/axios';
+import styles from '../../styles/projects/Forms.module.css';
 
-// Garanta que NEXT_PUBLIC_API_URL esteja definido em .env.local
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const statusOptions = [
@@ -19,27 +19,41 @@ const statusOptions = [
 export default function MoldForm({ mold, onHide, visible }) {
     const isEdit = Boolean(mold);
     const [formData, setFormData] = useState({
-        codigo: '',
-        description: '',
-        status: 'not started',
-        begin_date: new Date(),
-        delivery_date: new Date(),
-        componentes: [],
-        processos: []
+        codigo: '', description: '', status: 'not started',
+        begin_date: new Date(), delivery_date: new Date(),
+        componentes: [], processos: []
     });
+
+    const [machines, setMachines] = useState([]);
+    const [steps, setSteps] = useState([]);
 
     const [newComponent, setNewComponent] = useState({ id: '', name: '', material: '', quantity: 1, archive_3d_model: '' });
     const [newProcess, setNewProcess] = useState({
         componente_id: '',
-        description: '',
-        step_name: '',
+        step_id: '',
+        status: 'not started',
         maquina_id: '',
-        notes: '',
         order: 1,
         begin_date: new Date(),
         delivery_date: new Date(),
-        status: 'not started'      // inicializa status
+        description: ''
     });
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const [maqRes, stepsRes] = await Promise.all([
+                    api.get('/cnc/mach'),
+                    api.get('/processes/steps')
+                ]);
+                setMachines(maqRes.data.machines || []);
+                setSteps(stepsRes.data.steps || []);
+            } catch (err) {
+                console.error('Erro ao carregar máquinas/etapas:', err);
+            }
+        };
+        loadData();
+    }, []);
 
     useEffect(() => {
         if (mold) setFormData({
@@ -60,9 +74,9 @@ export default function MoldForm({ mold, onHide, visible }) {
     };
 
     const handleAddProcess = () => {
-        if (!newProcess.componente_id) return alert('Selecione um componente válido!');
+        if (!newProcess.componente_id || !newProcess.step_id) return alert('Selecione componente e etapa válidos!');
         setFormData(prev => ({ ...prev, processos: [...prev.processos, newProcess] }));
-        setNewProcess({ componente_id: '', description: '', step_name: '', maquina_id: '', notes: '', order: 1, begin_date: new Date(), delivery_date: new Date(), status: 'not started' });
+        setNewProcess({ componente_id: '', step_id: '', status: 'not started', maquina_id: '', order: 1, begin_date: new Date(), delivery_date: new Date(), description: '' });
     };
 
     const handleSave = async () => {
@@ -84,13 +98,14 @@ export default function MoldForm({ mold, onHide, visible }) {
             processos: formData.processos.map(p => ({
                 componente_id: p.componente_id,
                 description: p.description,
-                step_name: p.step_name,
+                step_name: steps.find(s => s.id === p.step_id)?.name || '',
                 status: p.status,
                 maquina_id: p.maquina_id,
                 begin_date: p.begin_date.toISOString(),
                 delivery_date: p.delivery_date.toISOString(),
-                notes: p.notes,
-                order: p.order
+                notes: '',
+                order: p.order,
+                step_id: p.step_id
             }))
         };
 
@@ -114,7 +129,6 @@ export default function MoldForm({ mold, onHide, visible }) {
                 const errorText = await response.text();
                 throw new Error(`Erro ${response.status}: ${errorText}`);
             }
-
             onHide(true);
         } catch (error) {
             console.error('Erro detalhado:', error);
@@ -123,13 +137,14 @@ export default function MoldForm({ mold, onHide, visible }) {
     };
 
     return (
-        <Dialog header={isEdit ? 'Editar Molde' : 'Novo Molde'} visible={visible} onHide={() => onHide(false)} className={styles.dialog} modal>
-            <div className="p-fluid">
-                <div className="p-field"><label>Código</label><InputText value={formData.codigo} onChange={e => setFormData({ ...formData, codigo: e.target.value })} disabled={isEdit} /></div>
-                <div className="p-field"><label>Descrição</label><InputText value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
-                <div className="p-field"><label>Status</label><Dropdown value={formData.status} options={statusOptions} onChange={e => setFormData({ ...formData, status: e.value })} /></div>
-                <div className="p-field"><label>Data Início</label><Calendar value={formData.begin_date} onChange={e => setFormData({ ...formData, begin_date: e.value })} showIcon /></div>
-                <div className="p-field"><label>Data Entrega</label><Calendar value={formData.delivery_date} onChange={e => setFormData({ ...formData, delivery_date: e.value })} showIcon /></div>
+        <Dialog header={isEdit?'Editar Molde':'Novo Molde'} visible={visible} onHide={()=>onHide(false)} className={styles.dialog} headerClassName={styles.dialogHeader} modal>
+            <div className={styles.formContent+' p-fluid'}>
+
+                <div className={styles.formField}><label className={styles.formLabel}>Código</label><InputText className={styles.formInput} value={formData.codigo} onChange={e=>setFormData({...formData,codigo:e.target.value})} disabled={isEdit}/></div>
+                <div className={styles.formField}><label className={styles.formLabel}>Descrição</label><InputText className={styles.formInput} value={formData.description} onChange={e=>setFormData({...formData,description:e.target.value})}/></div>
+                <div className={styles.formField}><label className={styles.formLabel}>Status</label><Dropdown className={styles.dropdown} value={formData.status} options={statusOptions} onChange={e=>setFormData({...formData,status:e.value})}/></div>
+                <div className={styles.formField}><label className={styles.formLabel}>Data Início</label><Calendar className={styles.formInput} value={formData.begin_date} onChange={e=>setFormData({...formData,begin_date:e.value})} showIcon/></div>
+                <div className={styles.formField}><label className={styles.formLabel}>Data Entrega</label><Calendar className={styles.formInput} value={formData.delivery_date} onChange={e=>setFormData({...formData,delivery_date:e.value})} showIcon/></div>
 
                 <div className={styles.section}>
                     <h4>Componentes</h4>
@@ -147,22 +162,28 @@ export default function MoldForm({ mold, onHide, visible }) {
                 <div className={styles.section}>
                     <h4>Processos</h4>
                     <div className="p-grid">
-                        <div className="p-col-2"><Dropdown placeholder="Componente" options={formData.componentes.map(c => ({ label: `${c.id}`, value: c.id }))} value={newProcess.componente_id} onChange={e => setNewProcess({ ...newProcess, componente_id: e.value })} /></div>
-                        <div className="p-col-2"><InputText placeholder="Descrição" value={newProcess.description} onChange={e => setNewProcess({ ...newProcess, description: e.target.value })} /></div>
-                        <div className="p-col-2"><InputText placeholder="Etapa" value={newProcess.step_name} onChange={e => setNewProcess({ ...newProcess, step_name: e.target.value })} /></div>
-                        <div className="p-col-2"><label>Status</label><Dropdown value={newProcess.status} options={statusOptions} onChange={e => setNewProcess({ ...newProcess, status: e.value })} /></div>
-                        <div className="p-col-1"><InputText placeholder="Máq ID" value={newProcess.maquina_id} onChange={e => setNewProcess({ ...newProcess, maquina_id: e.target.value })} /></div>
-                        <div className="p-col-1"><InputText type="number" placeholder="Ord" value={newProcess.order} onChange={e => setNewProcess({ ...newProcess, order: parseInt(e.target.value) })} /></div>
-                        <div className="p-col-2"><Calendar placeholder="Início" value={newProcess.begin_date} onChange={e => setNewProcess({ ...newProcess, begin_date: e.value })} showIcon /></div>
-                        <div className="p-col-2"><Calendar placeholder="Entrega" value={newProcess.delivery_date} onChange={e => setNewProcess({ ...newProcess, delivery_date: e.value })} showIcon /></div>
-                        <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddProcess} /></div>
+                        <div className="p-col-3">
+                            <Dropdown placeholder="Componente" options={formData.componentes.map(c => ({ label: c.id, value: c.id }))} value={newProcess.componente_id} onChange={e => setNewProcess({ ...newProcess, componente_id: e.value })} />
+                        </div>
+                        <div className="p-col-3">
+                            <Dropdown placeholder="Etapa" options={steps.map(s => ({ label: s.name, value: s.id }))} value={newProcess.step_id} onChange={e => setNewProcess({ ...newProcess, step_id: e.value })} />
+                        </div>
+                        <div className="p-col-2">
+                            <Dropdown placeholder="Máquina" options={machines.map(m => ({ label: m.name, value: m.id }))} value={newProcess.maquina_id} onChange={e => setNewProcess({ ...newProcess, maquina_id: e.value })} />
+                        </div>
+                        <div className="p-col-1">
+                            <InputText type="number" placeholder="Ord" value={newProcess.order} onChange={e => setNewProcess({ ...newProcess, order: parseInt(e.target.value) })} />
+                        </div>
+                        <div className="p-col-1">
+                            <Button label="+" icon="pi pi-plus" onClick={handleAddProcess} />
+                        </div>
                     </div>
-                    <div className={styles.list}>{formData.processos.map((p, i) => <div key={i} className={styles.listItem}><span>{p.componente_id} - {p.step_name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, processos: prev.processos.filter((_, idx) => idx !== i) }))} /></div>)}</div>
+                    <div className={styles.list}>{formData.processos.map((p, i) => <div key={i} className={styles.listItem}><span>{p.componente_id} - {steps.find(s => s.id === p.step_id)?.name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, processos: prev.processos.filter((_, idx) => idx !== i) }))} /></div>)}</div>
                 </div>
 
-                <div className="p-dialog-footer">
-                    <Button label="Cancelar" icon="pi pi-times" onClick={() => onHide(false)} className="p-button-text" />
-                    <Button label="Salvar" icon="pi pi-check" onClick={handleSave} autoFocus />
+                <div className={styles.formButtons}>
+                    <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={()=>onHide(false)}/>
+                    <Button label="Salvar" icon="pi pi-check" className="p-button-success" onClick={handleSave}/>
                 </div>
             </div>
         </Dialog>
