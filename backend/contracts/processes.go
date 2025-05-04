@@ -17,6 +17,8 @@ type ProcessWithStep struct {
 	ProcessNotes  string `json:"notes,omitempty"`
 	StepID        string `json:"step_id"`
 	StepName      string `json:"step_name"`
+	MachineID     string `gorm:"column:maquina_id" json:"maquina_id"`
+	MachineName   string `gorm:"column:maquina_name" json:"maquina_name"`
 	StepDesc      string `json:"step_description"`
 }
 

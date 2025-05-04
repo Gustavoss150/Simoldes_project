@@ -110,24 +110,30 @@ func (r *processRepository) GetAllInactiveSteps() ([]*models.Etapas, error) {
 
 func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contracts.StepsByComponent, error) {
 	query := `
-		SELECT 
-			c.id AS component_id,
-			c.name AS component_name,
-			p.id AS process_id,
-			p.order AS process_order,
-			p.status AS process_status,
-			p.notes AS process_notes,
-			e.id AS step_id,
-			e.name AS step_name,
-			e.description AS step_description
-		FROM processos p
-		INNER JOIN componentes c ON p.componentes_id = c.id
-		INNER JOIN etapas e ON p.step_id = e.id
-		WHERE p.molde_codigo = ? AND p.is_active = TRUE AND c.is_active = TRUE AND e.is_active = TRUE
-		ORDER BY c.id, p.order ASC
-	`
+        SELECT 
+            c.id AS component_id,
+            c.name AS component_name,
+            p.id AS process_id,
+            p.order AS process_order,
+            p.status AS process_status,
+            p.notes AS process_notes,
+            e.id AS step_id,
+            e.name AS step_name,
+            p.maquina_id AS maquina_id,
+            m.name AS maquina_name,
+            e.description AS step_description
+        FROM processos p
+        INNER JOIN componentes c ON p.componentes_id = c.id
+        INNER JOIN etapas e ON p.step_id = e.id
+        LEFT JOIN maquinas m ON p.maquina_id = m.id AND m.is_active = TRUE
+        WHERE 
+            p.molde_codigo = ? 
+            AND p.is_active = TRUE 
+            AND c.is_active = TRUE 
+            AND e.is_active = TRUE
+        ORDER BY c.id, p.order ASC;
+    `
 
-	// Struct temporária para mapear os dados brutos da query
 	type rawResult struct {
 		ComponentID     string
 		ComponentName   string
@@ -137,6 +143,8 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 		ProcessNotes    string
 		StepID          string
 		StepName        string
+		MachineID       string `gorm:"column:maquina_id"`
+		MachineName     string `gorm:"column:maquina_name"`
 		StepDescription string
 	}
 
@@ -145,7 +153,6 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 		return nil, fmt.Errorf("failed to query grouped steps: %w", err)
 	}
 
-	// Agrupar os resultados por componente
 	grouped := make(map[string]contracts.StepsByComponent)
 
 	for _, row := range raw {
@@ -156,6 +163,8 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 			ProcessNotes:  row.ProcessNotes,
 			StepID:        row.StepID,
 			StepName:      row.StepName,
+			MachineID:     row.MachineID,
+			MachineName:   row.MachineName,
 			StepDesc:      row.StepDescription,
 		}
 
@@ -171,7 +180,6 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 		grouped[row.ComponentID] = comp
 	}
 
-	// Converter o map em slice
 	result := make([]contracts.StepsByComponent, 0, len(grouped))
 	for _, comp := range grouped {
 		result = append(result, comp)
@@ -183,25 +191,28 @@ func (r *processRepository) GetProcessAndStepsByMold(moldCode string) ([]contrac
 func (r *processRepository) GetProcessWithStepsByComponent(componentID string) ([]*contracts.ProcessWithStep, error) {
 	var results []*contracts.ProcessWithStep
 
-	err := r.DB.
-		Table("processos").
-		Select(`
-            processos.id           AS process_id,
-			processos.order        AS process_order,
-			processos.status       AS process_status,
-			processos.notes        AS process_notes,
-			etapas.id              AS step_id,
-			etapas.name            AS step_name,
-			etapas.description     AS step_description
-        `).
-		Joins("JOIN etapas ON processos.step_id = etapas.id").
-		Where("processos.componentes_id = ? AND processos.is_active = ?", componentID, true).
-		Order("processos.order ASC").
-		Scan(&results).Error
+	query := `
+        SELECT 
+            p.id AS process_id,
+            p.order AS process_order,
+            p.status AS process_status,
+            p.notes AS process_notes,
+            e.id AS step_id,
+            e.name AS step_name,
+            p.maquina_id AS maquina_id,
+            m.name AS maquina_name,
+            e.description AS step_description
+        FROM processos p
+        INNER JOIN etapas e ON p.step_id = e.id AND e.is_active = TRUE
+        LEFT JOIN maquinas m ON p.maquina_id = m.id AND m.is_active = TRUE
+        WHERE p.componentes_id = ? AND p.is_active = TRUE
+        ORDER BY p.order ASC
+    `
 
-	if err != nil {
-		return nil, err
+	if err := r.DB.Raw(query, componentID).Scan(&results).Error; err != nil {
+		return nil, fmt.Errorf("failed to get process with steps: %w", err)
 	}
+
 	return results, nil
 }
 
