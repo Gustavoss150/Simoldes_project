@@ -4,7 +4,10 @@ import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
-import styles from '../../styles/projects/Forms.module.css';
+import styles from '../../styles/projects/MoldForm.module.css';
+
+// Garanta que NEXT_PUBLIC_API_URL esteja definido em .env.local
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const statusOptions = [
     { label: 'Not Started', value: 'not started' },
@@ -15,102 +18,70 @@ const statusOptions = [
 
 export default function MoldForm({ mold, onHide, visible }) {
     const isEdit = Boolean(mold);
-    const [formData, setFormData] = useState({ 
-        codigo: '', 
-        description: '', 
-        status: 'not started', 
-        begin_date: new Date(), 
+    const [formData, setFormData] = useState({
+        codigo: '',
+        description: '',
+        status: 'not started',
+        begin_date: new Date(),
         delivery_date: new Date(),
         componentes: [],
         processos: []
     });
-    
-    const [componenteDrafts, setComponenteDrafts] = useState([]);
-    const [processoDrafts, setProcessoDrafts] = useState([]);
-    const [maquinas, setMaquinas] = useState([]);
-    const [steps, setSteps] = useState([]);
+
+    const [newComponent, setNewComponent] = useState({ id: '', name: '', material: '', quantity: 1, archive_3d_model: '' });
+    const [newProcess, setNewProcess] = useState({
+        componente_id: '',
+        description: '',
+        step_name: '',
+        maquina_id: '',
+        notes: '',
+        order: 1,
+        begin_date: new Date(),
+        delivery_date: new Date(),
+        status: 'not started'      // inicializa status
+    });
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [maqRes, stepsRes] = await Promise.all([
-                    fetch('/api/cnc/mach').then(res => res.json()),
-                    fetch('/api/processes/steps').then(res => res.json())
-                ]);
-                setMaquinas(maqRes.machines || []);
-                setSteps(stepsRes.steps || []);
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-            }
-        };
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        if (mold) {
-            setFormData({
-                codigo: mold.codigo,
-                description: mold.description,
-                status: mold.status,
-                begin_date: new Date(mold.begin_date),
-                delivery_date: new Date(mold.delivery_date),
-                componentes: mold.componentes || [],
-                processos: mold.processos || []
-            });
-        } else {
-            setFormData({
-                codigo: '',
-                description: '',
-                status: 'not started',
-                begin_date: new Date(),
-                delivery_date: new Date(),
-                componentes: [],
-                processos: []
-            });
-        }
+        if (mold) setFormData({
+            codigo: mold.codigo,
+            description: mold.description,
+            status: mold.status,
+            begin_date: new Date(mold.begin_date),
+            delivery_date: new Date(mold.delivery_date),
+            componentes: mold.componentes || [],
+            processos: mold.processos || []
+        });
     }, [mold]);
 
-    const addComponenteDraft = () => {
-        setComponenteDrafts([...componenteDrafts, { 
-            id: '', 
-            name: '', 
-            material: '', 
-            quantity: 1, 
-            archive_3d_model: '' 
-        }]);
+    const handleAddComponent = () => {
+        if (!newComponent.id || !newComponent.name) return alert('Preencha ID e nome do componente!');
+        setFormData(prev => ({ ...prev, componentes: [...prev.componentes, newComponent] }));
+        setNewComponent({ id: '', name: '', material: '', quantity: 1, archive_3d_model: '' });
     };
 
-    const addProcessoDraft = () => {
-        setProcessoDrafts([...processoDrafts, { 
-            componente_id: '',
-            description: '',
-            step_name: '',
-            status: 'not started',
-            maquina_id: '',
-            begin_date: new Date(),
-            delivery_date: new Date(),
-            notes: '',
-            order: processoDrafts.length + 1
-        }]);
+    const handleAddProcess = () => {
+        if (!newProcess.componente_id) return alert('Selecione um componente válido!');
+        setFormData(prev => ({ ...prev, processos: [...prev.processos, newProcess] }));
+        setNewProcess({ componente_id: '', description: '', step_name: '', maquina_id: '', notes: '', order: 1, begin_date: new Date(), delivery_date: new Date(), status: 'not started' });
     };
 
     const handleSave = async () => {
-        // Preparar os componentes
-        const componentesPayload = [
-            ...formData.componentes,
-            ...componenteDrafts.map(c => ({
+        const payload = {
+            molde: {
+                codigo: formData.codigo,
+                description: formData.description,
+                status: formData.status,
+                begin_date: formData.begin_date.toISOString(),
+                delivery_date: formData.delivery_date.toISOString()
+            },
+            componentes: formData.componentes.map(c => ({
                 id: c.id,
                 name: c.name,
                 material: c.material,
                 quantity: c.quantity,
                 archive_3d_model: c.archive_3d_model
-            }))
-        ];
-    
-        // Preparar os processos
-        const processosPayload = [
-            ...formData.processos,
-            ...processoDrafts.map(p => ({
+            })),
+            processos: formData.processos.map(p => ({
                 componente_id: p.componente_id,
                 description: p.description,
                 step_name: p.step_name,
@@ -121,420 +92,77 @@ export default function MoldForm({ mold, onHide, visible }) {
                 notes: p.notes,
                 order: p.order
             }))
-        ];
-    
-        // Construir o payload completo
-        const payload = {
-            molde: {
-                codigo: formData.codigo,
-                description: formData.description,
-                status: formData.status,
-                begin_date: formData.begin_date.toISOString(),
-                delivery_date: formData.delivery_date.toISOString()
-            },
-            componentes: componentesPayload,
-            processos: processosPayload
         };
-    
-        console.log('Payload sendo enviado:', JSON.stringify(payload, null, 2)); // Para debug
-    
+
         try {
-            const url = isEdit ? `/api/projects/${formData.codigo}` : '/api/projects/';
+            if (!API_URL) throw new Error('NEXT_PUBLIC_API_URL não está definido');
+            const url = isEdit
+                ? `${API_URL}/projects/${formData.codigo}`
+                : `${API_URL}/projects/`;
             const method = isEdit ? 'PUT' : 'POST';
-    
+
             const response = await fetch(url, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Authorization': `Bearer ${localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY)}`
                 },
-                body: JSON.stringify(payload),
-                credentials: 'include' // Caso precise de cookies/sessão
+                body: JSON.stringify(payload)
             });
-    
+
             if (!response.ok) {
-                const errorResponse = await response.json().catch(() => null);
-                throw new Error(
-                    errorResponse?.message || 
-                    `Erro ${response.status}: ${response.statusText}`
-                );
+                const errorText = await response.text();
+                throw new Error(`Erro ${response.status}: ${errorText}`);
             }
-    
-            const data = await response.json();
-            console.log('Resposta da API:', data);
-            onHide(); // Fechar o modal após sucesso
+
+            onHide(true);
         } catch (error) {
-            console.error('Erro detalhado:', {
-                error: error,
-                message: error.message,
-                stack: error.stack
-            });
+            console.error('Erro detalhado:', error);
             alert(`Erro ao salvar: ${error.message}`);
         }
     };
+
     return (
-        <Dialog 
-            header={isEdit ? 'Editar Molde' : 'Novo Molde'} 
-            visible={visible} 
-            onHide={onHide} 
-            className={styles.dialog}
-            headerClassName={styles.dialogHeader}
-            modal
-        >
-            <div className={styles.formContent}>
-                {/* Campos básicos do molde */}
-                <div className={styles.formField}>
-                    <label className={styles.formLabel}>Código</label>
-                    <InputText
-                        className={styles.formInput}
-                        value={formData.codigo}
-                        onChange={e => setFormData({ ...formData, codigo: e.target.value })}
-                        disabled={isEdit}
-                    />
-                </div>
-                
-                <div className={styles.formField}>
-                    <label className={styles.formLabel}>Descrição</label>
-                    <InputText
-                        className={styles.formInput}
-                        value={formData.description}
-                        onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    />
-                </div>
-                
-                <div className={styles.formField}>
-                    <label className={styles.formLabel}>Status</label>
-                    <Dropdown
-                        className={styles.dropdown}
-                        value={formData.status}
-                        options={statusOptions}
-                        onChange={e => setFormData({ ...formData, status: e.value })}
-                    />
-                </div>
-                
-                <div className={styles.formField}>
-                    <label className={styles.formLabel}>Data Início</label>
-                    <Calendar
-                        className={styles.formInput}
-                        value={formData.begin_date}
-                        onChange={e => setFormData({ ...formData, begin_date: e.value })}
-                        showIcon
-                    />
-                </div>
-                
-                <div className={styles.formField}>
-                    <label className={styles.formLabel}>Data Entrega</label>
-                    <Calendar
-                        className={styles.formInput}
-                        value={formData.delivery_date}
-                        onChange={e => setFormData({ ...formData, delivery_date: e.value })}
-                        showIcon
-                    />
+        <Dialog header={isEdit ? 'Editar Molde' : 'Novo Molde'} visible={visible} onHide={() => onHide(false)} className={styles.dialog} modal>
+            <div className="p-fluid">
+                <div className="p-field"><label>Código</label><InputText value={formData.codigo} onChange={e => setFormData({ ...formData, codigo: e.target.value })} disabled={isEdit} /></div>
+                <div className="p-field"><label>Descrição</label><InputText value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} /></div>
+                <div className="p-field"><label>Status</label><Dropdown value={formData.status} options={statusOptions} onChange={e => setFormData({ ...formData, status: e.value })} /></div>
+                <div className="p-field"><label>Data Início</label><Calendar value={formData.begin_date} onChange={e => setFormData({ ...formData, begin_date: e.value })} showIcon /></div>
+                <div className="p-field"><label>Data Entrega</label><Calendar value={formData.delivery_date} onChange={e => setFormData({ ...formData, delivery_date: e.value })} showIcon /></div>
+
+                <div className={styles.section}>
+                    <h4>Componentes</h4>
+                    <div className="p-grid">
+                        <div className="p-col-3"><InputText placeholder="ID" value={newComponent.id} onChange={e => setNewComponent({ ...newComponent, id: e.target.value })} /></div>
+                        <div className="p-col-3"><InputText placeholder="Nome" value={newComponent.name} onChange={e => setNewComponent({ ...newComponent, name: e.target.value })} /></div>
+                        <div className="p-col-3"><InputText placeholder="Material" value={newComponent.material} onChange={e => setNewComponent({ ...newComponent, material: e.target.value })} /></div>
+                        <div className="p-col-1"><InputText type="number" placeholder="Qtd" value={newComponent.quantity} onChange={e => setNewComponent({ ...newComponent, quantity: parseInt(e.target.value) })} /></div>
+                        <div className="p-col-2"><InputText placeholder="3D Model URL" value={newComponent.archive_3d_model} onChange={e => setNewComponent({ ...newComponent, archive_3d_model: e.target.value })} /></div>
+                        <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddComponent} /></div>
+                    </div>
+                    <div className={styles.list}>{formData.componentes.map((c, i) => <div key={i} className={styles.listItem}><span>{c.id} - {c.name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, componentes: prev.componentes.filter((_, idx) => idx !== i) }))} /></div>)}</div>
                 </div>
 
-                {/* Seção de Componentes */}
-                <div className={styles.formSection}>
-                    <h3>Componentes</h3>
-                    <Button 
-                        label="Adicionar Componente" 
-                        icon="pi pi-plus" 
-                        className="p-button-secondary"
-                        onClick={addComponenteDraft}
-                    />
-                    
-                    {componenteDrafts.map((draft, index) => (
-                        <div key={`component-draft-${index}`} className={styles.draftForm}>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>ID do Componente *</label>
-                                <InputText
-                                    value={draft.id}
-                                    onChange={(e) => {
-                                        const newDrafts = [...componenteDrafts];
-                                        newDrafts[index].id = e.target.value;
-                                        setComponenteDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Nome *</label>
-                                <InputText
-                                    value={draft.name}
-                                    onChange={(e) => {
-                                        const newDrafts = [...componenteDrafts];
-                                        newDrafts[index].name = e.target.value;
-                                        setComponenteDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Material *</label>
-                                <InputText
-                                    value={draft.material}
-                                    onChange={(e) => {
-                                        const newDrafts = [...componenteDrafts];
-                                        newDrafts[index].material = e.target.value;
-                                        setComponenteDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Quantidade *</label>
-                                <InputText
-                                    type="number"
-                                    value={draft.quantity}
-                                    onChange={(e) => {
-                                        const newDrafts = [...componenteDrafts];
-                                        newDrafts[index].quantity = parseInt(e.target.value) || 1;
-                                        setComponenteDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Modelo 3D</label>
-                                <InputText
-                                    value={draft.archive_3d_model}
-                                    onChange={(e) => {
-                                        const newDrafts = [...componenteDrafts];
-                                        newDrafts[index].archive_3d_model = e.target.value;
-                                        setComponenteDrafts(newDrafts);
-                                    }}
-                                />
-                            </div>
-                            
-                            <div className={styles.draftButtons}>
-                                <Button 
-                                    label="Salvar" 
-                                    icon="pi pi-check" 
-                                    className="p-button-success"
-                                    onClick={() => {
-                                        const newComponente = { ...componenteDrafts[index] };
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            componentes: [...prev.componentes, newComponente]
-                                        }));
-                                        setComponenteDrafts(componenteDrafts.filter((_, i) => i !== index));
-                                    }}
-                                />
-                                <Button 
-                                    label="Cancelar" 
-                                    icon="pi pi-times" 
-                                    className="p-button-danger"
-                                    onClick={() => setComponenteDrafts(componenteDrafts.filter((_, i) => i !== index))}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                    
-                    {formData.componentes.map((componente, index) => (
-                        <div key={`componente-${index}`} className={styles.savedItem}>
-                            <span>{componente.id} - {componente.name}</span>
-                            <Button 
-                                icon="pi pi-trash" 
-                                className="p-button-rounded p-button-danger"
-                                onClick={() => {
-                                    const newComponentes = formData.componentes.filter((_, i) => i !== index);
-                                    setFormData(prev => ({ ...prev, componentes: newComponentes }));
-                                }}
-                            />
-                        </div>
-                    ))}
+                <div className={styles.section}>
+                    <h4>Processos</h4>
+                    <div className="p-grid">
+                        <div className="p-col-2"><Dropdown placeholder="Componente" options={formData.componentes.map(c => ({ label: `${c.id}`, value: c.id }))} value={newProcess.componente_id} onChange={e => setNewProcess({ ...newProcess, componente_id: e.value })} /></div>
+                        <div className="p-col-2"><InputText placeholder="Descrição" value={newProcess.description} onChange={e => setNewProcess({ ...newProcess, description: e.target.value })} /></div>
+                        <div className="p-col-2"><InputText placeholder="Etapa" value={newProcess.step_name} onChange={e => setNewProcess({ ...newProcess, step_name: e.target.value })} /></div>
+                        <div className="p-col-2"><label>Status</label><Dropdown value={newProcess.status} options={statusOptions} onChange={e => setNewProcess({ ...newProcess, status: e.value })} /></div>
+                        <div className="p-col-1"><InputText placeholder="Máq ID" value={newProcess.maquina_id} onChange={e => setNewProcess({ ...newProcess, maquina_id: e.target.value })} /></div>
+                        <div className="p-col-1"><InputText type="number" placeholder="Ord" value={newProcess.order} onChange={e => setNewProcess({ ...newProcess, order: parseInt(e.target.value) })} /></div>
+                        <div className="p-col-2"><Calendar placeholder="Início" value={newProcess.begin_date} onChange={e => setNewProcess({ ...newProcess, begin_date: e.value })} showIcon /></div>
+                        <div className="p-col-2"><Calendar placeholder="Entrega" value={newProcess.delivery_date} onChange={e => setNewProcess({ ...newProcess, delivery_date: e.value })} showIcon /></div>
+                        <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddProcess} /></div>
+                    </div>
+                    <div className={styles.list}>{formData.processos.map((p, i) => <div key={i} className={styles.listItem}><span>{p.componente_id} - {p.step_name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, processos: prev.processos.filter((_, idx) => idx !== i) }))} /></div>)}</div>
                 </div>
 
-                {/* Seção de Processos */}
-                <div className={styles.formSection}>
-                    <h3>Processos</h3>
-                    <Button 
-                        label="Adicionar Processo" 
-                        icon="pi pi-plus" 
-                        className="p-button-secondary"
-                        onClick={addProcessoDraft}
-                    />
-                    
-                    {processoDrafts.map((draft, index) => (
-                        <div key={`process-draft-${index}`} className={styles.draftForm}>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Componente Relacionado *</label>
-                                <Dropdown
-                                    value={draft.componente_id}
-                                    options={[
-                                    ...formData.componentes.map(c => ({ label: `${c.id} - ${c.name}`, value: c.id }))
-                                    ]}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].componente_id = e.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    placeholder="Selecione um Componente"
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Descrição *</label>
-                                <InputText
-                                    value={draft.description}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].description = e.target.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Nome do Passo *</label>
-                                <InputText
-                                    value={draft.step_name}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].step_name = e.target.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Status *</label>
-                                <Dropdown
-                                    options={statusOptions}
-                                    value={draft.status}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].status = e.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Máquina</label>
-                                <Dropdown
-                                    value={draft.maquina_id}
-                                    options={maquinas.map(m => ({ label: `${m.id} - ${m.name}`, value: m.id }))}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].maquina_id = e.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    placeholder="Selecione a máquina"
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Data Início</label>
-                                <Calendar
-                                    showIcon
-                                    value={draft.begin_date}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].begin_date = e.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Data Entrega</label>
-                                <Calendar
-                                    showIcon
-                                    value={draft.delivery_date}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].delivery_date = e.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Notas</label>
-                                <InputText
-                                    value={draft.notes}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].notes = e.target.value;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                />
-                            </div>
-                            
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Ordem *</label>
-                                <InputText
-                                    type="number"
-                                    value={draft.order}
-                                    onChange={(e) => {
-                                        const newDrafts = [...processoDrafts];
-                                        newDrafts[index].order = parseInt(e.target.value) || 1;
-                                        setProcessoDrafts(newDrafts);
-                                    }}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className={styles.draftButtons}>
-                                <Button 
-                                    label="Salvar" 
-                                    icon="pi pi-check" 
-                                    className="p-button-success"
-                                    onClick={() => {
-                                        const newProcesso = { ...processoDrafts[index] };
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            processos: [...prev.processos, newProcesso]
-                                        }));
-                                        setProcessoDrafts(processoDrafts.filter((_, i) => i !== index));
-                                    }}
-                                />
-                                <Button 
-                                    label="Cancelar" 
-                                    icon="pi pi-times" 
-                                    className="p-button-danger"
-                                    onClick={() => setProcessoDrafts(processoDrafts.filter((_, i) => i !== index))}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                    
-                    {formData.processos.map((processo, index) => (
-                        <div key={`processo-${index}`} className={styles.savedItem}>
-                            <span>{processo.componente_id} - {processo.step_name}</span>
-                            <Button 
-                                icon="pi pi-trash" 
-                                className="p-button-rounded p-button-danger"
-                                onClick={() => {
-                                    const newProcessos = formData.processos.filter((_, i) => i !== index);
-                                    setFormData(prev => ({ ...prev, processos: newProcessos }));
-                                }}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.formButtons}>
-                    <Button
-                        label="Cancelar"
-                        icon="pi pi-times"
-                        className="p-button-text"
-                        onClick={onHide}
-                    />
-                    <Button
-                        label="Salvar"
-                        icon="pi pi-check"
-                        className="p-button-success"
-                        onClick={handleSave}
-                    />
+                <div className="p-dialog-footer">
+                    <Button label="Cancelar" icon="pi pi-times" onClick={() => onHide(false)} className="p-button-text" />
+                    <Button label="Salvar" icon="pi pi-check" onClick={handleSave} autoFocus />
                 </div>
             </div>
         </Dialog>
