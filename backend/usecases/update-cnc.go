@@ -42,9 +42,6 @@ func UpdateProgramming(cncRepo cncrepo.CNCRepository, req contracts.UpdateCNCPro
 	if req.MaquinaID != nil {
 		prog.MaquinaID = *req.MaquinaID
 	}
-	if req.StepID != nil {
-		prog.StepID = *req.StepID
-	}
 	if req.Description != nil {
 		prog.Description = *req.Description
 	}

@@ -68,11 +68,11 @@ func (r *cncRepository) GetProgrammingByComponent(componentCode string) ([]*mode
 	return programming, nil
 }
 
-func (r *cncRepository) ValidateComponentWithMold(componentID string, moldCode string) (bool, error) {
+func (r *cncRepository) ValidateProcessWithMold(processID string, moldCode string) (bool, error) {
 	var count int64
 	if err := r.DB.
-		Model(&models.Componentes{}).
-		Where("id = ? AND molde_codigo = ?", componentID, moldCode).
+		Model(&models.Processos{}).
+		Where("id = ? AND molde_codigo = ?", processID, moldCode).
 		Count(&count).
 		Error; err != nil {
 		return false, err

@@ -9,7 +9,6 @@ type UpdateMachRequest struct {
 
 type UpdateCNCProgramming struct {
 	MaquinaID   *string `json:"maquina_id,omitempty"`
-	StepID      *string `json:"step_id,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Programmer  *string `json:"programador,omitempty"`
 	Script      *string `json:"script,omitempty"`

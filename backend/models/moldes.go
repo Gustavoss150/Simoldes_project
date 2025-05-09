@@ -75,17 +75,16 @@ type Maquinas struct {
 }
 
 type Programacoes struct {
-	ID           string    `gorm:"size:12;primaryKey" json:"id"`              // corresponde a Referência na planilha
-	MoldeCodigo  string    `gorm:"size:12;index" json:"molde_codigo"`         // foreign key to Moldes
-	ComponenteID string    `gorm:"size:12;index" json:"componente_id"`        // foreign key to Componentes
-	MaquinaID    string    `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
-	StepID       string    `gorm:"size:36;index" json:"step_id"`              // foreign key para Etapas
-	Description  string    `json:"description,omitempty"`
-	Date         time.Time `json:"date"`        // data da programação
-	Programmer   string    `json:"programador"` // nome do programador
-	UpdatedAt    time.Time `json:"updated_at"`
-	Script       string    `json:"script,omitempty"` // URL or path to CNC script
-	IsActive     bool      `json:"is_active"`
+	ID          string    `gorm:"size:12;primaryKey" json:"id"` // corresponde a Referência na planilha
+	ProcessID   string    `gorm:"size:36;index" json:"process_id"`
+	MoldeCodigo string    `gorm:"size:12;index" json:"molde_codigo"`         // foreign key to Moldes
+	MaquinaID   string    `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
+	Description string    `json:"description,omitempty"`
+	Programmer  string    `json:"programador"` // nome do programador
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+	Script      string    `json:"script,omitempty"` // URL or path to CNC script
+	IsActive    bool      `json:"is_active"`
 }
 
 type ChegadaAcos struct {

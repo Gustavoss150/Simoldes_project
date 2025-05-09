@@ -28,16 +28,17 @@ func NewMoldService(
 
 // recalc recalcula Steps e CurrentStep de um molde e persiste
 func (s *MoldService) recalc(moldCode string) error {
-	// buscar todos componentes ativos do molde
+	// 1) buscar todos componentes ativos do molde
 	activeComponents, err := s.componentsRepo.SearchActiveByMold(moldCode)
 	if err != nil {
 		return fmt.Errorf("error fetching active components for mold %s: %w", moldCode, err)
 	}
 
-	total := 0
-	done := 0
-	inProcess := false
+	// flags para varrer os processos
+	var total, done int
+	var hasInProcess, hasPaused, hasNotStarted bool
 
+	// 2) iterar processos de cada componente
 	for _, comp := range activeComponents {
 		procs, err := s.processRepo.GetProcessByComponent(comp.ID)
 		if err != nil {
@@ -45,31 +46,39 @@ func (s *MoldService) recalc(moldCode string) error {
 		}
 		for _, p := range procs {
 			total++
-			if p.Status == models.StatusConcluido {
+			switch p.Status {
+			case models.StatusConcluido:
 				done++
-			}
-			if p.Status == models.StatusEmProcesso {
-				inProcess = true
+			case models.StatusEmProcesso:
+				hasInProcess = true
+			case models.StatusParalisado:
+				hasPaused = true
+			case models.StatusNaoIniciado:
+				hasNotStarted = true
 			}
 		}
 	}
 
+	// 3) carregar molde e ajustar contadores
 	m, err := s.moldsRepo.Get(moldCode)
 	if err != nil {
 		return err
 	}
-
 	m.Steps = total
 	m.CurrentStep = done
 
-	switch {
-	case m.CurrentStep > 0 && m.CurrentStep == m.Steps:
+	// 4) derivar status do molde segundo as regras
+	if total > 0 && done == total {
 		m.Status = models.StatusConcluido
-	case inProcess:
+	} else if hasInProcess {
 		m.Status = models.StatusEmProcesso
-		// opcional: senão, poderia ser not_started ou paused dependendo da regra
+	} else if hasPaused {
+		m.Status = models.StatusParalisado
+	} else if hasNotStarted {
+		m.Status = models.StatusNaoIniciado
 	}
 
+	// 5) persistir molde
 	return s.moldsRepo.Save(m)
 }
 

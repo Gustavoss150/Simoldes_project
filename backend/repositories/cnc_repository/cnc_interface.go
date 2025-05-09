@@ -12,5 +12,5 @@ type CNCRepository interface {
 	GetProgrammingByID(id string) (*models.Programacoes, error)
 	GetProgrammingByMold(moldCode string) ([]*models.Programacoes, error)
 	GetProgrammingByComponent(componentCode string) ([]*models.Programacoes, error)
-	ValidateComponentWithMold(componentID string, moldCode string) (bool, error)
+	ValidateProcessWithMold(processID string, moldCode string) (bool, error)
 }

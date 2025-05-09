@@ -25,9 +25,9 @@ func CreateProgramming(cncRepo cncrepo.CNCRepository, scriptCNC models.Programac
 		return errors.New("CNC programming with this ID already exists")
 	}
 
-	isValid, err := cncRepo.ValidateComponentWithMold(scriptCNC.ComponenteID, moldCode)
+	isValid, err := cncRepo.ValidateProcessWithMold(scriptCNC.ProcessID, moldCode)
 	if err != nil {
-		return errors.New("error validating component association with mold: " + err.Error())
+		return errors.New("error validating process association with mold: " + err.Error())
 	}
 	if !isValid {
 		return errors.New("component is not associated with the specified mold")

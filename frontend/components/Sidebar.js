@@ -40,6 +40,7 @@ const AppSidebar = () => {
                         <SidebarLink href="/dashboard" label="Dashboard" />
                         <SidebarLink href="/projects" label="Projetos" />
                         <SidebarLink href="/materials" label="Materiais" />
+                        <SidebarLink href="/cnc" label="CNC" />
                         {userRole === 'user' && <SidebarLink href="/users/" label="Editar Dados" />}
                         {userRole === 'admin' && <SidebarLink href="/users/" label="Gerenciar Usuários" />}
                     </ul>
