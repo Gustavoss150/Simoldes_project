@@ -1,6 +1,6 @@
 /* Forms.module.css */
 .dialog {
-    min-width: 500px;
+    min-width: 550px;
     border-radius: 12px;
     background-color: white;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
@@ -48,16 +48,18 @@
 .dropdown {
     width: 100%;
     border-radius: 6px;
+    padding: 5px;
 }
 
 .dropdown:focus {
     border-color: var(--base);
     box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+    padding: 5px;
 }
 
 .processSection {
     margin-top: 2rem;
-    padding: 1.5rem;
+    padding: 0.7rem;
     background-color: white;
     border-radius: 8px;
     border-left: 3px solid var(--base);
@@ -82,7 +84,7 @@
     justify-content: flex-end;
     gap: 0.5rem;
     margin-top: 2rem;
-    padding-top: 1.5rem;
+    padding-top: 0.5rem;
     border-top: 1px solid #eee;
 }
 

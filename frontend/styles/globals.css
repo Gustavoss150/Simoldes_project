@@ -77,6 +77,15 @@ html, body {
 
 .p-dropdown {
     width: 250px;
+    margin: 2px;
+}
+
+.p-grid {
+    padding-top: 10px;
+}
+
+.p-grid ::placeholder {
+    padding: 2px;
 }
 
 .p-datatable .p-column-header-content {

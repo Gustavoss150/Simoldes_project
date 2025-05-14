@@ -119,7 +119,7 @@ h1.text-2xl {
 .rowExpansion {
     background-color: #f9f9f9;
     border-left: 3px solid var(--base);
-    padding: 1rem;
+    padding: 2rem;
 }
 
 .rowExpansion h3 {
