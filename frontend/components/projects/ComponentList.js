@@ -99,6 +99,19 @@ export default function ComponentList({ moldCode }) {
             </span>
           )}
         />
+        <Column 
+            header="Modelo 3D"
+            body={rowData => (
+              rowData.archive_3d_model && (
+                <Button
+                  icon="pi pi-external-link"
+                  className="p-button-text p-button-success"
+                  tooltip="Abrir modelo 3D"
+                  onClick={() => window.open(rowData.archive_3d_model, '_blank')}
+                />
+              )
+            )}
+          />
         <Column
           header="Ações"
           body={rowData => (

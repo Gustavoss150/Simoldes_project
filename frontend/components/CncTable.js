@@ -163,6 +163,19 @@ export default function Cnc() {
           <Column field="componente_id" header="Componente" />
           <Column field="programador" header="Programador" />
           <Column field="maquina_id" header="Máquina" />
+          <Column 
+            header="Código"
+            body={rowData => (
+              rowData.script && (
+                <Button
+                  icon="pi pi-external-link"
+                  className="p-button-text p-button-success"
+                  tooltip="Abrir Programação"
+                  onClick={() => window.open(rowData.script, '_blank')}
+                />
+              )
+            )}
+          />
           <Column body={(row) => <Button icon="pi pi-trash" severity="danger" onClick={() => deleteProgram(row.id)} />} />
         </DataTable>
 
