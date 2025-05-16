@@ -91,7 +91,7 @@ export default function ProjectsPage() {
                 </div>
                 {loading ? <ProgressSpinner /> : (
                     <div className={styles.tableContainer}>
-                        <DataTable value={molds} paginator rows={10} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)} rowExpansionTemplate={rowExpansionTemplate} dataKey="codigo">
+                        <DataTable value={molds} paginator rows={1} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)} rowExpansionTemplate={rowExpansionTemplate} dataKey="codigo">
                             <Column expander style={{ width: '3em' }} />
                             <Column field="codigo" header="Código" sortable />
                             <Column field="description" header="Descrição" />

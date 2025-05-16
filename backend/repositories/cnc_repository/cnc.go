@@ -79,3 +79,16 @@ func (r *cncRepository) ValidateProcessWithMold(processID string, moldCode strin
 	}
 	return count > 0, nil
 }
+
+func (r *cncRepository) ValidateProcessWithComponent(processID string, componenteID string) (bool, error) {
+	var count int64
+	err := r.DB.
+		Model(&models.Processos{}).
+		Where("id = ? AND componentes_id = ?", processID, componenteID).
+		Count(&count).
+		Error
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

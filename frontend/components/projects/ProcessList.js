@@ -94,7 +94,7 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                 />
             </div>
 
-            <DataTable 
+            <DataTable paginator rows={10}
                 value={processes}
                 responsiveLayout="scroll"
                 dataKey="id" // Campo único obrigatório

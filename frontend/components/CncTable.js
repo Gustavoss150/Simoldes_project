@@ -1,4 +1,3 @@
-// components/CncTable.js
 import React, { useEffect, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -11,14 +10,24 @@ import styles from '../styles/CncTable.module.css';
 import formStyles from '../styles/CncForm.module.css';
 
 export default function Cnc() {
-
     const [machines, setMachines] = useState([]);
     const [machineDialog, setMachineDialog] = useState(false);
     const [machineForm, setMachineForm] = useState({ id: '', name: '', description: '', type: '', department: '', is_active: true });
 
     const [programs, setPrograms] = useState([]);
     const [programDialog, setProgramDialog] = useState(false);
-    const [programForm, setProgramForm] = useState({ id: '', process_id: '', molde_codigo: '', componente_id: '', maquina_id: '', description: '', programador: '', script: '', is_active: true });
+    const [isEditProgram, setIsEditProgram] = useState(false);
+    const [programForm, setProgramForm] = useState({
+        id: '',
+        process_id: '',
+        molde_codigo: '',
+        componente_id: '',
+        maquina_id: '',
+        description: '',
+        programador: '',
+        script: '',
+        is_active: true
+    });
 
     const [molds, setMolds] = useState([]);
     const [components, setComponents] = useState([]);
@@ -48,7 +57,7 @@ export default function Cnc() {
         setProcesses([]);
         const { data } = await api.get(`/projects/components/${mold.codigo}`);
         setComponents(data.components);
-        setProgramForm(prev => ({ ...prev, molde_codigo: mold.codigo }));
+        setProgramForm(prev => ({ ...prev, molde_codigo: mold.codigo, componente_id: '', process_id: '', maquina_id: '' }));
     };
 
     const onComponentChange = async (e) => {
@@ -56,39 +65,75 @@ export default function Cnc() {
         setSelectedComponent(comp);
         const { data } = await api.get(`/processes/components/${comp.id}`);
         setProcesses(data.processes);
-        setProgramForm(prev => ({ ...prev, componente_id: comp.id }));
+        setProgramForm(prev => ({ ...prev, componente_id: comp.id, process_id: '', maquina_id: '' }));
+    };
+
+    const onProcessChange = (e) => {
+        const pid = e.value;
+        const proc = processes.find(p => p.process_id === pid);
+        if (!proc) return;
+        setProgramForm(prev => ({
+        ...prev,
+        process_id: pid,
+        maquina_id: proc.maquina_id // auto set machine
+        }));
     };
 
     const openNewMachine = () => {
         setMachineForm({ id: '', name: '', description: '', type: '', department: '', is_active: true });
         setMachineDialog(true);
     };
+
     const saveMachine = async () => {
         if (machineForm.id) await api.put(`/cnc/mach/${machineForm.id}`, machineForm);
         else await api.post('/cnc/mach', machineForm);
         setMachineDialog(false);
         fetchMachines();
     };
+
     const deleteMachine = async (id) => {
         await api.delete(`/cnc/mach/${id}`);
         fetchMachines();
     };
 
-    const openNewProgram = () => {
-        setProgramForm({ id: '', process_id: '', molde_codigo: '', componente_id: '', maquina_id: '', description: '', programador: '', script: '', is_active: true });
+    const openNewProgram = async () => {
+        setIsEditProgram(false);
+        setProgramForm({ id: '', process_id: '', molde_codigo: selectedMold?.codigo || '', componente_id: selectedComponent?.id || '', maquina_id: '', description: '', programador: '', script: '', is_active: true });
+        if (selectedMold) {
+            const { data: compData } = await api.get(`/projects/components/${selectedMold.codigo}`);
+            setComponents(compData.components);
+        }
+        if (selectedComponent) {
+            const { data: procData } = await api.get(`/processes/components/${selectedComponent.id}`);
+            setProcesses(procData.processes);
+        }
         setProgramDialog(true);
     };
+
+    const onProgramRowSelect = (e) => {
+        setProgramForm(e.data);
+        setSelectedMold({ codigo: e.data.molde_codigo });
+        setSelectedComponent({ id: e.data.componente_id });
+        setIsEditProgram(true);
+        setProgramDialog(true);
+    };
+
     const loadPrograms = async () => {
         if (!selectedComponent) return;
         const { data } = await api.get(`/cnc/program/${selectedComponent.id}`);
         setPrograms(data['CNC Programs']);
     };
+
     const saveProgram = async () => {
-        if (programForm.id) await api.put(`/cnc/program/${programForm.id}`, programForm);
-        else await api.post(`/cnc/program/${programForm.molde_codigo}`, programForm);
+        if (isEditProgram) {
+        await api.put(`/cnc/program/${programForm.id}`, programForm);
+        } else {
+        await api.post(`/cnc/program/${programForm.molde_codigo}`, programForm);
+        }
         setProgramDialog(false);
         loadPrograms();
     };
+
     const deleteProgram = async (id) => {
         await api.delete(`/cnc/program/${id}`);
         loadPrograms();
@@ -101,13 +146,9 @@ export default function Cnc() {
                 <Button label="Nova Máquina" icon="pi pi-plus" onClick={openNewMachine} className="mb-2" />
                 <DataTable
                     value={machines}
-                    paginator
-                    rows={5}
+                    paginator rows={5}
                     selectionMode="single"
-                    onRowSelect={(e) => {
-                        setMachineForm(e.data);
-                        setMachineDialog(true);
-                    }}
+                    onRowSelect={e => { setMachineForm(e.data); setMachineDialog(true); }}
                     className={styles.dataTable}
                 >
                     <Column field="id" header="ID" />
@@ -117,19 +158,9 @@ export default function Cnc() {
                     <Column
                         field="is_active"
                         header="Ativa"
-                        body={(row) =>
-                            row.is_active ? (
-                                <span className={`${styles.statusBadge} ${styles.statusActive}`}>Sim</span>
-                            ) : (
-                                <span className={`${styles.statusBadge} ${styles.statusInactive}`}>Não</span>
-                            )
-                        }
+                        body={row => row.is_active ? <span className={`${styles.statusBadge} ${styles.statusActive}`}>Sim</span> : <span className={`${styles.statusBadge} ${styles.statusInactive}`}>Não</span>}
                     />
-                    <Column
-                        body={(row) => (
-                            <Button icon="pi pi-trash" severity="danger" onClick={() => deleteMachine(row.id)} />
-                        )}
-                    />
+                    <Column body={row => <Button icon="pi pi-trash" severity="danger" onClick={() => deleteMachine(row.id)} />} />
                 </DataTable>
 
                 <Dialog
@@ -190,40 +221,19 @@ export default function Cnc() {
             </section>
 
             <section>
-                <h2 className={styles.sectionHeader}>Programações CNC</h2>
+                <h2 className={styles.sectionHeader}>Programações NC</h2>
                 <div className={styles.filterBar}>
-                    <Dropdown
-                        value={selectedMold}
-                        options={molds}
-                        onChange={onMoldChange}
-                        optionLabel="codigo"
-                        placeholder="Selecione Molde"
-                        filter
-                        filterBy="codigo"
-                    />
-                    <Dropdown
-                        value={selectedComponent}
-                        options={components}
-                        onChange={onComponentChange}
-                        optionLabel="name"
-                        placeholder="Selecione Componente"
-                        disabled={!selectedMold}
-                        filter
-                        filterBy="name"
-                    />
+                    <Dropdown value={selectedMold} options={molds} onChange={onMoldChange} optionLabel="codigo" placeholder="Selecione Molde" filter filterBy="codigo" />
+                    <Dropdown value={selectedComponent} options={components} onChange={onComponentChange} optionLabel="name" placeholder="Selecione Componente" disabled={!selectedMold} filter filterBy="name" />
                     <Button label="Buscar Programas" icon="pi pi-search" onClick={loadPrograms} />
                     <Button label="Nova Programação" icon="pi pi-plus" onClick={openNewProgram} />
                 </div>
 
                 <DataTable
                     value={programs}
-                    paginator
-                    rows={5}
+                    paginator rows={5}
                     selectionMode="single"
-                    onRowSelect={(e) => {
-                        setProgramForm(e.data);
-                        setProgramDialog(true);
-                    }}
+                    onRowSelect={onProgramRowSelect}
                     className={styles.dataTable}
                 >
                     <Column field="id" header="ID" />
@@ -231,69 +241,39 @@ export default function Cnc() {
                     <Column field="componente_id" header="Componente" />
                     <Column field="programador" header="Programador" />
                     <Column field="maquina_id" header="Máquina" />
-                    <Column
-                        header="Prog. CNC"
-                        body={(rowData) =>
-                            rowData.script && (
-                                <span
-                                    className={styles.scriptPreview}
-                                    onClick={() => window.open(rowData.script, '_blank')}
-                                >
-                                    Ver Script
-                                </span>
-                            )
-                        }
-                    />
-                    <Column
-                        body={(row) => (
-                            <Button icon="pi pi-trash" severity="danger" onClick={() => deleteProgram(row.id)} />
-                        )}
-                    />
+                    <Column header="Prog. NC" body={rowData => rowData.script && <span className={styles.scriptPreview} onClick={() => window.open(rowData.script, '_blank')}>Ver Script</span>} />
+                    <Column body={row => <Button icon="pi pi-trash" severity="danger" onClick={() => deleteProgram(row.id)} />} />
                 </DataTable>
 
-                <Dialog
-                    header="Programação CNC"
-                    visible={programDialog}
-                    onHide={() => setProgramDialog(false)}
-                    className={formStyles.dialog}
-                    headerClassName={formStyles.dialogHeader}
-                >
+                <Dialog header="Programação NC" visible={programDialog} onHide={() => setProgramDialog(false)} className={formStyles.dialog} headerClassName={formStyles.dialogHeader}>
                     <div className={formStyles.formContent}>
                         <div className={formStyles.formField}>
+                            <label className={formStyles.formLabel}>ID</label>
+                            <InputText value={programForm.id} onChange={e => setProgramForm({ ...programForm, id: e.target.value })} className={formStyles.formInput} required />
+                        </div>
+                        <div className={formStyles.formField}>
+                            <label className={formStyles.formLabel}>Molde</label>
+                            <Dropdown value={selectedMold} options={molds} onChange={onMoldChange} optionLabel="codigo" placeholder="Selecione Molde" filter filterBy="codigo" className={formStyles.dropdown} />
+                        </div>
+                        <div className={formStyles.formField}>
+                            <label className={formStyles.formLabel}>Componente</label>
+                            <Dropdown value={selectedComponent} options={components} onChange={onComponentChange} optionLabel="name" placeholder="Selecione Componente" disabled={!selectedMold} filter filterBy="name" className={formStyles.dropdown} />
+                        </div>
+                        <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Processo</label>
-                            <Dropdown
-                                value={programForm.process_id}
-                                options={processes}
-                                onChange={(e) => setProgramForm({ ...programForm, process_id: e.value })}
-                                optionLabel="name"
-                                placeholder="Selecione Processo"
-                                filter
-                                className={formStyles.dropdown}
-                            />
+                            <Dropdown value={programForm.process_id} options={processes} onChange={onProcessChange} optionLabel="step_name" optionValue="process_id" placeholder="Selecione Processo" filter filterBy="step_name" className={formStyles.dropdown} />
                         </div>
                         <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Descrição</label>
-                            <InputText
-                                value={programForm.description}
-                                onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })}
-                                className={formStyles.formInput}
-                            />
+                            <InputText value={programForm.description} onChange={e => setProgramForm({ ...programForm, description: e.target.value })} className={formStyles.formInput} />
                         </div>
                         <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Programador</label>
-                            <InputText
-                                value={programForm.programador}
-                                onChange={(e) => setProgramForm({ ...programForm, programador: e.target.value })}
-                                className={formStyles.formInput}
-                            />
+                            <InputText value={programForm.programador} onChange={e => setProgramForm({ ...programForm, programador: e.target.value })} className={formStyles.formInput} />
                         </div>
                         <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Script (URL)</label>
-                            <InputText
-                                value={programForm.script}
-                                onChange={(e) => setProgramForm({ ...programForm, script: e.target.value })}
-                                className={formStyles.formInput}
-                            />
+                            <InputText value={programForm.script} onChange={e => setProgramForm({ ...programForm, script: e.target.value })} className={formStyles.formInput} />
                         </div>
                         <div className={formStyles.formButtons}>
                             <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} />

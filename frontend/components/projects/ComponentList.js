@@ -78,7 +78,7 @@ export default function ComponentList({ moldCode }) {
         />
       </div>
 
-      <DataTable
+      <DataTable paginator rows={10}
         value={components}
         loading={loading}
         expandedRows={expandedRows}

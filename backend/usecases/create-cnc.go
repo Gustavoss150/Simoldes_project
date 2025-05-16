@@ -33,6 +33,14 @@ func CreateProgramming(cncRepo cncrepo.CNCRepository, scriptCNC models.Programac
 		return errors.New("component is not associated with the specified mold")
 	}
 
+	isValidComp, err := cncRepo.ValidateProcessWithComponent(scriptCNC.ProcessID, scriptCNC.ComponenteID)
+	if err != nil {
+		return errors.New("error validating process association with component")
+	}
+	if !isValidComp {
+		return errors.New("process is not associated with the specified component")
+	}
+
 	if err := cncRepo.SaveProgramming(&scriptCNC); err != nil {
 		return errors.New("error registering CNC programming " + err.Error())
 	}
