@@ -1,0 +1,106 @@
+/* components/CncTable.module.css */
+.cncContainer {
+    padding: 2.5rem;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 1rem 0;
+}
+
+.sectionHeader {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a365d;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+    margin: 3px;
+    padding-top: 10px;
+}
+
+.dataTable {
+    margin-top: 1rem;
+}
+
+.dataTable th {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.dataTable td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.formDialog {
+    min-width: 600px;
+    margin: 10px;
+}
+
+.formRow {
+    margin-bottom: 1rem;
+    margin: 10px;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+    margin: 10px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.formActions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.filterBar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+}
+
+.scriptPreview {
+    color: #3182ce;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.scriptPreview:hover {
+    color: #2b6cb0;
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.statusActive {
+    background-color: #c6f6d5;
+    color: #22543d;
+}
+
+.statusInactive {
+    background-color: #fed7d7;
+    color: #742a2a;
+}
+
+.tooltipIcon {
+    color: #718096;
+    cursor: help;
+    margin-left: 0.5rem;
+}

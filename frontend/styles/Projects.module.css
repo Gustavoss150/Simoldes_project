@@ -5,7 +5,6 @@
 }
 
 .mainContent {
-    margin-left: 20px;
     padding: 30px;
     width: calc(100% - 50px);
     display: flex;

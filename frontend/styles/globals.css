@@ -80,6 +80,47 @@ html, body {
     margin: 2px;
 }
 
+.p-dropdown {
+  border-radius: 8px;
+  background-color: #f4f4f4;
+  border: 1px solid #ccc;
+  font-family: inherit;
+}
+
+/* Painel de opções */
+.p-dropdown-panel {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Cada item da lista */
+.p-dropdown-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover no item */
+.p-dropdown-item:hover {
+  background-color: #e1eaff;
+  color: #000;
+}
+
+/* Item selecionado */
+.p-dropdown-item.p-highlight {
+  background-color: var(--hover);
+  color: #ffffff;
+}
+
+/* Placeholder (quando nenhum valor está selecionado) */
+.p-dropdown .p-dropdown-label.p-placeholder {
+  color: #999;
+}
+
 .p-grid {
     padding-top: 10px;
 }
@@ -90,6 +131,7 @@ html, body {
 
 .p-datatable .p-column-header-content {
     margin: 0 8px;
+    padding: 5px;
 }
 
 /* Ajustar espaçamento interno das células */

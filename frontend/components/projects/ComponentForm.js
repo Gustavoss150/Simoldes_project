@@ -326,7 +326,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                                     className={styles.dropdown}
                                     value={process.step_id}
                                     options={(steps || []).map(s => ({
-                                        label: `${s.name} - ${s.id}`,
+                                        label: `${s.name}`,
                                         value: s.id
                                     }))}
                                     onChange={(e) => handleProcessChange(index, 'step_id', e.value)}

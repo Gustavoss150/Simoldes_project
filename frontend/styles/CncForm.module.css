@@ -1,4 +1,3 @@
-/* Forms.module.css */
 .dialog {
     min-width: 550px;
     border-radius: 12px;
@@ -43,6 +42,18 @@
     border-color: var(--base);
     box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
     outline: none;
+}
+
+.dropdown {
+    width: 100%;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+.dropdown:focus {
+    border-color: var(--base);
+    box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+    padding: 5px;
 }
 
 .processSection {
