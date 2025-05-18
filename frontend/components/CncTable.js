@@ -18,18 +18,14 @@ export default function Cnc() {
     const [programDialog, setProgramDialog] = useState(false);
     const [isEditProgram, setIsEditProgram] = useState(false);
     const [programForm, setProgramForm] = useState({
-        id: '',
-        process_id: '',
-        molde_codigo: '',
-        componente_id: '',
-        maquina_id: '',
-        description: '',
-        programador: '',
-        script: '',
-        is_active: true
+        id: '', process_id: '', molde_codigo: '', componente_id: '', maquina_id: '',
+        description: '', programador: '', script: '', is_active: true
     });
 
     const [molds, setMolds] = useState([]);
+    const componentTemplate = (option) => option
+    ? `${option.id} — ${option.name}`
+    : '';
     const [components, setComponents] = useState([]);
     const [processes, setProcesses] = useState([]);
     const [selectedMold, setSelectedMold] = useState(null);
@@ -113,7 +109,7 @@ export default function Cnc() {
     const onProgramRowSelect = (e) => {
         setProgramForm(e.data);
         setSelectedMold({ codigo: e.data.molde_codigo });
-        setSelectedComponent({ id: e.data.componente_id });
+        setSelectedComponent({ id: e.data.componente_id, name: e.data.componente_id });
         setIsEditProgram(true);
         setProgramDialog(true);
     };
@@ -224,7 +220,17 @@ export default function Cnc() {
                 <h2 className={styles.sectionHeader}>Programações NC</h2>
                 <div className={styles.filterBar}>
                     <Dropdown value={selectedMold} options={molds} onChange={onMoldChange} optionLabel="codigo" placeholder="Selecione Molde" filter filterBy="codigo" />
-                    <Dropdown value={selectedComponent} options={components} onChange={onComponentChange} optionLabel="name" placeholder="Selecione Componente" disabled={!selectedMold} filter filterBy="name" />
+                    <Dropdown
+                        value={selectedComponent}
+                        options={components}
+                        onChange={onComponentChange}
+                        placeholder="Selecione Componente"
+                        disabled={!selectedMold}
+                        filter
+                        filterBy="name"
+                        itemTemplate={componentTemplate}
+                        valueTemplate={componentTemplate}
+                    />
                     <Button label="Buscar Programas" icon="pi pi-search" onClick={loadPrograms} />
                     <Button label="Nova Programação" icon="pi pi-plus" onClick={openNewProgram} />
                 </div>
@@ -257,7 +263,18 @@ export default function Cnc() {
                         </div>
                         <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Componente</label>
-                            <Dropdown value={selectedComponent} options={components} onChange={onComponentChange} optionLabel="name" placeholder="Selecione Componente" disabled={!selectedMold} filter filterBy="name" className={formStyles.dropdown} />
+                            <Dropdown
+                                value={selectedComponent}
+                                options={components}
+                                onChange={onComponentChange}
+                                placeholder="Selecione Componente"
+                                disabled={!selectedMold}
+                                filter
+                                filterBy="name"
+                                itemTemplate={componentTemplate}
+                                valueTemplate={componentTemplate}
+                                className={formStyles.dropdown}
+                            />
                         </div>
                         <div className={formStyles.formField}>
                             <label className={formStyles.formLabel}>Processo</label>

@@ -46,6 +46,7 @@ func RegisterProgram(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
 		return
 	}
+	prog.MoldeCodigo = moldCode
 
 	cncRepo, err := cncrepo.InitCNCDatabase()
 	if err != nil {
