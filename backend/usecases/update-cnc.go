@@ -26,6 +26,10 @@ func UpdateMach(cncRepo cncrepo.CNCRepository, req contracts.UpdateMachRequest, 
 		mach.Department = *req.Department
 	}
 
+	if req.IsActive != nil {
+		mach.IsActive = *req.IsActive
+	}
+
 	if err = cncRepo.SaveMach(mach); err != nil {
 		return errors.New("error updating machine")
 	}

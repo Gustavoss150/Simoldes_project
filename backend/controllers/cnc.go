@@ -190,12 +190,12 @@ func DeleteMachine(c *gin.Context) {
 		return
 	}
 
-	if err := usecases.SoftDeleteMach(cncRepo, machineID); err != nil {
+	if err := usecases.DeleteMach(cncRepo, machineID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error deleting machine: " + err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{"message": "Machine deleted successfully"})
+	c.Status(http.StatusNoContent)
 }
 
 func DeleteProgram(c *gin.Context) {

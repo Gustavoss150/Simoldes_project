@@ -40,6 +40,10 @@ func (r *cncRepository) GetAllMachs() ([]*models.Maquinas, error) {
 	return machines, nil
 }
 
+func (r *cncRepository) DeleteMach(id string) error {
+	return r.DB.Where("id = ?", id).Delete(&models.Maquinas{}).Error
+}
+
 func (r *cncRepository) SaveProgramming(programming *models.Programacoes) error {
 	return r.DB.Save(programming).Error
 }

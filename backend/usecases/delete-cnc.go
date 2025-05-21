@@ -6,18 +6,13 @@ import (
 	cncrepo "github.com/Gustavoss150/simoldes-backend/repositories/cnc_repository"
 )
 
-func SoftDeleteMach(cncRepo cncrepo.CNCRepository, machID string) error {
+func DeleteMach(cncRepo cncrepo.CNCRepository, machID string) error {
 	mach, err := cncRepo.GetMachByID(machID)
 	if err != nil || mach == nil {
 		return errors.New("machine not found")
 	}
 
-	if !mach.IsActive {
-		return errors.New("machine is already inactive")
-	}
-
-	mach.IsActive = false
-	return cncRepo.SaveMach(mach)
+	return cncRepo.DeleteMach(machID)
 }
 
 func SoftDeleteCNCProgramming(cncRepo cncrepo.CNCRepository, scriptID string) error {

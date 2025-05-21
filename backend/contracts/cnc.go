@@ -5,6 +5,7 @@ type UpdateMachRequest struct {
 	Description *string `json:"description,omitempty"`
 	Type        *string `json:"type,omitempty"`
 	Department  *string `json:"department,omitempty"`
+	IsActive    *bool   `json:"is_active"`
 }
 
 type UpdateCNCProgramming struct {
