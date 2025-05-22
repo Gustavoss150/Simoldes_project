@@ -149,14 +149,14 @@ export default function MoldForm({ mold, onHide, visible }) {
                 <div className={styles.section}>
                     <h4>Componentes</h4>
                     <div className="p-grid">
-                        <div className="p-col-3"><InputText placeholder="ID" value={newComponent.id} onChange={e => setNewComponent({ ...newComponent, id: e.target.value })} /></div>
-                        <div className="p-col-3"><InputText placeholder="Nome" value={newComponent.name} onChange={e => setNewComponent({ ...newComponent, name: e.target.value })} /></div>
-                        <div className="p-col-3"><InputText placeholder="Material" value={newComponent.material} onChange={e => setNewComponent({ ...newComponent, material: e.target.value })} /></div>
-                        <div className="p-col-1"><InputText type="number" placeholder="Qtd" value={newComponent.quantity} onChange={e => setNewComponent({ ...newComponent, quantity: parseInt(e.target.value) })} /></div>
-                        <div className="p-col-2"><InputText placeholder="3D Model URL" value={newComponent.archive_3d_model} onChange={e => setNewComponent({ ...newComponent, archive_3d_model: e.target.value })} /></div>
-                        <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddComponent} /></div>
+                        <div className="p-col-3"><InputText placeholder="ID" value={newComponent.id} onChange={e => setNewComponent({ ...newComponent, id: e.target.value })} className='formText' /></div>
+                        <div className="p-col-3"><InputText placeholder="Nome" value={newComponent.name} onChange={e => setNewComponent({ ...newComponent, name: e.target.value })} className='formText' /></div>
+                        <div className="p-col-3"><InputText placeholder="Material" value={newComponent.material} onChange={e => setNewComponent({ ...newComponent, material: e.target.value })} className='formText' /></div>
+                        <div className="p-col-1"><InputText type="number" placeholder="Qtd" value={newComponent.quantity} onChange={e => setNewComponent({ ...newComponent, quantity: parseInt(e.target.value) })} className='formText' /></div>
+                        <div className="p-col-2"><InputText placeholder="3D Model URL" value={newComponent.archive_3d_model} onChange={e => setNewComponent({ ...newComponent, archive_3d_model: e.target.value })} className='formText' /></div>
+                        <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddComponent} className='mr-2' /></div>
                     </div>
-                    <div className={styles.list}>{formData.componentes.map((c, i) => <div key={i} className={styles.listItem}><span>{c.id} - {c.name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, componentes: prev.componentes.filter((_, idx) => idx !== i) }))} /></div>)}</div>
+                    <div className={styles.list}>{formData.componentes.map((c, i) => <div key={i} className={styles.listItem}><span>{c.id} - {c.name}</span><Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => setFormData(prev => ({ ...prev, componentes: prev.componentes.filter((_, idx) => idx !== i) }))} /></div>)}</div>
                 </div>
 
                 <div className={styles.section}>
@@ -172,18 +172,18 @@ export default function MoldForm({ mold, onHide, visible }) {
                             <Dropdown placeholder="Máquina" options={machines.map(m => ({ label: m.name, value: m.id }))} value={newProcess.maquina_id} onChange={e => setNewProcess({ ...newProcess, maquina_id: e.value })} />
                         </div>
                         <div className="p-col-1">
-                            <InputText type="number" placeholder="Ord" value={newProcess.order} onChange={e => setNewProcess({ ...newProcess, order: parseInt(e.target.value) })} />
+                            <InputText type="number" placeholder="Ord" className='mr-2' value={newProcess.order} onChange={e => setNewProcess({ ...newProcess, order: parseInt(e.target.value) })} />
                         </div>
                         <div className="p-col-1">
-                            <Button label="+" icon="pi pi-plus" onClick={handleAddProcess} />
+                            <Button label="+" icon="pi pi-plus" className='mr-2' onClick={handleAddProcess} />
                         </div>
                     </div>
-                    <div className={styles.list}>{formData.processos.map((p, i) => <div key={i} className={styles.listItem}><span>{p.componente_id} - {steps.find(s => s.id === p.step_id)?.name}</span><Button icon="pi pi-trash" className="p-button-danger" onClick={() => setFormData(prev => ({ ...prev, processos: prev.processos.filter((_, idx) => idx !== i) }))} /></div>)}</div>
+                    <div className={styles.list}>{formData.processos.map((p, i) => <div key={i} className={styles.listItem}><span>{p.componente_id} - {steps.find(s => s.id === p.step_id)?.name}</span><Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => setFormData(prev => ({ ...prev, processos: prev.processos.filter((_, idx) => idx !== i) }))} /></div>)}</div>
                 </div>
 
                 <div className={styles.formButtons}>
-                    <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={()=>onHide(false)}/>
-                    <Button label="Salvar" icon="pi pi-check" className="p-button-success" onClick={handleSave}/>
+                    <Button label="Cancelar" icon="pi pi-times" className="p-button-text mr-3" onClick={()=>onHide(false)}/>
+                    <Button label="Salvar" icon="pi pi-check" className="p-button-success mr-3" onClick={handleSave}/>
                 </div>
             </div>
         </Dialog>

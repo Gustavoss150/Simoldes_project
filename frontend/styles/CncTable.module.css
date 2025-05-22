@@ -3,7 +3,7 @@
     padding: 2.5rem;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin: 1rem 0;
+    margin: 0.2rem 0;
 }
 
 .sectionHeader {
@@ -13,12 +13,8 @@
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid #e2e8f0;
-    margin: 3px;
-    padding-top: 10px;
-}
-
-.dataTable {
-    margin-top: 1rem;
+    margin-top: 15px;
+    padding-top: 1px;
 }
 
 .dataTable th {
@@ -66,8 +62,6 @@
 
 .filterBar {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
     align-items: center;
 }
 

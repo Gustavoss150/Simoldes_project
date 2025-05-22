@@ -391,13 +391,13 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                 <Button
                     label="Cancelar"
                     icon="pi pi-times"
-                    className="p-button-text"
+                    className="p-button-text mr-3"
                     onClick={onHide}
                 />
                 <Button
                     label="Salvar"
                     icon="pi pi-check"
-                    className="p-button-success"
+                    className="p-button-success mr-3"
                     onClick={handleSubmit}
                 />
             </div>

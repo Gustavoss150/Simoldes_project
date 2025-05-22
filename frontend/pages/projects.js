@@ -7,6 +7,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 import MoldForm from '../components/projects/MoldForm';
 import MoldEditForm from '../components/projects/MoldEditForm';
 import ComponentList from '../components/projects/ComponentList';
@@ -14,6 +15,7 @@ import ProcessList from '../components/projects/ProcessList';
 import styles from '../styles/Projects.module.css';
 
 export default function ProjectsPage() {
+    const [globalFilter, setGlobalFilter] = useState('');
     const [molds, setMolds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -84,14 +86,20 @@ export default function ProjectsPage() {
             <main className={styles.mainContent}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>Projetos de Moldes</h1>
-                    <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button-success" />
+                    <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button-success p-button-lg mr-3" />
                 </div>
                 <div className={styles.filters}>
+                    <InputText 
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        placeholder="Buscar por código ou descrição"
+                        className="p-inputtext-sm mr-4"
+                    />
                     <Dropdown value={selectedStatus} options={statusOptions} onChange={(e) => setSelectedStatus(e.value)} placeholder="Filtrar por status" className={styles.filterDropdown} />
                 </div>
                 {loading ? <ProgressSpinner /> : (
                     <div className={styles.tableContainer}>
-                        <DataTable value={molds} paginator rows={1} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)} rowExpansionTemplate={rowExpansionTemplate} dataKey="codigo">
+                        <DataTable value={molds} paginator rows={1} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)} rowExpansionTemplate={rowExpansionTemplate} dataKey="codigo" globalFilter={globalFilter}>
                             <Column expander style={{ width: '3em' }} />
                             <Column field="codigo" header="Código" sortable />
                             <Column field="description" header="Descrição" />

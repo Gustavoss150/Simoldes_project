@@ -6,11 +6,13 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
 import ComponentForm from './ComponentForm';
 import ProcessList from './ProcessList';
 import styles from '../../styles/projects/ComponentList.module.css'; 
 
 export default function ComponentList({ moldCode }) {
+  const [globalFilter, setGlobalFilter] = useState('');
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedRows, setExpandedRows] = useState(null);
@@ -64,8 +66,14 @@ export default function ComponentList({ moldCode }) {
         <Button
           label="Novo Componente"
           icon="pi pi-plus"
-          className="p-button-sm"
+          className="p-button-sm mr-3"
           onClick={() => setShowForm(true)}
+        />
+        <InputText 
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Buscar componente..."
+          className="p-inputtext-sm mr-4"
         />
         <Dropdown
           value={showInactive}
@@ -85,6 +93,8 @@ export default function ComponentList({ moldCode }) {
         onRowToggle={(e) => setExpandedRows(e.data)}
         rowExpansionTemplate={rowExpansionTemplate}
         dataKey="id"
+        globalFilter={globalFilter}
+        header={null}
       >
         <Column expander style={{ width: '3em' }} />
         <Column field="id" header="ID" />

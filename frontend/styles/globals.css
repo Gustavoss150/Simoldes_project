@@ -77,48 +77,52 @@ html, body {
 
 .p-dropdown {
     width: 250px;
-    margin: 2px;
+    margin: 5px;
 }
 
 .p-dropdown {
-  border-radius: 8px;
-  background-color: #f4f4f4;
-  border: 1px solid #ccc;
-  font-family: inherit;
+    border-radius: 5px;
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    font-family: inherit;
+    margin-right: 1rem; 
+    margin-bottom: 0.3rem;
+    padding: 4px;
+    gap: 5px;
 }
 
 /* Painel de opções */
 .p-dropdown-panel {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 /* Cada item da lista */
 .p-dropdown-item {
-  padding: 10px 16px;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 /* Hover no item */
 .p-dropdown-item:hover {
-  background-color: #e1eaff;
-  color: #000;
+    background-color: #e1eaff;
+    color: #000;
 }
 
 /* Item selecionado */
 .p-dropdown-item.p-highlight {
-  background-color: var(--hover);
-  color: #ffffff;
+    background-color: var(--hover);
+    color: #ffffff;
 }
 
 /* Placeholder (quando nenhum valor está selecionado) */
 .p-dropdown .p-dropdown-label.p-placeholder {
-  color: #999;
+    color: #999;
 }
 
 .p-grid {
@@ -208,4 +212,28 @@ html, body {
     color: rgba(255, 0, 0, 0.705);
     font-weight: bold;
     margin-top: 10px;
+}
+
+.formText {  
+    margin-bottom: 0.3rem;
+    padding: 5px;
+}
+
+.mr-2 { 
+    margin: 0.1rem;
+    padding-inline: 2px;
+    padding: 5px;
+}
+
+.mr-3 { 
+    margin-right: 1rem; 
+    margin-bottom: 0.3rem;
+    padding: 4px;
+    gap: 5px;
+}
+
+.mr-4 {
+    margin-bottom: 0.3rem;
+    padding: 6px;
+    gap: 5px;
 }

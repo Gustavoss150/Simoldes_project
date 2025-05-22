@@ -100,6 +100,9 @@ export default function Cnc() {
     };
 
     const deleteMachine = async (id) => {
+        const confirmed = window.confirm("Tem certeza que deseja excluir esta máquina?");
+        if (!confirmed) return;
+
         await api.delete(`/cnc/mach/${id}`);
         fetchMachines();
     };
@@ -141,6 +144,9 @@ export default function Cnc() {
     };
 
     const deleteProgram = async (id) => {
+        const confirmed = window.confirm("Tem certeza que deseja excluir esta programação?");
+        if (!confirmed) return;
+
         await api.delete(`/cnc/program/${id}`);
         loadPrograms();
     };
@@ -149,14 +155,14 @@ export default function Cnc() {
         <div className={styles.cncContainer}>
             <section>
                 <h2 className={styles.sectionHeader}>Máquinas CNC</h2>
-                <Button label="Nova Máquina" icon="pi pi-plus" onClick={openNewMachine} className="mb-2" />
+                <Button label="Nova Máquina" icon="pi pi-plus" onClick={openNewMachine} className="mr-3" />
                 <DataTable value={machines} paginator rows={5} selectionMode="single" onRowSelect={onMachineRowSelect} className={styles.dataTable}>
                     <Column field="id" header="ID" />
                     <Column field="name" header="Nome" />
                     <Column field="type" header="Tipo" />
                     <Column field="department" header="Departamento" />
                     <Column field="is_active" header="Ativa" body={row => row.is_active ? <span className={`${styles.statusBadge} ${styles.statusActive}`}>Sim</span> : <span className={`${styles.statusBadge} ${styles.statusInactive}`}>Não</span>} />
-                    <Column body={row => <Button icon="pi pi-trash" severity="danger" onClick={() => deleteMachine(row.id)} />} />
+                    <Column body={row => <Button icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" severity="danger" onClick={() => deleteMachine(row.id)} />} />
                 </DataTable>
 
                 <Dialog header="Máquina CNC" visible={machineDialog} onHide={() => setMachineDialog(false)} className={formStyles.dialog} headerClassName={formStyles.dialogHeader}>
@@ -185,7 +191,7 @@ export default function Cnc() {
                             <label className={formStyles.formLabel}><input type="checkbox" checked={machineForm.is_active} onChange={e => setMachineForm({ ...machineForm, is_active: e.target.checked })} /> Ativa</label>
                         </div>
                         <div className={formStyles.formButtons}>
-                            <Button label="Salvar" onClick={saveMachine} className="p-button-success" />
+                            <Button label="Salvar" onClick={saveMachine} className="p-button-success mr-3" />
                         </div>
                     </div>
                 </Dialog>
@@ -196,8 +202,8 @@ export default function Cnc() {
                 <div className={styles.filterBar}>
                     <Dropdown value={selectedMold} options={molds} onChange={onMoldChange} optionLabel="codigo" placeholder="Selecione Molde" filter filterBy="codigo" />
                     <Dropdown value={selectedComponent} options={components} onChange={onComponentChange} placeholder="Selecione Componente" disabled={!selectedMold} filter filterBy="name" itemTemplate={componentTemplate} valueTemplate={componentTemplate} />
-                    <Button label="Buscar Programas" icon="pi pi-search" onClick={loadPrograms} />
-                    <Button label="Nova Programação" icon="pi pi-plus" onClick={openNewProgram} />
+                    <Button label="Buscar Programas" icon="pi pi-search" onClick={loadPrograms} className='mr-3' />
+                    <Button label="Nova Programação" icon="pi pi-plus" onClick={openNewProgram} className='mr-3' />
                 </div>
 
                 <DataTable value={programs} paginator rows={5} selectionMode="single" onRowSelect={onProgramRowSelect} className={styles.dataTable}>
@@ -207,7 +213,7 @@ export default function Cnc() {
                     <Column field="programador" header="Programador" />
                     <Column field="maquina_id" header="Máquina" />
                     <Column header="Prog. CNC" body={row => row.script && <span className={styles.scriptPreview} onClick={() => window.open(row.script, '_blank')}>Ver Script</span>} />
-                    <Column body={row => <Button icon="pi pi-trash" severity="danger" onClick={() => deleteProgram(row.id)} />} />
+                    <Column body={row => <Button icon="pi pi-trash" severity="danger" className="p-button-text p-button-danger p-button-sm" onClick={() => deleteProgram(row.id)} />} />
                 </DataTable>
 
                 <Dialog header="Programação CNC" visible={programDialog} onHide={() => setProgramDialog(false)} className={formStyles.dialog} headerClassName={formStyles.dialogHeader}>
@@ -274,8 +280,8 @@ export default function Cnc() {
                             <InputText value={programForm.script} onChange={e => setProgramForm({ ...programForm, script: e.target.value })} className={formStyles.formInput} />
                         </div>
                         <div className={formStyles.formButtons}>
-                            <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} />
-                            <Button label="Salvar" onClick={saveProgram} className="p-button-success" />
+                            <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} className=" mr-3" />
+                            <Button label="Salvar" onClick={saveProgram} className="p-button-success mr-3" />
                         </div>
                     </div>
                 </Dialog>

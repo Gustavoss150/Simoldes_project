@@ -66,7 +66,7 @@ func (r *cncRepository) GetProgrammingByMold(moldCode string) ([]*models.Program
 
 func (r *cncRepository) GetProgrammingByComponent(componentCode string) ([]*models.Programacoes, error) {
 	var programming []*models.Programacoes
-	if err := r.DB.Where("componente_id = ?", componentCode).Find(&programming).Error; err != nil {
+	if err := r.DB.Where("componente_id = ? AND is_active = ?", componentCode, true).Find(&programming).Error; err != nil {
 		return nil, err
 	}
 	return programming, nil
