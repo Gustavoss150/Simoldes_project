@@ -10,12 +10,15 @@ func InitRoutes(router *gin.Engine) {
 
 	InitCORS(router)
 
+	router.Static("/static", "./static")
+
 	routes.AuthRouter(router)
 	routes.UserRouter(router)
 	routes.ProjectsRouter(router)
 	routes.ProcessesRouter(router)
 	routes.CNCRouter(router)
 	routes.MaterialsRouter(router)
+	routes.UploadRouter(router)
 
 	router.GET("/api", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "API working"})

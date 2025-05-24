@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
@@ -10,6 +10,7 @@ import styles from '../styles/CncTable.module.css';
 import formStyles from '../styles/CncForm.module.css';
 
 export default function Cnc() {
+    const fileInputRef = useRef(null);
     const [machines, setMachines] = useState([]);
     const [machineDialog, setMachineDialog] = useState(false);
     const [isEditMachine, setIsEditMachine] = useState(false);
@@ -107,7 +108,28 @@ export default function Cnc() {
         fetchMachines();
     };
 
-    // Abertura de modal Programação
+    const handleNCUpload = async (file) => {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+
+            // envia para http://localhost:9000/api/upload/scriptnc
+            const res = await api.post('/upload/scriptnc', fd, {
+                headers: {'Content-Type': 'multipart/form-data'}
+            });
+
+            // monta URL absoluta (retira /api do baseURL)
+            const host = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '');
+            setProgramForm(prev => ({
+            ...prev,
+            script: host + res.data.url
+            }));
+        } catch (err) {
+            console.error('Erro no upload NC:', err);
+            alert('Erro ao enviar script NC: ' + (err.response?.data?.error || err.message));
+        }
+    };
+
     const openNewProgram = () => {
         setIsEditProgram(false);
         setProgramForm({ id: '', process_id: '', molde_codigo: selectedMold?.codigo || '', componente_id: selectedComponent?.id || '', maquina_id: '', description: '', programador: '', script: '', is_active: true });
@@ -275,12 +297,19 @@ export default function Cnc() {
                             <label className={formStyles.formLabel}>Programador</label>
                             <InputText value={programForm.programador} onChange={e => setProgramForm({ ...programForm, programador: e.target.value })} className={formStyles.formInput} />
                         </div>
-                        <div className={formStyles.formField}>
-                            <label className={formStyles.formLabel}>Script (URL)</label>
-                            <InputText value={programForm.script} onChange={e => setProgramForm({ ...programForm, script: e.target.value })} className={formStyles.formInput} />
+                        <div className={styles.uploadGroup}>
+                            <InputText readOnly placeholder="Script NC URL" value={programForm.script} className='url-upload' />
+                            <Button icon="pi pi-upload" className="upload-buttom" onClick={() => fileInputRef.current.click()} />
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                hidden
+                                accept=".nc,.txt"
+                                onChange={e => e.target.files[0] && handleNCUpload(e.target.files[0])}
+                            />
                         </div>
                         <div className={formStyles.formButtons}>
-                            <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} className=" mr-3" />
+                            <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} className="mr-3" />
                             <Button label="Salvar" onClick={saveProgram} className="p-button-success mr-3" />
                         </div>
                     </div>

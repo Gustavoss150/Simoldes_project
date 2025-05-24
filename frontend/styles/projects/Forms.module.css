@@ -1,7 +1,7 @@
 /* Forms.module.css */
 .dialog {
     min-width: 550px;
-    border-radius: 12px;
+    border-radius: 10px;
     background-color: white;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
@@ -9,22 +9,22 @@
 .dialogHeader {
     background-color: var(--base);
     color: white;
-    padding: 1.5rem;
-    border-radius: 12px 12px 0 0;
+    padding: 1.2rem;
+    border-radius: 10px 10px 0 0;
 }
 
 .formContent {
-    padding: 1.5rem;
+    padding: 1.2rem;
     background-color: var(--light-bg);
 }
 
 .formField {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.0rem;
 }
 
 .formLabel {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.1rem;
     font-weight: 500;
     color: var(--base);
     font-size: 0.9rem;
@@ -45,19 +45,12 @@
     outline: none;
 }
 
-.processSection {
-    margin-top: 2rem;
-    padding: 0.7rem;
-    background-color: white;
-    border-radius: 8px;
-    border-left: 3px solid var(--base);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
 .uploadGroup {
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    padding-bottom: 3px;
+    margin-right: 100px;
 }
 
 .fileInput {
@@ -67,12 +60,21 @@
     border-radius: 6px;
 }
 
+.processSection {
+    margin-top: 1.0rem;
+    padding: 0.5rem;
+    background-color: white;
+    border-radius: 8px;
+    border-left: 3px solid var(--base);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
 .formButtons {
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
-    margin-top: 2rem;
-    padding-top: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1.0rem;
     border-top: 1px solid #eee;
 }
 
@@ -87,7 +89,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
     color: var(--base);
 }
 

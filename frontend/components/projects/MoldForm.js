@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
@@ -26,6 +26,7 @@ export default function MoldForm({ mold, onHide, visible }) {
 
     const [machines, setMachines] = useState([]);
     const [steps, setSteps] = useState([]);
+    const fileInputRef = useRef(null);
 
     const [newComponent, setNewComponent] = useState({ id: '', name: '', material: '', quantity: 1, archive_3d_model: '' });
     const [newProcess, setNewProcess] = useState({
@@ -38,6 +39,25 @@ export default function MoldForm({ mold, onHide, visible }) {
         delivery_date: new Date(),
         description: ''
     });
+
+    const handleFileUpload = async (file) => {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+        
+            const res = await api.post('/upload/model3d', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+    
+            const backendRoot = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '');
+            const fullUrl = `${backendRoot}${res.data.url}`;
+    
+            setFormData(prev => ({ ...prev, archive_3d_model: fullUrl }));
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Erro ao enviar arquivo: ' + (error.response?.data?.error || error.message));
+        }
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -153,7 +173,10 @@ export default function MoldForm({ mold, onHide, visible }) {
                         <div className="p-col-3"><InputText placeholder="Nome" value={newComponent.name} onChange={e => setNewComponent({ ...newComponent, name: e.target.value })} className='formText' /></div>
                         <div className="p-col-3"><InputText placeholder="Material" value={newComponent.material} onChange={e => setNewComponent({ ...newComponent, material: e.target.value })} className='formText' /></div>
                         <div className="p-col-1"><InputText type="number" placeholder="Qtd" value={newComponent.quantity} onChange={e => setNewComponent({ ...newComponent, quantity: parseInt(e.target.value) })} className='formText' /></div>
-                        <div className="p-col-2"><InputText placeholder="3D Model URL" value={newComponent.archive_3d_model} onChange={e => setNewComponent({ ...newComponent, archive_3d_model: e.target.value })} className='formText' /></div>
+                        <div className={styles.uploadGroup}><InputText readOnly placeholder="Modelo 3D URL" value={newComponent.archive_3d_model} className='url-upload' />
+                            <Button icon="pi pi-upload" className="upload-buttom" onClick={() => fileInputRef.current.click()} />
+                            <input type="file" ref={fileInputRef} hidden accept=".stl,.step,.iges,.pdf" onChange={e => e.target.files[0] && handleFileUpload(e.target.files[0])} />
+                        </div>
                         <div className="p-col-1"><Button label="+" icon="pi pi-plus" onClick={handleAddComponent} className='mr-2' /></div>
                     </div>
                     <div className={styles.list}>{formData.componentes.map((c, i) => <div key={i} className={styles.listItem}><span>{c.id} - {c.name}</span><Button icon="pi pi-trash" className="p-button-text p-button-danger" onClick={() => setFormData(prev => ({ ...prev, componentes: prev.componentes.filter((_, idx) => idx !== i) }))} /></div>)}</div>

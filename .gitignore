@@ -2,6 +2,8 @@ frontend/.next/
 /frontend/node_modules/
 /comandos.txt
 .vscode/
+/backend/static/models3d/
+/backend/static/scripts/
 
 38755e
 2e5a48

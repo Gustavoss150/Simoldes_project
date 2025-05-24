@@ -1,5 +1,5 @@
 // File: /components/projects/ComponentForm.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
@@ -20,23 +20,24 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
   const [processes, setProcesses] = useState([]);
   const [maquinas, setMaquinas] = useState([]);
   const [steps, setSteps] = useState([]);
+  const fileInputRef = useRef(null);
 
   const handleFileUpload = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const res = await api.post('/upload', formData, {
-        headers: {'Content-Type': 'multipart/form-data'}
+      const fd = new FormData();
+      fd.append('file', file);
+
+      const res = await api.post('/upload/model3d', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
-      setFormData(prev => ({
-        ...prev,
-        Archive3DModel: res.data.fileUrl
-      }));
+
+      const backendRoot = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '');
+      const fullUrl = `${backendRoot}${res.data.url}`;
+
+      setFormData(prev => ({ ...prev, archive_3d_model: fullUrl }));
     } catch (error) {
       console.error('Erro no upload:', error);
-      alert('Erro ao enviar arquivo: ' + error.message);
+      alert('Erro ao enviar arquivo: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -66,18 +67,12 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
         name: component.name,
         quantity: component.quantity,
         status: component.status,
-        archive3DModel: component.archive_3d_model,
+        archive_3D_Model: component.archive_3d_model,
         material: component.material
       });
       fetchProcesses();
     } else {
-      setFormData({ 
-        status: false, 
-        quantity: 1,
-        archive3DModel: '',
-        material: '',
-        name: ''
-      });
+      setFormData({ status: false, quantity: 1, archive_3d_model: '', material: '', name: '' });
       setProcesses([]);
     }
   }, [component, isNew]);
@@ -138,7 +133,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
           componente_id: formData.id,
           ...(formData.quantity && { quantity: formData.quantity }),
           ...(formData.status !== undefined && { status: formData.status }),
-          ...(formData.archive3DModel && { archive_3d_model: formData.archive3DModel }),
+          ...(formData.archive_3d_model && { archive_3d_model: formData.archive_3d_model }),
           ...(formData.material && { material: formData.material })
         }],
         processos: existingProcesses.map(p => ({
@@ -159,7 +154,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
             material: formData.material,
             quantity: formData.quantity,
             status: formData.status,
-            archive_3d_model: formData.archive3DModel
+            archive_3d_model: formData.archive_3D_Model
           }],
           processos: newProcesses.map(p => ({
             step_id: p.step_id,
@@ -275,23 +270,9 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Modelo 3D</label>
                     <div className={styles.uploadGroup}>
-                        <InputText
-                            className={styles.fileInput}
-                            value={formData.archive3DModel || ''}
-                            placeholder="URL do modelo 3D"
-                            onChange={(e) => setFormData({...formData, archive3DModel: e.target.value})}
-                        />
-                        <Button
-                            icon="pi pi-upload"
-                            className="p-button-outlined"
-                            onClick={() => document.getElementById('fileInput').click()}
-                        />
-                        <input
-                            type="file"
-                            id="fileInput"
-                            hidden
-                            onChange={(e) => e.target.files[0] && handleFileUpload(e.target.files[0])}
-                        />
+                      <InputText readOnly value={formData.archive_3d_model||''} placeholder="URL do modelo 3D" className='url-upload' />
+                      <Button icon="pi pi-upload" onClick={()=>fileInputRef.current.click()} className='upload-buttom' />
+                      <input type="file" ref={fileInputRef} hidden accept=".stl,.step,.iges, .pdf" onChange={e=>e.target.files[0] && handleFileUpload(e.target.files[0])} />
                     </div>
                 </div>
             </div>
@@ -315,7 +296,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                                             const newProcesses = processes.filter((_, i) => i !== index);
                                             setProcesses(newProcesses);
                                         }}
-                                        tooltip="Cancelar processo"
+                                      tooltip="Cancelar processo"
                                     />
                                 )}
                             </div>
@@ -380,7 +361,7 @@ export default function ComponentForm({ component, moldCode, visible, onHide, on
                         <Button 
                             icon="pi pi-plus"
                             label="Adicionar Processo"
-                            className="p-button-success"
+                            className="p-button-success mr-3"
                             onClick={addNewProcess}
                         />
                     </div>

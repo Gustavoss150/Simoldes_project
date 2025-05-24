@@ -237,3 +237,11 @@ html, body {
     padding: 6px;
     gap: 5px;
 }
+
+.url-upload {
+    padding: 2px;
+}
+
+.upload-buttom {
+    padding: 2px;
+}
