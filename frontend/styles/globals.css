@@ -168,36 +168,6 @@ html, body {
     border-color: #eee;
 }
 
-/* Status Badges (global pois pode ser usado em várias páginas) */
-.status-badge {
-    padding: 0.25rem 0.5rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    display: inline-block;
-}
-
-.status-not-started {
-    background-color: #e0e0e0;
-    color: #616161;
-}
-
-.status-in-process {
-    background-color: #fff3e0;
-    color: #ff6d00;
-}
-
-.status-paused {
-    background-color: #ffebee;
-    color: var(--danger);
-}
-
-.status-completed {
-    background-color: #e8f5e9;
-    color: var(--success);
-}
-
 .p-datatable td:nth-child(4),
 .p-datatable td:nth-child(5) {
     text-align: center;

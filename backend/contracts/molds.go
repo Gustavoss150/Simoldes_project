@@ -39,12 +39,12 @@ type CreateProcessRequest struct {
 type CreateMoldProjectRequest struct {
 	Molde       CreateMoldRequest        `json:"molde"`
 	Componentes []CreateComponentRequest `json:"componentes"`
-	Processos   []CreateProcessRequest   `json:"processos"`
+	Processos   []CreateProcessRequest   `json:"processos,omitempty"`
 }
 
 type CreateComponentsAndProcessesRequest struct {
 	Componentes []CreateComponentRequest `json:"componentes"`
-	Processos   []CreateProcessRequest   `json:"processos"`
+	Processos   []CreateProcessRequest   `json:"processos,omitempty"`
 }
 
 type UpdateMoldOperationDTO struct {

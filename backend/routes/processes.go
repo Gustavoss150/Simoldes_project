@@ -12,6 +12,7 @@ func ProcessesRouter(router *gin.Engine) {
 		r.Use(middleware.AuthMiddleware())
 
 		r.POST("/register_steps", controllers.RegisterSteps)
+		r.POST("/components/:componentID/processes", controllers.ResgisterProcessesToComponent)
 		r.GET("/:moldCode", controllers.ListMoldProcesses)
 		r.GET("/components/:componentID", controllers.ListProcessesByComponent)
 		r.GET("/steps", controllers.ListAllSteps)

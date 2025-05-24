@@ -5,6 +5,7 @@ import { Column } from 'primereact/column';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
+import styles from '../../styles/Projects.module.css';
 
 export default function ProcessList({ moldCode, componentID, isGlobalView }) {
     const [processes, setProcesses] = useState([]);
@@ -104,15 +105,13 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                 {isGlobalView && <Column field="component_id" header="Componente" />}
                 <Column field="step_name" header="Etapa" />
                 <Column field="order" header="Ordem" />
-                <Column 
-                    field="status" 
-                    header="Status" 
-                    body={(rowData) => (
-                        <span className={`status-badge ${rowData.status.replace(' ', '-')}`}>
-                            {statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}
-                        </span>
-                    )}
-                />
+                <Column field="status" header="Status" sortable body={(rowData) => (
+                    <span className={`${styles.statusBadge} ${
+                        rowData.status === 'not started' ? styles.notStarted :
+                        rowData.status === 'in process' ? styles.inProcess :
+                        rowData.status === 'paused' ? styles.paused : styles.completed
+                    }`}>{statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}</span>
+                )} />
                 <Column field="maquina_id" header="Maq. ID" />
                 <Column field="maquina_name" header="Maq. Nome" />
                 <Column

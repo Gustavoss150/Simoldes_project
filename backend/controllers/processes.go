@@ -31,6 +31,35 @@ func RegisterSteps(c *gin.Context) {
 	c.JSON(http.StatusCreated, steps)
 }
 
+func ResgisterProcessesToComponent(c *gin.Context) {
+	componentID := c.Param("componentID")
+
+	var dto contracts.AddProcessToComponentDTO
+	if err := c.ShouldBindJSON(&dto); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request: " + err.Error()})
+		return
+	}
+
+	processRepo, err := processrepo.InitProcessDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing process database: " + err.Error()})
+		return
+	}
+
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.CreateProcessesToComponent(componentID, processRepo, componentsRepo, dto); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Processes added successfully"})
+}
+
 func ListMoldProcesses(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {

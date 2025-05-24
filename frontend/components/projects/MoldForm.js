@@ -1,3 +1,4 @@
+// File: /components/projects/MoldForm.js
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
@@ -6,8 +7,6 @@ import { Dropdown } from 'primereact/dropdown';
 import { Button } from 'primereact/button';
 import api from '../../utils/axios';
 import styles from '../../styles/projects/Forms.module.css';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 const statusOptions = [
     { label: 'Not Started', value: 'not started' },
@@ -19,9 +18,13 @@ const statusOptions = [
 export default function MoldForm({ mold, onHide, visible }) {
     const isEdit = Boolean(mold);
     const [formData, setFormData] = useState({
-        codigo: '', description: '', status: 'not started',
-        begin_date: new Date(), delivery_date: new Date(),
-        componentes: [], processos: []
+        codigo: '',
+        description: '',
+        status: 'not started',
+        begin_date: new Date(),
+        delivery_date: new Date(),
+        componentes: [],
+        processos: []
     });
 
     const [machines, setMachines] = useState([]);
@@ -40,25 +43,6 @@ export default function MoldForm({ mold, onHide, visible }) {
         description: ''
     });
 
-    const handleFileUpload = async (file) => {
-        try {
-            const fd = new FormData();
-            fd.append('file', file);
-        
-            const res = await api.post('/upload/model3d', fd, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
-    
-            const backendRoot = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '');
-            const fullUrl = `${backendRoot}${res.data.url}`;
-    
-            setFormData(prev => ({ ...prev, archive_3d_model: fullUrl }));
-        } catch (error) {
-            console.error('Erro no upload:', error);
-            alert('Erro ao enviar arquivo: ' + (error.response?.data?.error || error.message));
-        }
-    };
-
     useEffect(() => {
         const loadData = async () => {
             try {
@@ -76,25 +60,49 @@ export default function MoldForm({ mold, onHide, visible }) {
     }, []);
 
     useEffect(() => {
-        if (mold) setFormData({
-            codigo: mold.codigo,
-            description: mold.description,
-            status: mold.status,
-            begin_date: new Date(mold.begin_date),
-            delivery_date: new Date(mold.delivery_date),
-            componentes: mold.componentes || [],
-            processos: mold.processos || []
-        });
+        if (mold) {
+            setFormData({
+                codigo: mold.codigo,
+                description: mold.description,
+                status: mold.status,
+                begin_date: new Date(mold.begin_date),
+                delivery_date: new Date(mold.delivery_date),
+                componentes: mold.componentes || [],
+                processos: mold.processos || []
+            });
+        }
     }, [mold]);
 
+    const handleFileUpload = async (file) => {
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await api.post('/upload/model3d', fd, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const backendRoot = process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/, '');
+            const fullUrl = `${backendRoot}${res.data.url}`;
+            setFormData(prev => ({ ...prev, archive_3d_model: fullUrl }));
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            alert('Erro ao enviar arquivo: ' + (error.response?.data?.error || error.message));
+        }
+    };
+
     const handleAddComponent = () => {
-        if (!newComponent.id || !newComponent.name) return alert('Preencha ID e nome do componente!');
+        if (!newComponent.id || !newComponent.name) {
+            alert('Preencha ID e nome do componente!');
+            return;
+        }
         setFormData(prev => ({ ...prev, componentes: [...prev.componentes, newComponent] }));
         setNewComponent({ id: '', name: '', material: '', quantity: 1, archive_3d_model: '' });
     };
 
     const handleAddProcess = () => {
-        if (!newProcess.componente_id || !newProcess.step_id) return alert('Selecione componente e etapa válidos!');
+        if (!newProcess.componente_id || !newProcess.step_id) {
+            alert('Selecione componente e etapa válidos!');
+            return;
+        }
         setFormData(prev => ({ ...prev, processos: [...prev.processos, newProcess] }));
         setNewProcess({ componente_id: '', step_id: '', status: 'not started', maquina_id: '', order: 1, begin_date: new Date(), delivery_date: new Date(), description: '' });
     };
@@ -123,38 +131,27 @@ export default function MoldForm({ mold, onHide, visible }) {
                 maquina_id: p.maquina_id,
                 begin_date: p.begin_date.toISOString(),
                 delivery_date: p.delivery_date.toISOString(),
-                notes: '',
+                notes: p.notes || '',
                 order: p.order,
                 step_id: p.step_id
             }))
         };
 
         try {
-            if (!API_URL) throw new Error('NEXT_PUBLIC_API_URL não está definido');
-            const url = isEdit
-                ? `${API_URL}/projects/${formData.codigo}`
-                : `${API_URL}/projects/`;
-            const method = isEdit ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem(process.env.NEXT_PUBLIC_TOKEN_KEY)}`
-                },
-                body: JSON.stringify(payload)
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Erro ${response.status}: ${errorText}`);
+            const url = isEdit ? `/projects/${formData.codigo}` : '/projects';
+            if (isEdit) {
+                await api.put(url, payload);
+            } else {
+                await api.post(url, payload);
             }
             onHide(true);
         } catch (error) {
-            console.error('Erro detalhado:', error);
-            alert(`Erro ao salvar: ${error.message}`);
+            console.error('Erro ao salvar projeto:', error);
+            alert(`Erro ao salvar: ${error.response?.data?.error || error.message}`);
         }
     };
+
+    if (!visible) return null;
 
     return (
         <Dialog header={isEdit?'Editar Molde':'Novo Molde'} visible={visible} onHide={()=>onHide(false)} className={styles.dialog} headerClassName={styles.dialogHeader} modal>

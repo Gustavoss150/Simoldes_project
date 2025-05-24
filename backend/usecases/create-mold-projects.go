@@ -44,8 +44,10 @@ func CreateMoldProject(
 		}
 
 		// 4. Criar processos
-		if err := createProcesses(processRepo, req.Processos, req.Molde.Codigo); err != nil {
-			return err
+		if len(req.Processos) > 0 {
+			if err := createProcesses(processRepo, req.Processos, req.Molde.Codigo); err != nil {
+				return err
+			}
 		}
 
 		// 5. Recalcular Steps e CurrentStep
