@@ -52,7 +52,13 @@ func ResgisterProcessesToComponent(c *gin.Context) {
 		return
 	}
 
-	if err := usecases.CreateProcessesToComponent(componentID, processRepo, componentsRepo, dto); err != nil {
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	if err := usecases.CreateProcessesToComponent(componentID, processRepo, componentsRepo, moldsRepo, dto); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

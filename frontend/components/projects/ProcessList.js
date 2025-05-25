@@ -5,6 +5,7 @@ import { Column } from 'primereact/column';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
+import AddProcessForm from './ProcessForm';
 import styles from '../../styles/Projects.module.css';
 
 export default function ProcessList({ moldCode, componentID, isGlobalView }) {
@@ -12,6 +13,7 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState(null);
     const [expandedRows, setExpandedRows] = useState(null);
+    const [displayAddForm, setDisplayAddForm] = useState(false);
 
     const statusOptions = [
         { label: 'Todos', value: null },
@@ -86,6 +88,14 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
     return (
         <div>
             <div className="flex gap-2 mb-2">
+                {componentID && (
+                    <Button
+                        label="Adicionar Processo"
+                        icon="pi pi-plus"
+                        className="p-button-sm mr-3"
+                        onClick={() => setDisplayAddForm(true)}
+                    />
+                )}
                 <Dropdown
                     value={statusFilter}
                     options={statusOptions}
@@ -126,6 +136,17 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                     )}
                 />
             </DataTable>
+            {displayAddForm && (
+                <AddProcessForm
+                    componentID={componentID}
+                    visible={displayAddForm}
+                    onHide={() => setDisplayAddForm(false)}
+                    onAdded={() => {
+                        setDisplayAddForm(false);
+                        fetchProcesses();
+                    }}
+                />
+            )}
         </div>
     );
 }

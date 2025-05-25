@@ -25,8 +25,6 @@ const AppSidebar = () => {
             {/* Botão que abre a sidebar */}
             <Button icon="pi pi-bars" onClick={() => setVisible(true)} className="p-button-rounded p-button-success p-button-text" />
 
-            {/* Sidebar do PrimeReact */}
-            {/* Sidebar do PrimeReact */}
             <Sidebar
                 visible={visible}
                 onHide={() => setVisible(false)}

@@ -1,0 +1,153 @@
+.container {
+    width: 100%;
+}
+
+.mainContent {
+    margin: 20px;
+    padding: 30px;
+    padding-left: 5px;
+    width: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header {
+    background-color: var(--light-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    line-height: 2.2;
+    gap: 10px;
+}
+
+.title {
+    color: var(--base);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.dataTable th {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.dataTable td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #edf2f7;
+}
+
+.formDialog {
+    min-width: 600px;
+    margin: 10px;
+}
+
+.formRow {
+    margin-bottom: 1rem;
+    margin: 10px;
+}
+
+.formGroup {
+    margin-bottom: 1rem;
+    margin: 10px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.formActions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+}
+
+.filterBar {
+    display: flex;
+    align-items: center;
+}
+
+.dialog {
+    min-width: 550px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dialogHeader {
+    background-color: var(--base);
+    color: white;
+    padding: 1.2rem;
+    border-radius: 10px 10px 0 0;
+}
+
+.formContent {
+    padding: 1.2rem;
+    background-color: var(--light-bg);
+}
+
+.formField {
+    margin-bottom: 1.0rem;
+}
+
+.formLabel {
+    display: block;
+    margin-bottom: 0.1rem;
+    font-weight: 500;
+    color: var(--base);
+    font-size: 0.9rem;
+}
+
+.formInput {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-size: 1rem;
+}
+
+.formInput:focus {
+    border-color: var(--base);
+    box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+    outline: none;
+}
+
+.statusToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.dropdown {
+    width: 100%;
+    border-radius: 6px;
+    padding: 5px;
+}
+
+.dropdown:focus {
+    border-color: var(--base);
+    box-shadow: 0 0 0 2px rgba(2, 70, 62, 0.2);
+    padding: 5px;
+}
