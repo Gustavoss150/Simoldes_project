@@ -23,7 +23,7 @@ export default function MaterialsList() {
 
     useEffect(() => {
         api.get('/projects/')
-            .then(res => setMolds(res.data.projects || [])).catch(() => setMolds([]));
+            .then(res => setMolds(res.data.molds || [])).catch(() => setMolds([]));
     }, []);
 
     useEffect(() => {
