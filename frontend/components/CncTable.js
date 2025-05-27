@@ -71,7 +71,6 @@ export default function Cnc() {
         setProgramForm(prev => ({ ...prev, process_id: pid, maquina_id: proc.maquina_id }));
     };
 
-    // Abertura de modal Máquina
     const openNewMachine = () => {
         setIsEditMachine(false);
         setMachineForm({ id: '', name: '', description: '', type: '', department: '', is_active: true });

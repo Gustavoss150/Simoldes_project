@@ -1,77 +1,72 @@
-// File: /components/materials/MaterialForm.js
+// File: components/MaterialForm.js
 import React, { useState, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
-import { InputText } from 'primereact/inputtext';
 import { Dropdown } from 'primereact/dropdown';
+import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import api from '../utils/axios';
 import styles from '../styles/Materials.module.css';
 
-export default function MaterialForm({ moldCode, material, visible, onHide, onSaved }) {
+export default function MaterialForm({ material, visible, onHide, onSaved }) {
     const isEdit = Boolean(material);
     const [form, setForm] = useState({
-        componentes_id: '', type: '', quantity: 0,
-        arrival_date: new Date(), is_arrived: false, supplier: ''
+        molde_codigo: '',
+        componentes_id: '',
+        type: '',
+        quantity: 0,
+        arrival_date: new Date(),
+        is_arrived: false,
+        supplier: ''
     });
-
     const [molds, setMolds] = useState([]);
-        const componentTemplate = (option) => option ? `${option.id} — ${option.name}` : '';
-        const [components, setComponents] = useState([]);
-        const [selectedMold, setSelectedMold] = useState(null);
-        const [selectedComponent, setSelectedComponent] = useState(null);
+    const [components, setComponents] = useState([]);
 
     useEffect(() => {
-        if (visible) {
-            if (isEdit) {
-                setForm({
-                    componentes_id: material.componentes_id,
-                    type:           material.type,
-                    quantity:       material.quantity,
-                    arrival_date:   new Date(material.arrival_date),
-                    is_arrived:     material.is_arrived,
-                    supplier:       material.supplier
-                });
-            } else {
-                setForm({ componentes_id: '', type: '', quantity: 0, arrival_date: new Date(), is_arrived: false, supplier: '' });
-            }
+        if (!visible) return;
+
+        api.get('/projects/').then(res => setMolds(res.data.projects || []));
+
+        if (isEdit) {
+            setForm({
+                molde_codigo:   material.molde_codigo,
+                componentes_id: material.componentes_id,
+                type:           material.type,
+                quantity:       material.quantity,
+                arrival_date:   new Date(material.arrival_date),
+                is_arrived:     material.is_arrived,
+                supplier:       material.supplier
+            });
+        api.get(`/projects/components/${material.molde_codigo}`).then(res => setComponents(res.data.components || []));
+        } else {
+            setForm(f => ({ ...f, molde_codigo: '', componentes_id: '' }));
+            setComponents([]);
         }
-    }, [visible, material]);
+    }, [visible]);
 
-    const onMoldChange = async (e) => {
-        const mold = e.value;
-        setSelectedMold(mold);
-        setSelectedComponent(null);
-        setProcesses([]);
-        const { data } = await api.get(`/projects/components/${mold.codigo}`);
-        setComponents(data.components);
-        setProgramForm(prev => ({ ...prev, molde_codigo: mold.codigo, componente_id: '', process_id: '', maquina_id: '' }));
-    };
-
-    const onComponentChange = async (e) => {
-        const comp = e.value;
-        setSelectedComponent(comp);
-        const { data } = await api.get(`/processes/components/${comp.id}`);
-        setProcesses(data.processes);
-        setProgramForm(prev => ({ ...prev, componente_id: comp.id, process_id: '', maquina_id: '' }));
+    const onMoldChange = (e) => {
+        const m = e.value;
+        setForm(f => ({ ...f, molde_codigo: m.codigo, componentes_id: '' }));
+        api.get(`/projects/components/${m.codigo}`).then(res => setComponents(res.data.components || []));
     };
 
     const handleSave = async () => {
         const payload = {
-            molde_codigo: moldCode,
+            molde_codigo:   form.molde_codigo,
             componentes_id: form.componentes_id,
-            type: form.type,
-            quantity: form.quantity,
-            arrival_date: form.arrival_date.toISOString(),
-            is_arrived: form.is_arrived,
-            supplier: form.supplier
+            type:           form.type,
+            quantity:       form.quantity,
+            arrival_date:   form.arrival_date.toISOString(),
+            is_arrived:     form.is_arrived,
+            supplier:       form.supplier
         };
+
         try {
             if (isEdit) {
                 await api.put(`/materials/${material.id}`, payload);
             } else {
-                await api.post('/materials/', payload);
+                await api.post('/materials', payload);
             }
             onSaved();
         } catch (err) {
@@ -81,49 +76,85 @@ export default function MaterialForm({ moldCode, material, visible, onHide, onSa
     };
 
     if (!visible) return null;
-
     return (
-        <Dialog header={isEdit ? 'Editar Material' : 'Novo Material'} visible={visible} onHide={onHide} className={styles.dialog} headerClassName={styles.dialogHeader} modal>
+        <Dialog
+            header={isEdit ? 'Editar Material' : 'Novo Material'}
+            visible={visible}
+            onHide={onHide}
+            className={styles.dialog}
+            headerClassName={styles.dialogHeader}
+            modal
+        >
             <div className={styles.formContent + ' p-fluid'}>
                 <div className={styles.formField}>
-                    <label className={styles.formLabel}>Componente</label>
+                    <label className={styles.formLabel}>Molde *</label>
                     <Dropdown
-                        value={selectedComponent}
+                        value={molds.find(m => m.codigo === form.molde_codigo)}
+                        options={molds}
+                        optionLabel="codigo"
+                        onChange={onMoldChange}
+                        placeholder="Selecione Molde"
+                        filter filterBy="codigo"
+                    />
+                </div>
+                <div className={styles.formField}>
+                    <label className={styles.formLabel}>Componente *</label>
+                    <Dropdown
+                        value={components.find(c => c.id === form.componentes_id)}
                         options={components}
-                        onChange={e => { onComponentChange(e); setProgramForm(prev => ({ ...prev, componente_id: e.value.id })); }}
-                        optionLabel="name"
+                        optionLabel="id"
+                        onChange={e => setForm(f => ({ ...f, componentes_id: e.value.id }))}
                         placeholder="Selecione Componente"
-                        filter
-                        filterBy="name"
-                        itemTemplate={componentTemplate}
-                        valueTemplate={componentTemplate}
-                        className={styles.dropdown}
+                        filter filterBy="id"
                     />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Tipo *</label>
-                    <InputText value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} required className='formText' />
+                    <InputText
+                        value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+                    />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Quantidade *</label>
-                    <InputText type="number" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseInt(e.target.value) })} required className='formText' />
+                    <InputText
+                        type="number" value={form.quantity}
+                        onChange={e => setForm(f => ({ ...f, quantity: +e.target.value }))}
+                    />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Data Chegada *</label>
-                    <Calendar value={form.arrival_date} onChange={e => setForm({ ...form, arrival_date: e.value })} showIcon required />
+                    <Calendar
+                        value={form.arrival_date}
+                        onChange={e => setForm(f => ({ ...f, arrival_date: e.value }))}
+                        showIcon
+                    />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Chegou?</label>
-                    <Checkbox checked={form.is_arrived} onChange={e => setForm({ ...form, is_arrived: e.checked })} />
+                    <Checkbox
+                        checked={form.is_arrived} onChange={e => setForm(f => ({ ...f, is_arrived: e.checked }))}
+                    />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Fornecedor</label>
-                    <InputText value={form.supplier} onChange={e => setForm({ ...form, supplier: e.target.value })} className='formText' />
+                    <InputText
+                        value={form.supplier} onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))}
+                    />
                 </div>
             </div>
             <div className={styles.formButtons}>
-                <Button label="Cancelar" icon="pi pi-times" className="p-button-text mr-3" onClick={onHide} />
-                <Button label="Salvar" icon="pi pi-check" className="p-button-success mr-3" onClick={handleSave} />
+                <Button
+                    label="Cancelar"
+                    icon="pi pi-times"
+                    className="p-button-text mr-3"
+                    onClick={onHide}
+                />
+                <Button
+                    label="Salvar"
+                    icon="pi pi-check"
+                    className="p-button-success mr-3"
+                    onClick={handleSave}
+                />
             </div>
         </Dialog>
     );
