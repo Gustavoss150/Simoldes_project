@@ -19,8 +19,8 @@ type Moldes struct {
 	Status       ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`
 	Steps        int           `json:"steps,omitempty"` // Número de etapas do molde
 	CurrentStep  int           `json:"current_step,omitempty"`
-	BeginDate    time.Time     `json:"begin_date"`
-	DeliveryDate time.Time     `json:"delivery_date"`
+	BeginDate    time.Time     `json:"begin_date,omitempty"`
+	DeliveryDate time.Time     `json:"delivery_date,omitempty"`
 	CreatedAt    time.Time     `json:"created_at"`
 	UpdatedAt    time.Time     `json:"updated_at"`
 	IsActive     bool          `json:"is_active"`
@@ -48,7 +48,7 @@ type Processos struct {
 	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`
 	MaquinaID     string        `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
 	BeginDate     time.Time     `json:"begin_date"`
-	DeliveryDate  time.Time     `json:"delivery_date"`
+	DeliveryDate  time.Time     `json:"delivery_date,omitempty"`
 	Notes         string        `json:"notes,omitempty"`
 	Order         int           `json:"order"` // Número da etapa na sequência
 	CreatedAt     time.Time     `json:"created_at"`
@@ -94,7 +94,7 @@ type ChegadaAcos struct {
 	ComponentesID string    `gorm:"size:12;index" json:"componentes_id"` // foreign key to Componentes
 	Type          string    `json:"type"`                                // Tipo de aço
 	Quantity      int       `json:"quantity"`                            // Quantidade recebida
-	ArrivalDate   time.Time `json:"arrival_date"`                        // Data de chegada
+	ArrivalDate   time.Time `json:"arrival_date,omitempty"`              // Data de chegada
 	IsArrived     bool      `json:"is_arrived"`                          // true se o aço chegou
 	Supplier      string    `json:"supplier"`                            // Fornecedor
 	IsActive      bool      `json:"is_active"`

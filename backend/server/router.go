@@ -19,6 +19,7 @@ func InitRoutes(router *gin.Engine) {
 	routes.CNCRouter(router)
 	routes.MaterialsRouter(router)
 	routes.UploadRouter(router)
+	routes.ImportRouter(router)
 
 	router.GET("/api", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "API working"})
