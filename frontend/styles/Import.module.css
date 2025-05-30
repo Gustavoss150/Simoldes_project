@@ -1,0 +1,30 @@
+.dialog {
+    min-width: 550px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.dialogHeader {
+    background-color: var(--base);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 12px 12px 0 0;
+}
+
+.formContent {
+    padding: 1.5rem;
+    background-color: var(--light-bg);
+}
+
+.myImportButton {
+    text-align: center;
+    background-color: var(--base) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1rem !important;
+}
+
+.myImportButton:hover {
+    background-color: var(--base-dark) !important;
+}
