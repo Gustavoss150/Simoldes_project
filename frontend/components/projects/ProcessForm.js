@@ -80,66 +80,68 @@ export default function ProcessForm({ componentID, visible, onHide, onAdded }) {
             headerClassName={styles.dialogHeader}
             modal
         >
-            <div className={styles.processSection}>
-                {entries.map((entry, idx) => (
-                    <div key={idx} className={styles.processRow}>
-                        <div className={styles.processHeaderRow}>
-                            <h4>Processo {idx + 1}</h4>
-                            {entries.length > 1 && (
-                                <Button icon="pi pi-times" className="p-button-danger p-button-text" onClick={() => removeEntry(idx)} />
-                            )}
+            <div className={styles.formContent+' p-fluid'}>
+                <div className={styles.processSection}>
+                    {entries.map((entry, idx) => (
+                        <div key={idx} className={styles.processRow}>
+                            <div className={styles.processHeaderRow}>
+                                <h4>Processo {idx + 1}</h4>
+                                {entries.length > 1 && (
+                                    <Button icon="pi pi-times" className="p-button-danger p-button-text" onClick={() => removeEntry(idx)} />
+                                )}
+                            </div>
+                            <div className="p-fluid">
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Etapa *</label>
+                                    <Dropdown
+                                        value={entry.step_id}
+                                        options={steps.map(s => ({ label: s.name, value: s.id }))}
+                                        onChange={e => updateEntry(idx, 'step_id', e.value)}
+                                        placeholder="Selecione a etapa"
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Status *</label>
+                                    <Dropdown value={entry.status} options={statusOptions} onChange={e => updateEntry(idx, 'status', e.value)} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Máquina</label>
+                                    <Dropdown value={entry.maquina_id} options={maquinas.map(m => ({ label: m.name, value: m.id }))} onChange={e => updateEntry(idx, 'maquina_id', e.value)} placeholder="Selecione a máquina" />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Ordem *</label>
+                                    <InputText
+                                        type="number"
+                                        value={entry.order}
+                                        onChange={e => updateEntry(idx, 'order', parseInt(e.target.value) || 1)}
+                                        className={styles.formInput}
+                                    />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Data Início</label>
+                                    <Calendar value={entry.begin_date} onChange={e => updateEntry(idx, 'begin_date', e.value)} showIcon />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Data Entrega</label>
+                                    <Calendar value={entry.delivery_date} onChange={e => updateEntry(idx, 'delivery_date', e.value)} showIcon />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Descrição</label>
+                                    <InputText value={entry.description} onChange={e => updateEntry(idx, 'description', e.target.value)} className={styles.formInput} />
+                                </div>
+                                <div className={styles.formField}>
+                                    <label className={styles.formLabel}>Notas</label>
+                                    <InputText value={entry.notes} onChange={e => updateEntry(idx, 'notes', e.target.value)} className={styles.formInput} />
+                                </div>
+                            </div>
                         </div>
-                        <div className="p-fluid">
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Etapa *</label>
-                                <Dropdown
-                                    value={entry.step_id}
-                                    options={steps.map(s => ({ label: s.name, value: s.id }))}
-                                    onChange={e => updateEntry(idx, 'step_id', e.value)}
-                                    placeholder="Selecione a etapa"
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Status *</label>
-                                <Dropdown value={entry.status} options={statusOptions} onChange={e => updateEntry(idx, 'status', e.value)} />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Máquina</label>
-                                <Dropdown value={entry.maquina_id} options={maquinas.map(m => ({ label: m.name, value: m.id }))} onChange={e => updateEntry(idx, 'maquina_id', e.value)} placeholder="Selecione a máquina" />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Ordem *</label>
-                                <InputText
-                                    type="number"
-                                    value={entry.order}
-                                    onChange={e => updateEntry(idx, 'order', parseInt(e.target.value) || 1)}
-                                    className={styles.formInput}
-                                />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Data Início</label>
-                                <Calendar value={entry.begin_date} onChange={e => updateEntry(idx, 'begin_date', e.value)} showIcon />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Data Entrega</label>
-                                <Calendar value={entry.delivery_date} onChange={e => updateEntry(idx, 'delivery_date', e.value)} showIcon />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Descrição</label>
-                                <InputText value={entry.description} onChange={e => updateEntry(idx, 'description', e.target.value)} className={styles.formInput} />
-                            </div>
-                            <div className={styles.formField}>
-                                <label className={styles.formLabel}>Notas</label>
-                                <InputText value={entry.notes} onChange={e => updateEntry(idx, 'notes', e.target.value)} className={styles.formInput} />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-                <Button label="Adicionar Outro Processo" icon="pi pi-plus" className="p-button-text mr-3" onClick={addEntry} />
-            </div>
-            <div className={styles.formButtons}>
-                <Button label="Cancelar" icon="pi pi-times" className="p-button-text mr-3" onClick={onHide} />
-                <Button label="Salvar Todos" icon="pi pi-check" className="p-button-success mr-3" onClick={handleSave} />
+                    ))}
+                    <Button label="Adicionar Outro Processo" icon="pi pi-plus" className="p-button-text mr-3" onClick={addEntry} />
+                </div>
+                <div className={styles.formButtons}>
+                    <Button label="Cancelar" icon="pi pi-times" className="p-button-text mr-3" onClick={onHide} />
+                    <Button label="Salvar Todos" icon="pi pi-check" className="p-button-success mr-3" onClick={handleSave} />
+                </div>
             </div>
         </Dialog>
     );

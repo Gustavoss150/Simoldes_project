@@ -91,7 +91,7 @@ export default function ProjectsPage() {
                 <main className={styles.mainContent}>
                     <div className={styles.header}>
                         <h1 className={styles.title}>Projetos de Moldes</h1>
-                        <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button-success p-button-lg mr-3" />
+                        <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button p-button-lg mr-4" />
                     </div>
                     <div className={styles.filters}>
                         <InputText 
