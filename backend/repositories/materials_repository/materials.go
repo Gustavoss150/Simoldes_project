@@ -24,6 +24,19 @@ func (r *materialsRepository) Save(aco *models.ChegadaAcos) error {
 	return r.DB.Save(aco).Error
 }
 
+func (r *materialsRepository) CountByIDPrefix(prefix string) (int64, error) {
+	// Ex.: prefix = "1679 - 700 - " (com hífen e espaço no final)
+	var count int64
+	// Usamos LIKE 'prefix%' (atenção ao wildcard '%'):
+	if err := r.DB.
+		Model(&models.ChegadaAcos{}).
+		Where("id LIKE ?", prefix+"%").
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *materialsRepository) GetAcoByID(id string) (*models.ChegadaAcos, error) {
 	var aco models.ChegadaAcos
 	if err := r.DB.Where("id = ?", id).First(&aco).Error; err != nil {

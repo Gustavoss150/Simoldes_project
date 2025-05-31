@@ -48,6 +48,19 @@ func (r *cncRepository) SaveProgramming(programming *models.Programacoes) error 
 	return r.DB.Save(programming).Error
 }
 
+func (r *cncRepository) CountByIDPrefix(prefix string) (int64, error) {
+	// Ex.: prefix = "1679 - 700 - " (com hífen e espaço no final)
+	var count int64
+	// Usamos LIKE 'prefix%' (atenção ao wildcard '%'):
+	if err := r.DB.
+		Model(&models.Programacoes{}).
+		Where("id LIKE ?", prefix+"%").
+		Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
 func (r *cncRepository) GetProgrammingByID(id string) (*models.Programacoes, error) {
 	var programming models.Programacoes
 	if err := r.DB.Where("id = ?", id).First(&programming).Error; err != nil {

@@ -81,11 +81,14 @@ func (s *ExcelImportService) ParseComponents(r io.Reader) ([]contracts.ImportCom
 			descByID[itemID] = desc
 		}
 
-		for id, qty := range countByID {
+		for rawID, qty := range countByID {
+			// Criamos um ID único por molde+item
+			compositeID := fmt.Sprintf("%s - %s", moldeCode, rawID)
+
 			dtos = append(dtos, contracts.ImportComponentDTO{
-				ID:          id,
+				ID:          compositeID,
 				MoldeCodigo: moldeCode,
-				Name:        helpers.StringPointer(descByID[id]),
+				Name:        helpers.StringPointer(descByID[rawID]),
 				Quantity:    helpers.IntPointer(qty),
 			})
 		}
@@ -93,7 +96,6 @@ func (s *ExcelImportService) ParseComponents(r io.Reader) ([]contracts.ImportCom
 	return dtos, nil
 }
 
-// ParseSteelArrivals importa a planilha "CHEGADA AÇOS"
 func (s *ExcelImportService) ParseSteelArrivals(r io.Reader) ([]contracts.ImportSteelArrivalDTO, error) {
 	f, err := excelize.OpenReader(r)
 	if err != nil {
@@ -106,22 +108,43 @@ func (s *ExcelImportService) ParseSteelArrivals(r io.Reader) ([]contracts.Import
 		return nil, fmt.Errorf("aba CHEGADA AÇOS não encontrada")
 	}
 	idx := helpers.MapColIndex(rows[0])
+
 	var dtos []contracts.ImportSteelArrivalDTO
 	for _, row := range rows[1:] {
 		molde := helpers.GetCellValue(row, idx, "MOLDE")
 		if molde == "" {
-			continue
+			continue // pula linhas sem MOLDE
 		}
-		comp := helpers.GetCellValue(row, idx, "REFERÊNCIA")
+
+		rawID := helpers.GetCellValue(row, idx, "REFERÊNCIA")
+		if rawID == "" {
+			continue // pula linhas sem REFERÊNCIA
+		}
+
+		// 1) ComponentesID = "<molde> - <rawID>"
+		componentID := fmt.Sprintf("%s - %s", molde, rawID)
+
+		// 2) prefix será usado no usecase para gerar o sufixo incremental,
+		prefix := fmt.Sprintf("%s - %s - ", molde, rawID)
+		// ex.: "1679 - 700 - "
+
 		qty, _ := strconv.Atoi(helpers.GetCellValue(row, idx, "QUANTIDADE"))
-		// Ignora moldes sem aba específica
+
 		if _, err := f.GetSheetIndex("M" + molde); err != nil {
 			continue
 		}
+
 		dtos = append(dtos, contracts.ImportSteelArrivalDTO{
+			// ID = prefix; no usecase, faremos CountByIDPrefix(prefix) → "prefix + índice"
+			ID:            &prefix,
 			MoldeCodigo:   molde,
-			ComponentesID: comp,
+			ComponentesID: componentID,
+			Type:          helpers.StringPointer(helpers.GetCellValue(row, idx, "TIPO")),
 			Quantity:      helpers.IntPointer(qty),
+			ArrivalDate:   nil,
+			Supplier:      helpers.StringPointer(helpers.GetCellValue(row, idx, "FORNECEDOR")),
+			IsArrived:     nil,
+			IsActive:      nil,
 		})
 	}
 	return dtos, nil
@@ -140,18 +163,37 @@ func (s *ExcelImportService) ParseProgrammings(r io.Reader) ([]contracts.ImportP
 		return nil, fmt.Errorf("aba PROGRAMAÇÃO não encontrada")
 	}
 	idx := helpers.MapColIndex(rows[0])
+
 	var dtos []contracts.ImportProgrammingDTO
 	for _, row := range rows[1:] {
 		molde := helpers.GetCellValue(row, idx, "MOLDE")
-		sheetIdx, err := f.GetSheetIndex("M" + molde)
-		if molde == "" || err != nil || sheetIdx == 0 {
+		if molde == "" {
 			continue
 		}
-		comp := helpers.GetCellValue(row, idx, "REFERÊNCIA")
+
+		rawID := helpers.GetCellValue(row, idx, "REFERÊNCIA")
+		if rawID == "" {
+			continue
+		}
+
+		// 1) ComponentesID = "<molde> - <rawID>"
+		componentID := fmt.Sprintf("%s - %s", molde, rawID)
+
+		// 2) prefix para programação (será completado no usecase com CountByIDPrefix)
+		prefix := fmt.Sprintf("%s - %s - ", molde, rawID)
+		// ex.: "1679 - 700 - "
+
 		dtos = append(dtos, contracts.ImportProgrammingDTO{
+			// ID = prefix; no usecase faremos CountByIDPrefix(prefix) → "prefix + índice"
+			ID:           &prefix,
 			MoldeCodigo:  molde,
-			ComponenteID: helpers.StringPointer(comp),
+			ComponenteID: &componentID,
 			Programmer:   helpers.StringPointer(helpers.GetCellValue(row, idx, "PROGRAMADOR")),
+			CreatedAt:    nil,
+			MaquinaID:    nil,
+			Script:       nil,
+			IsActive:     nil,
+			ProcessID:    nil,
 		})
 	}
 	return dtos, nil

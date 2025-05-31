@@ -10,6 +10,7 @@ type CNCRepository interface {
 	GetAllMachs() ([]*models.Maquinas, error)
 	DeleteMach(id string) error
 	SaveProgramming(programming *models.Programacoes) error
+	CountByIDPrefix(prefix string) (int64, error)
 	GetProgrammingByID(id string) (*models.Programacoes, error)
 	GetProgrammingByMold(moldCode string) ([]*models.Programacoes, error)
 	GetProgrammingByComponent(componentCode string) ([]*models.Programacoes, error)

@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Gustavoss150/simoldes-backend/contracts"
@@ -12,6 +13,14 @@ import (
 func (uc *importUsecase) ImportComponents(ctx context.Context, dtos []contracts.ImportComponentDTO) error {
 	var list []*models.Componentes
 	for _, dto := range dtos {
+		exists, err := uc.componentsRepo.ExistsByID(dto.ID)
+		if err != nil {
+			return fmt.Errorf("erro ao checar existência do componente %q: %w", dto.ID, err)
+		}
+		if exists {
+			continue // Se já existe, apenas ignora e prossegue para o próximo DTO
+		}
+
 		c := &models.Componentes{
 			ID:             dto.ID,
 			MoldeCodigo:    dto.MoldeCodigo,

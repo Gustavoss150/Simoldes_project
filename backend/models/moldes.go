@@ -42,7 +42,7 @@ type Componentes struct {
 type Processos struct {
 	ID            string        `gorm:"size:36;primaryKey" json:"id"`
 	MoldeCodigo   string        `gorm:"size:12;index" json:"molde_codigo"`  // foreign key to Moldes
-	ComponentesID string        `gorm:"size:12;index" json:"componente_id"` // foreign key to Componentes
+	ComponentesID string        `gorm:"size:36;index" json:"componente_id"` // foreign key to Componentes
 	Description   string        `json:"description"`
 	StepID        string        `gorm:"size:36;index" json:"step_id"`
 	Status        ProcessStatus `gorm:"type:ENUM('not started','in process','paused','completed');not null" json:"status"`
@@ -75,10 +75,10 @@ type Maquinas struct {
 }
 
 type Programacoes struct {
-	ID           string    `gorm:"size:12;primaryKey" json:"id"` // corresponde a Referência na planilha
+	ID           string    `gorm:"size:36;primaryKey" json:"id"` // corresponde a Referência na planilha
 	ProcessID    string    `gorm:"size:36;index" json:"process_id"`
 	MoldeCodigo  string    `gorm:"size:12;index" json:"molde_codigo"` // foreign key to Moldes
-	ComponenteID string    `gorm:"size:12;index" json:"componente_id"`
+	ComponenteID string    `gorm:"size:36;index" json:"componente_id"`
 	MaquinaID    string    `gorm:"size:12;index" json:"maquina_id,omitempty"` // foreign key to Maquinas
 	Description  string    `json:"description,omitempty"`
 	Programmer   string    `json:"programador"` // nome do programador
@@ -89,9 +89,9 @@ type Programacoes struct {
 }
 
 type ChegadaAcos struct {
-	ID            string    `gorm:"size:12;primaryKey" json:"id"`
+	ID            string    `gorm:"size:36;primaryKey" json:"id"`
 	MoldeCodigo   string    `gorm:"size:12;index" json:"molde_codigo"`   // foreign key to Moldes
-	ComponentesID string    `gorm:"size:12;index" json:"componentes_id"` // foreign key to Componentes
+	ComponentesID string    `gorm:"size:36;index" json:"componentes_id"` // foreign key to Componentes
 	Type          string    `json:"type"`                                // Tipo de aço
 	Quantity      int       `json:"quantity"`                            // Quantidade recebida
 	ArrivalDate   time.Time `json:"arrival_date,omitempty"`              // Data de chegada
