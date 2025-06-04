@@ -12,7 +12,14 @@ import styles from '../styles/Materials.module.css';
 export default function MaterialForm({ material, visible, onHide, onSaved }) {
     const isEdit = Boolean(material);
     const [form, setForm] = useState({
-        id: '', molde_codigo: '', componentes_id: '', type: '', quantity: 0, arrival_date: new Date(), is_arrived: false, supplier: ''
+        id: '', 
+        molde_codigo: '', 
+        componentes_id: '', 
+        type: '', 
+        quantity: 0, 
+        arrival_date: new Date(), 
+        is_arrived: false, 
+        supplier: ''
     });
     const [molds, setMolds] = useState([]);
     const [components, setComponents] = useState([]);
@@ -20,7 +27,7 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
     useEffect(() => {
         if (!visible) return;
 
-        api.get('/projects/').then(res => setMolds(res.data.projects || []));
+        api.get('/projects/').then(res => setMolds(res.data.molds || []));
         if (isEdit) {
             setForm({
                 id:             material.id,
@@ -32,7 +39,8 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                 is_arrived:     material.is_arrived,
                 supplier:       material.supplier
             });
-            api.get(`/projects/components/${material.molde_codigo}`).then(res => setComponents(res.data.components || []));
+            api.get(`/projects/components/${material.molde_codigo}`)
+                .then(res => setComponents(res.data.components || []));
         } else {
             setForm(f => ({ ...f, molde_codigo: '', componentes_id: '' }));
             setComponents([]);
@@ -42,43 +50,40 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
     const onMoldChange = e => {
         const m = e.value;
         setForm(f => ({ ...f, molde_codigo: m.codigo, componentes_id: '' }));
-        api.get(`/projects/components/${m.codigo}`).then(res => setComponents(res.data.components || []));
+        api.get(`/projects/components/${m.codigo}`)
+            .then(res => setComponents(res.data.components || []));
     };
 
     const handleSave = async () => {
-        const payload = isEdit
-            ? {
-                type: form.type,
-                quantity: form.quantity,
-                arrival_date: form.arrival_date.toISOString(),
-                is_arrived: form.is_arrived,
-                supplier: form.supplier
-            }
-            : {
-                id:             form.id,
-                molde_codigo:   form.molde_codigo,
-                componentes_id: form.componentes_id,
-                type:           form.type,
-                quantity:       form.quantity,
-                arrival_date:   form.arrival_date.toISOString(),
-                is_arrived:     form.is_arrived,
-                supplier:       form.supplier
-            };
+        const arrivalDate = form.arrival_date.toISOString();
+        const payload = {
+            molde_codigo:   form.molde_codigo,
+            componentes_id: form.componentes_id,
+            type:           form.type,
+            quantity:       form.quantity,
+            arrival_date:   arrivalDate,
+            is_arrived:     form.is_arrived,
+            supplier:       form.supplier
+        };
 
         try {
             if (isEdit) {
                 await api.put(`/materials/${material.id}`, payload);
             } else {
-                await api.post('/materials', payload);
+                await api.post('/materials/', { 
+                    ...payload, 
+                    id: form.id 
+                });
             }
             onSaved();
         } catch (err) {
             console.error('Erro ao salvar material:', err);
-            alert('Falha ao salvar material');
+            alert('Falha ao salvar material: ' + err.message);
         }
     };
 
     if (!visible) return null;
+    
     return (
         <Dialog
             header={isEdit ? 'Editar Material' : 'Novo Material'}
@@ -110,7 +115,8 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                                 optionLabel="codigo"
                                 onChange={onMoldChange}
                                 placeholder="Selecione Molde"
-                                filter filterBy="codigo"
+                                filter 
+                                filterBy="codigo"
                             />
                         </div>
                         <div className={styles.formField}>
@@ -118,10 +124,23 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                             <Dropdown
                                 value={components.find(c => c.id === form.componentes_id)}
                                 options={components}
-                                optionLabel="id"
-                                onChange={e => setForm(f => ({ ...f, componentes_id: e.value.id }))}
+                                optionLabel="name"
+                                onChange={e => setForm(f => ({ 
+                                    ...f, 
+                                    componentes_id: e.value.id 
+                                }))}
                                 placeholder="Selecione Componente"
-                                filter filterBy="id"
+                                filter 
+                                filterBy="name,id"
+                                itemTemplate={(option) => (
+                                    <div>
+                                        {option.name} (ID: {option.id})
+                                    </div>
+                                )}
+                                valueTemplate={(option, props) => {
+                                    if (!option) return props.placeholder;
+                                    return <div>{option.name} (ID: {option.id})</div>;
+                                }}
                             />
                         </div>
                     </>
@@ -141,7 +160,10 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                         className={styles.formInput}
                         type="number"
                         value={form.quantity}
-                        onChange={e => setForm(f => ({ ...f, quantity: +e.target.value }))}
+                        onChange={e => setForm(f => ({ 
+                            ...f, 
+                            quantity: Number(e.target.value) || 0 
+                        }))}
                     />
                 </div>
                 <div className={styles.formField}>
@@ -149,15 +171,22 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                     <Calendar
                         className={styles.formInput}
                         value={form.arrival_date}
-                        onChange={e => setForm(f => ({ ...f, arrival_date: e.value }))}
+                        onChange={e => setForm(f => ({ 
+                            ...f, 
+                            arrival_date: e.value 
+                        }))}
                         showIcon
+                        dateFormat="dd/mm/yy"
                     />
                 </div>
                 <div className={styles.formField}>
                     <label className={styles.formLabel}>Chegou?</label>
                     <Checkbox
                         checked={form.is_arrived}
-                        onChange={e => setForm(f => ({ ...f, is_arrived: e.checked }))}
+                        onChange={e => setForm(f => ({ 
+                            ...f, 
+                            is_arrived: e.checked 
+                        }))}
                     />
                 </div>
                 <div className={styles.formField}>
@@ -165,11 +194,13 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                     <InputText
                         className={styles.formInput}
                         value={form.supplier}
-                        onChange={e => setForm(f => ({ ...f, supplier: e.target.value }))}
+                        onChange={e => setForm(f => ({ 
+                            ...f, 
+                            supplier: e.target.value 
+                        }))}
                     />
                 </div>
             </div>
-
             <div className={styles.formButtons}>
                 <Button
                     label="Cancelar"

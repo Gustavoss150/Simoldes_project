@@ -91,6 +91,9 @@ export default function MaterialsList() {
                     onChange={e => setSelectedComponent(e.value)}
                     disabled={!selectedMold}
                     className={styles.filterDropdown}
+                    itemTemplate={(option) => (
+                                    <div> ({option.id}) {option.name}</div>
+                    )}
                 />
             </div>
             {loading
@@ -99,6 +102,7 @@ export default function MaterialsList() {
                     <div className={styles.tableContainer}>
                         <DataTable
                             value={materials}
+                            paginator rows={10}
                             dataKey="id"
                             responsiveLayout="scroll"
                             className={styles.dataTable}
