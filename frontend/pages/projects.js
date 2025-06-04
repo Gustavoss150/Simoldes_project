@@ -9,6 +9,7 @@ import { Column } from 'primereact/column';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import StepsList from '../components/StepsList';
 import MoldForm from '../components/projects/MoldForm';
 import MoldEditForm from '../components/projects/MoldEditForm';
 import ComponentList from '../components/projects/ComponentList';
@@ -16,6 +17,7 @@ import ProcessList from '../components/projects/ProcessList';
 import styles from '../styles/Projects.module.css';
 
 export default function ProjectsPage() {
+    const [showStepsModal, setShowStepsModal] = useState(false); // Corrigido o nome do estado
     const [globalFilter, setGlobalFilter] = useState('');
     const [molds, setMolds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -25,6 +27,7 @@ export default function ProjectsPage() {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [editingMold, setEditingMold] = useState(null);
+    const [showGlobalInactive, setShowGlobalInactive] = useState(false);
 
     const statusOptions = [
         { label: 'Todos', value: null },
@@ -79,7 +82,6 @@ export default function ProjectsPage() {
             </div>
         </div>
     );
-    const [showGlobalInactive, setShowGlobalInactive] = useState(false);
 
     return (
         <>
@@ -91,7 +93,15 @@ export default function ProjectsPage() {
                 <main className={styles.mainContent}>
                     <div className={styles.header}>
                         <h1 className={styles.title}>Projetos de Moldes</h1>
-                        <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button p-button-lg mr-4" />
+                        <div>
+                            <Button label="Novo Projeto" icon="pi pi-plus" onClick={handleCreate} className="p-button p-button-lg mr-5" />
+                            <Button 
+                                label="Gerenciar Etapas" 
+                                icon="pi pi-cog"
+                                onClick={() => setShowStepsModal(true)}
+                                className="p-button p-button-lg mr-5"
+                            />
+                        </div>
                     </div>
                     <div className={styles.filters}>
                         <InputText 
@@ -137,10 +147,12 @@ export default function ProjectsPage() {
                         <MoldEditForm mold={editingMold} visible={showEditForm} onHide={(saved) => { setShowEditForm(false); if (saved) fetchMolds(); }} />
                     )}
 
+                    <StepsList 
+                        visible={showStepsModal} 
+                        onHide={() => setShowStepsModal(false)} 
+                    />
                 </main>
             </div>
         </>
     );
 }
-
-    

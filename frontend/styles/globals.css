@@ -189,6 +189,12 @@ html, body {
     padding: 5px;
 }
 
+.mr-1 { 
+    gap: 0.5rem;
+    padding: 4px;
+    margin-right: 10px;
+}
+
 .mr-2 { 
     margin: 0.1rem;
     padding-inline: 2px;
@@ -206,6 +212,12 @@ html, body {
     margin-bottom: 0.3rem;
     padding: 6px;
     gap: 5px;
+}
+
+.mr-5 {
+    padding: 6px;
+    margin: 10px;
+    gap: 0.5rem;
 }
 
 .url-upload {

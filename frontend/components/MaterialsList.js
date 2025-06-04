@@ -73,7 +73,7 @@ export default function MaterialsList() {
                 <Button
                     label="Novo Material"
                     icon="pi pi-plus"
-                    className="mr-3"
+                    className="mr-1"
                     onClick={() => { setSelectedMaterial(null); setFormVisible(true); }}
                 />
                 <Dropdown

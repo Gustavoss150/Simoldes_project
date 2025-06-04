@@ -1,0 +1,110 @@
+.activeBadge {
+    background-color: var(--success);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+.inactiveBadge {
+    background-color: var(--danger);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    font-weight: 700;
+    display: inline-block;
+}
+
+/* Header do modal */
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    align-items: center;
+}
+
+/* Diálogos */
+.p-dialog .p-dialog-header {
+    background-color: var(--base);
+    color: white;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    padding: 1rem;
+}
+
+.p-dialog .p-dialog-header .p-dialog-title {
+    color: white;
+    font-weight: 600;
+}
+
+.p-dialog .p-dialog-header .p-dialog-header-icon {
+    color: white;
+}
+
+.p-dialog .p-dialog-header .p-dialog-header-icon:hover {
+    color: white;
+    background: rgba(255,255,255,0.1);
+}
+
+/* Tabela */
+.p-datatable {
+    font-size: 0.9rem;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+    background-color: var(--base);
+    color: white;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+
+.p-datatable .p-datatable-tbody > tr {
+    transition: background-color 0.2s;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+    background-color: var(--light-bg);
+}
+
+.p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.75rem 1rem;
+    border-color: #eee;
+}
+
+/* Botões */
+.p-button {
+    background-color: var(--base);
+    border-color: var(--base);
+}
+
+.p-button:hover {
+    background-color: var(--hover);
+    border-color: var(--hover);
+}
+
+.p-button-success {
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.p-button-success:hover {
+    background-color: #45a049;
+    border-color: #45a049;
+}
+
+.p-button-text {
+    color: var(--base);
+    background: transparent;
+    border: none;
+}
+
+.p-button-text:hover {
+    background: rgba(2, 70, 62, 0.1);
+}
