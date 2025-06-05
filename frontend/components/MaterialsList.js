@@ -8,6 +8,7 @@ import { Button } from 'primereact/button';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import MaterialForm from './MaterialForm';
 import styles from '../styles/Materials.module.css';
+import statusStyles from '../styles/Projects.module.css'
 
 export default function MaterialsList() {
     const [molds, setMolds] = useState([]);
@@ -120,8 +121,18 @@ export default function MaterialsList() {
                             <Column
                                 field="is_arrived"
                                 header="Chegou?"
-                                body={row => row.is_arrived ? 'Sim' : 'Não'}
-                            />
+                                body={rowData => (
+                                    <span 
+                                        className={`${statusStyles.statusBadge} ${
+                                            rowData.is_arrived 
+                                            ? statusStyles.completed 
+                                            : statusStyles.paused
+                                        }`}
+                                    >
+                                        {rowData.is_arrived ? 'Sim' : 'Não'}
+                                    </span>
+                                )}
+                                />
                             <Column field="supplier" header="Fornecedor" />
                             <Column
                                 header="Ações"

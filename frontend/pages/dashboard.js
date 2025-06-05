@@ -4,13 +4,11 @@ import Head from 'next/head';
 import api from "../utils/axios";
 import Sidebar from "../components/Sidebar";
 import ImportModal from "../components/ImportModal";
-import { Upload } from 'lucide-react';
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { ProgressSpinner } from "primereact/progressspinner";
-import styles from "../styles/Import.module.css"
 
 export default function Dashboard() {
     const [userData, setUserData] = useState(null);
@@ -81,6 +79,21 @@ export default function Dashboard() {
         fetchMolds();
     }, [selectedStatus, router]);
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch {
+            return dateString;
+        }
+    };
+
     return (
         <>
             <Head>
@@ -128,8 +141,16 @@ export default function Dashboard() {
                                 <Column field="status" header="Status" sortable />
                                 <Column field="current_step" header="Etapa Atual" />
                                 <Column field="steps" header="Etapas" />
-                                <Column field="begin_date" header="Início" />
-                                <Column field="delivery_date" header="Entrega Prevista" />
+                                <Column 
+                                    field="begin_date" 
+                                    header="Início" 
+                                    body={(rowData) => formatDate(rowData.begin_date)} 
+                                />
+                                <Column 
+                                    field="delivery_date" 
+                                    header="Entrega Prevista" 
+                                    body={(rowData) => formatDate(rowData.delivery_date)} 
+                                />
                             </DataTable>
                         )}
 

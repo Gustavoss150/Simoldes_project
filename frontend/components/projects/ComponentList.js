@@ -10,6 +10,7 @@ import { InputText } from 'primereact/inputtext';
 import ComponentForm from './ComponentForm';
 import ProcessList from './ProcessList';
 import styles from '../../styles/projects/ComponentList.module.css'; 
+import projectStyles from '../../styles/Projects.module.css'
 
 export default function ComponentList({ moldCode }) {
   const [globalFilter, setGlobalFilter] = useState('');
@@ -101,10 +102,16 @@ export default function ComponentList({ moldCode }) {
         <Column field="name" header="Nome" />
         <Column field="material" header="Material" />
         <Column field="quantity" header="Quantidade" />
-        <Column 
+        <Column
           header="Status"
           body={rowData => (
-            <span className={rowData.status ? 'text-green-500' : 'text-yellow-500'}>
+            <span 
+              className={`${projectStyles.statusBadge} ${
+                rowData.status 
+                  ? projectStyles.completed 
+                  : projectStyles.inProcess
+              }`}
+            >
               {rowData.status ? 'Concluído' : 'Pendente'}
             </span>
           )}

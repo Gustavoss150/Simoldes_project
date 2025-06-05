@@ -83,6 +83,21 @@ export default function ProjectsPage() {
         </div>
     );
 
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch {
+            return dateString;
+        }
+    };
+
     return (
         <>
             <Head>
@@ -127,8 +142,16 @@ export default function ProjectsPage() {
                                 )} />
                                 <Column field="current_step" header="Etapa Atual" />
                                 <Column field="steps" header="Total de Etapas" />
-                                <Column field="begin_date" header="Data de Início" />
-                                <Column field="delivery_date" header="Data de Entrega" />
+                                <Column 
+                                    field="begin_date" 
+                                    header="Início" 
+                                    body={(rowData) => formatDate(rowData.begin_date)} 
+                                />
+                                <Column 
+                                    field="delivery_date" 
+                                    header="Entrega Prevista" 
+                                    body={(rowData) => formatDate(rowData.delivery_date)} 
+                                />
                                 <Column header="Ações" body={(rowData) => (
                                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                                         <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => handleEdit(rowData)} />
