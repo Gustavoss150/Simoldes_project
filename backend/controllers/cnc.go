@@ -105,7 +105,29 @@ func ListMachines(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"machines": machines})
 }
 
-func ListProgramming(c *gin.Context) {
+func ListProgrammingByMold(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "moldCode is required"})
+		return
+	}
+
+	cncRepo, err := cncrepo.InitCNCDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing CNC database: " + err.Error()})
+		return
+	}
+
+	progs, err := usecases.ListProgrammingByMold(cncRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching scripts: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"CNC Programs": progs})
+}
+
+func ListProgrammingByComponent(c *gin.Context) {
 	compID := c.Param("componentID")
 	if compID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "component ID is required"})

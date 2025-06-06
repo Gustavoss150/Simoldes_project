@@ -71,7 +71,7 @@ func (r *cncRepository) GetProgrammingByID(id string) (*models.Programacoes, err
 
 func (r *cncRepository) GetProgrammingByMold(moldCode string) ([]*models.Programacoes, error) {
 	var programming []*models.Programacoes
-	if err := r.DB.Where("molde_codigo = ?", moldCode).Find(&programming).Error; err != nil {
+	if err := r.DB.Where("molde_codigo = ? AND is_active = ?", moldCode, true).Find(&programming).Error; err != nil {
 		return nil, err
 	}
 	return programming, nil

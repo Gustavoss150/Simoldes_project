@@ -43,9 +43,30 @@ func UpdateProgramming(cncRepo cncrepo.CNCRepository, req contracts.UpdateCNCPro
 		return errors.New("programming id not found")
 	}
 
-	if req.MaquinaID != nil {
-		prog.MaquinaID = *req.MaquinaID
+	if req.ProcessID != nil {
+		// valida associação com molde
+		isValid, err := cncRepo.ValidateProcessWithMold(*req.ProcessID, prog.MoldeCodigo)
+		if err != nil {
+			return errors.New("error validating process association with mold: " + err.Error())
+		}
+		if !isValid {
+			return errors.New("process is not associated with the specified mold")
+		}
+		// valida associação com componente
+		isValidComp, err := cncRepo.ValidateProcessWithComponent(*req.ProcessID, prog.ComponenteID)
+		if err != nil {
+			return errors.New("error validating process association with component: " + err.Error())
+		}
+		if !isValidComp {
+			return errors.New("process is not associated with the specified component")
+		}
+		prog.ProcessID = req.ProcessID
 	}
+
+	if req.MaquinaID != nil {
+		prog.MaquinaID = req.MaquinaID
+	}
+
 	if req.Description != nil {
 		prog.Description = *req.Description
 	}
@@ -59,6 +80,5 @@ func UpdateProgramming(cncRepo cncrepo.CNCRepository, req contracts.UpdateCNCPro
 	if err = cncRepo.SaveProgramming(prog); err != nil {
 		return errors.New("error updating programming info")
 	}
-
 	return nil
 }

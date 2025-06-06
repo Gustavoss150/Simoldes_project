@@ -163,15 +163,17 @@ func (s *ExcelImportService) ParseProgrammings(r io.Reader) ([]contracts.ImportP
 		return nil, fmt.Errorf("aba PROGRAMAÇÃO não encontrada")
 	}
 	idx := helpers.MapColIndex(rows[0])
-
 	var dtos []contracts.ImportProgrammingDTO
 	for _, row := range rows[1:] {
 		molde := helpers.GetCellValue(row, idx, "MOLDE")
 		if molde == "" {
 			continue
 		}
+		if _, err := f.GetSheetIndex("M" + molde); err != nil {
+			continue
+		}
 
-		rawID := helpers.GetCellValue(row, idx, "REFERÊNCIA")
+		rawID := helpers.GetCellValue(row, idx, "REFERENCIA")
 		if rawID == "" {
 			continue
 		}
@@ -184,7 +186,6 @@ func (s *ExcelImportService) ParseProgrammings(r io.Reader) ([]contracts.ImportP
 		// ex.: "1679 - 700 - "
 
 		dtos = append(dtos, contracts.ImportProgrammingDTO{
-			// ID = prefix; no usecase faremos CountByIDPrefix(prefix) → "prefix + índice"
 			ID:           &prefix,
 			MoldeCodigo:  molde,
 			ComponenteID: &componentID,

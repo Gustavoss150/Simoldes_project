@@ -66,6 +66,23 @@ func (r *componentsRepository) GetByMold(moldCode string, limit int, offset int)
 	return components, nil
 }
 
+// componentsrepo.go
+func (r *componentsRepository) GetActiveComponentsWithActiveProcessesByMold(moldCode string) ([]*models.Componentes, error) {
+	var components []*models.Componentes
+	err := r.DB.
+		Distinct("componentes.*").
+		Joins("INNER JOIN processos ON componentes.id = processos.componentes_id").
+		Where("componentes.molde_codigo = ?", moldCode).
+		Where("componentes.is_active = ?", true).
+		Where("processos.is_active = ?", true).
+		Find(&components).Error
+
+	if err != nil {
+		return nil, err
+	}
+	return components, nil
+}
+
 func (r *componentsRepository) ExistsByID(id string) (bool, error) {
 	var count int64
 	if err := r.DB.Model(&models.Componentes{}).

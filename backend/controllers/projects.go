@@ -136,6 +136,31 @@ func ListMoldComponents(c *gin.Context) {
 	})
 }
 
+func ListActiveComponentsWithActiveProcesses(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mold code is required"})
+		return
+	}
+
+	componentsRepo, err := componentsrepo.InitComponentsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing components database: " + err.Error()})
+		return
+	}
+
+	components, err := usecases.ListActiveComponentsWithActiveProcessByMold(componentsRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"components": components,
+		"count":      len(components),
+	})
+}
+
 func UpdateMoldOperation(c *gin.Context) {
 	moldCode := c.Param("moldCode")
 	if moldCode == "" {
