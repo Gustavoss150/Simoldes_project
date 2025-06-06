@@ -216,10 +216,8 @@ export default function CNCList() {
                         <span className={`${styles.statusBadge} ${styles.statusInactive}`}>Não</span>} />
                     <Column body={row => 
                         <Button 
-                            icon="pi pi-trash" 
-                            className="p-button-text p-button-danger p-button-sm" 
-                            severity="danger" 
-                            onClick={() => deleteMachine(row.id)} 
+                            icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" 
+                            severity="danger" onClick={() => deleteMachine(row.id)} 
                         />} 
                     />
                 </DataTable>

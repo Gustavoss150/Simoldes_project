@@ -89,49 +89,43 @@ const CNCForm = ({
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>ID</label>
                         <InputText 
-                            value={machineForm.id} 
-                            onChange={e => setMachineForm({ ...machineForm, id: e.target.value })} 
-                            className={formStyles.formInput} 
+                            className={formStyles.formInput} value={machineForm.id} 
+                            onChange={e => setMachineForm({ ...machineForm, id: e.target.value })}  
                             disabled={isEditMachine} // Editável apenas na criação
                         />
                     </div>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Nome</label>
                         <InputText 
-                            value={machineForm.name} 
-                            onChange={e => setMachineForm({ ...machineForm, name: e.target.value })} 
-                            className={formStyles.formInput} 
+                            className={formStyles.formInput} value={machineForm.name} 
+                            onChange={e => setMachineForm({ ...machineForm, name: e.target.value })}
                         />
                     </div>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Descrição</label>
                         <InputText 
-                            value={machineForm.description} 
+                            className={formStyles.formInput} value={machineForm.description} 
                             onChange={e => setMachineForm({ ...machineForm, description: e.target.value })} 
-                            className={formStyles.formInput} 
                         />
                     </div>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Tipo</label>
                         <InputText 
-                            value={machineForm.type} 
+                            className={formStyles.formInput} value={machineForm.type} 
                             onChange={e => setMachineForm({ ...machineForm, type: e.target.value })} 
-                            className={formStyles.formInput} 
                         />
                     </div>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Departamento</label>
                         <InputText 
-                            value={machineForm.department} 
+                             className={formStyles.formInput} value={machineForm.department} 
                             onChange={e => setMachineForm({ ...machineForm, department: e.target.value })} 
-                            className={formStyles.formInput} 
                         />
                     </div>
                     <div className={formStyles.statusToggle}>
                         <label className={formStyles.formLabel}>
                             <input 
-                                type="checkbox" 
-                                checked={machineForm.is_active} 
+                                type="checkbox" checked={machineForm.is_active} 
                                 onChange={e => setMachineForm({ ...machineForm, is_active: e.target.checked })} 
                             /> Ativa
                         </label>
@@ -147,18 +141,15 @@ const CNCForm = ({
                 header={isEditProgram ? "Editar Programação CNC" : "Nova Programação CNC"} 
                 visible={programDialog} 
                 onHide={() => setProgramDialog(false)} 
-                className={formStyles.dialog} 
-                headerClassName={formStyles.dialogHeader}
+                className={formStyles.dialog} headerClassName={formStyles.dialogHeader}
             >
                 <div className={formStyles.formContent}>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>ID</label>
                         <InputText 
-                            value={programForm.id} 
+                            className={formStyles.formInput} value={programForm.id} 
                             onChange={e => setProgramForm({ ...programForm, id: e.target.value })} 
-                            className={formStyles.formInput} 
-                            disabled={isEditProgram} 
-                            required 
+                            disabled={isEditProgram} required 
                         />
                     </div>
                     <div className={formStyles.formField}>
@@ -216,33 +207,25 @@ const CNCForm = ({
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Descrição</label>
                         <InputText 
-                            value={programForm.description} 
-                            onChange={e => setProgramForm({ ...programForm, description: e.target.value })} 
-                            className={formStyles.formInput} 
+                            className={formStyles.formInput} value={programForm.description} 
+                            onChange={e => setProgramForm({ ...programForm, description: e.target.value })}  
                         />
                     </div>
                     <div className={formStyles.formField}>
                         <label className={formStyles.formLabel}>Programador</label>
                         <InputText 
-                            value={programForm.programador} 
+                            className={formStyles.formInput} value={programForm.programador} 
                             onChange={e => setProgramForm({ ...programForm, programador: e.target.value })} 
-                            className={formStyles.formInput} 
                         />
                     </div>
                     <div className={styles.uploadGroup}>
                         <InputText 
-                            readOnly 
-                            placeholder="Script NC URL" 
-                            value={programForm.script} 
-                            className='url-upload' 
+                            readOnly placeholder="Script NC URL" value={programForm.script} className='url-upload' 
                         />
                         <Button icon="pi pi-upload" className="upload-buttom" onClick={() => fileInputRef.current.click()} />
                         <input
-                            type="file"
-                            ref={fileInputRef}
-                            hidden
-                            accept=".nc,.txt"
-                            onChange={e => e.target.files[0] && handleNCUpload(e.target.files[0])}
+                            type="file" ref={fileInputRef} hidden 
+                            accept=".nc,.txt" onChange={e => e.target.files[0] && handleNCUpload(e.target.files[0])}
                         />
                     </div>
                     <div className={formStyles.formButtons}>
