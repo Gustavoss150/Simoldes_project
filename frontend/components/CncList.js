@@ -29,7 +29,6 @@ export default function CNCList() {
     const [selectedMold, setSelectedMold] = useState(null);
     const [selectedComponent, setSelectedComponent] = useState(null);
 
-    // Função para garantir que sempre temos um array
     const ensureArray = (data) => {
         if (Array.isArray(data)) return data;
         if (data && data.programs) return ensureArray(data.programs);
@@ -44,7 +43,6 @@ export default function CNCList() {
                 setPrograms([]);
                 return;
             }
-
             try {
                 let response;
                 if (selectedComponent) {
@@ -62,7 +60,6 @@ export default function CNCList() {
                 setPrograms([]);
             }
         };
-
         loadPrograms();
     }, [selectedMold, selectedComponent]);
 
@@ -90,13 +87,11 @@ export default function CNCList() {
             setMolds([]);
         }
     };
-
     const onMoldChange = async (e) => {
         const mold = e.value;
         setSelectedMold(mold);
         setSelectedComponent(null);
-        setProcesses([]);
-        
+        setProcesses([]);       
         try {
             const { data } = await api.get(`/projects/components/processes/${mold.codigo}`);
             setComponents(ensureArray(data.components));
@@ -106,11 +101,9 @@ export default function CNCList() {
             setComponents([]);
         }
     };
-
     const onComponentChange = async (e) => {
         const comp = e.value;
-        setSelectedComponent(comp);
-        
+        setSelectedComponent(comp);       
         try {
             const { data } = await api.get(`/processes/components/${comp.id}`);
             setProcesses(ensureArray(data.processes));
@@ -169,15 +162,9 @@ export default function CNCList() {
     const openNewProgram = () => {
         setIsEditProgram(false);
         setProgramForm({ 
-            id: '', 
-            process_id: '', 
-            molde_codigo: selectedMold?.codigo || '', 
-            componente_id: selectedComponent?.id || '', 
-            maquina_id: '', 
-            description: '', 
-            programador: '', 
-            script: '', 
-            is_active: true 
+            id: '', process_id: '', molde_codigo: selectedMold?.codigo || '', 
+            componente_id: selectedComponent?.id || '', maquina_id: '', description: '', 
+            programador: '', script: '', is_active: true 
         });
         setProgramDialog(true);
     };
@@ -197,7 +184,6 @@ export default function CNCList() {
         try {
             await api.delete(`/cnc/program/${id}`);
             
-            // Recarrega programas automaticamente após exclusão
             if (selectedComponent) {
                 const response = await api.get(`/cnc/program/${selectedComponent.id}`);
                 setPrograms(ensureArray(response.data));

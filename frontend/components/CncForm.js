@@ -27,7 +27,6 @@ const CNCForm = ({
                 };
                 await api.put(`/cnc/mach/${machineForm.id}`, payload);
             } else {
-                // Na criação, permite definir ID manualmente
                 await api.post('/cnc/mach', machineForm);
             }
             setMachineDialog(false);
@@ -42,12 +41,8 @@ const CNCForm = ({
         try {
             if (isEditProgram) {
                 const payload = {
-                    process_id: programForm.process_id,
-                    maquina_id: programForm.maquina_id,
-                    description: programForm.description,
-                    programador: programForm.programador,
-                    script: programForm.script,
-                    is_active: programForm.is_active
+                    process_id: programForm.process_id, maquina_id: programForm.maquina_id, description: programForm.description,
+                    programador: programForm.programador, script: programForm.script, is_active: programForm.is_active
                 };
                 await api.put(`/cnc/program/${programForm.id}`, payload);
             } else {
@@ -78,11 +73,7 @@ const CNCForm = ({
         const pid = e.value;
         const proc = processes.find(p => p.process_id === pid);
         if (!proc) return;
-        setProgramForm(prev => ({ 
-            ...prev, 
-            process_id: pid,
-            maquina_id: proc.maquina_id 
-        }));
+        setProgramForm(prev => ({ ...prev, process_id: pid, maquina_id: proc.maquina_id }));
     };
 
     return (
@@ -245,11 +236,7 @@ const CNCForm = ({
                             value={programForm.script} 
                             className='url-upload' 
                         />
-                        <Button 
-                            icon="pi pi-upload" 
-                            className="upload-buttom" 
-                            onClick={() => fileInputRef.current.click()} 
-                        />
+                        <Button icon="pi pi-upload" className="upload-buttom" onClick={() => fileInputRef.current.click()} />
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -259,17 +246,8 @@ const CNCForm = ({
                         />
                     </div>
                     <div className={formStyles.formButtons}>
-                        <Button 
-                            label="Cancelar" 
-                            severity="secondary" 
-                            onClick={() => setProgramDialog(false)} 
-                            className="mr-3" 
-                        />
-                        <Button 
-                            label="Salvar" 
-                            onClick={saveProgram} 
-                            className="p-button-success mr-3" 
-                        />
+                        <Button label="Cancelar" severity="secondary" onClick={() => setProgramDialog(false)} className="mr-3" />
+                        <Button label="Salvar" onClick={saveProgram} className="p-button-success mr-3" />
                     </div>
                 </div>
             </Dialog>
