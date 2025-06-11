@@ -40,10 +40,21 @@ export default function StepsList({ visible, onHide }) {
     }
 
     async function create() {
-        await api.post('/processes/register_steps', newStep);
-        setShowCreate(false);
-        setNewStep({ name: '', description: '' });
-        fetch();
+        try {
+            const payload = [
+                {
+                    name: newStep.name,
+                    description: newStep.description
+                }
+            ];
+            await api.post('/processes/register_steps', payload);
+            setShowCreate(false);
+            setNewStep({ name: '', description: '' });
+            fetch();
+        } catch (err) {
+            console.error('Erro ao criar etapa:', err);
+            alert('Falha ao criar etapa: ' + (err.response?.data?.error || err.message));
+        }
     }
 
     async function update() {
