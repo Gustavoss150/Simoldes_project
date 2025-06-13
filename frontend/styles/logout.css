@@ -1,6 +1,5 @@
 :root {
     --base: #02463e;
-    --hover: #2B6B5F;
 }
 
 .logout-container {
@@ -23,4 +22,8 @@
     gap: 8px;
     transition: all 0.3s ease;
     padding: 10px;
+}
+
+.logout-button:hover {
+    transform: translateY(-2px);
 }
