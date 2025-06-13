@@ -4,6 +4,7 @@ import 'primeicons/primeicons.css';
 import '../styles/globals.css';  // Importando estilos globais
 import '../styles/index.css';    // Importando estilos principais
 import '../styles/sidebar.css';
+import '../styles/logout.css';
 
 import { useRouter } from 'next/router';
 

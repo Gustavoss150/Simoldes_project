@@ -3,6 +3,7 @@ import { Button } from 'primereact/button';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import api from '../utils/axios';
+import LogoutButton from './Logout';
 
 const AppSidebar = () => {
     const [visible, setVisible] = useState(false);
@@ -22,7 +23,6 @@ const AppSidebar = () => {
 
     return (
         <div>
-            {/* Botão que abre a sidebar */}
             <Button icon="pi pi-bars" onClick={() => setVisible(true)} className="p-button-rounded p-button-success p-button-text" />
 
             <Sidebar
@@ -39,6 +39,7 @@ const AppSidebar = () => {
                         <SidebarLink href="/projects" label="Projetos" />
                         <SidebarLink href="/materials" label="Materiais" />
                         <SidebarLink href="/cnc" label="CNC" />
+                        <LogoutButton />
                         {userRole === 'user' && <SidebarLink href="/users/" label="Editar Dados" />}
                         {userRole === 'admin' && <SidebarLink href="/users/" label="Gerenciar Usuários" />}
                     </ul>

@@ -1,0 +1,26 @@
+:root {
+    --base: #02463e;
+    --hover: #2B6B5F;
+}
+
+.logout-container {
+    position: fixed;
+    top: 500px;
+    left: 125px;
+    z-index: 999;
+}
+
+.logout-button {
+    background-color: var(--base);
+    color: white;
+    border: none;
+    font-family: "Josefin Sans", sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    padding: 10px;
+}

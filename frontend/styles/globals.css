@@ -29,6 +29,7 @@ html, body {
 }
 
 .dashboard-container {
+    margin-top: 2rem;
     display: flex;
     width: 100%;
 }
