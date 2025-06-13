@@ -34,24 +34,34 @@ export default function ProjectsPage() {
         { label: 'Não iniciado', value: 'not started' },
         { label: 'Em processo', value: 'in process' },
         { label: 'Pausado', value: 'paused' },
-        { label: 'Completo', value: 'completed' }
+        { label: 'Completo', value: 'completed' },
+        { label: 'Atrasados', value: 'delayed' },
+        { label: 'Inativos', value: 'inactive' }
     ];
 
     useEffect(() => { fetchMolds(); }, [selectedStatus]);
 
     const fetchMolds = async () => {
         setLoading(true);
-        try {
-            const params = selectedStatus ? { status: selectedStatus } : {};
-            const res = await api.get('/projects/', { params });
-            setMolds(res.data.molds);
-        } catch (err) {
-            console.error(err);
-            setError('Erro ao carregar projetos');
-        } finally {
-            setLoading(false);
-        }
-    };
+            try {
+                let res;
+                if (selectedStatus === 'delayed') {
+                    res = await api.get('/projects/delayed');
+                } else if (selectedStatus === 'inactive') {
+                    res = await api.get('/projects/inactive_projects');
+                } else {
+                    // padrão: lista ativa, filtrada por status
+                    const params = selectedStatus ? { status: selectedStatus } : {};
+                    res = await api.get('/projects/', { params });
+                }
+                setMolds(res.data.molds);
+            } catch (err) {
+                console.error(err);
+                setError('Erro ao carregar projetos');
+            } finally {
+                setLoading(false);
+            }
+        };
 
     const handleCreate = () => {
         setEditingMold(null);

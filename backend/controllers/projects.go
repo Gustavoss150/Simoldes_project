@@ -263,6 +263,27 @@ func DeleteComponent(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{"message": "Component deleted successfully"})
 }
 
+func ListDelayedMoldProjects(c *gin.Context) {
+	moldsRepo, err := moldsrepo.InitMoldsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing molds database: " + err.Error()})
+		return
+	}
+
+	limit, offset := getPaginationParams(c)
+
+	molds, total, err := usecases.GetDelayedProjects(moldsRepo, limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing delayed molds: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"molds": molds,
+		"total": total,
+	})
+}
+
 func ListInactiveMoldProjects(c *gin.Context) {
 	moldsRepo, err := moldsrepo.InitMoldsDatabase()
 	if err != nil {

@@ -9,6 +9,8 @@ type MoldsRepository interface {
 	GetByStatus(status string, limit int, offset int) ([]*models.Moldes, error)
 	CountActive() (int64, error)
 	CountByStatus(status string) (int64, error)
+	GetDelayed(limit int, offset int) ([]*models.Moldes, error)
+	CountDelayed() (int64, error)
 	GetAllInactive(limit int, offset int) ([]*models.Moldes, error)
 	CountInactive() (int64, error)
 }

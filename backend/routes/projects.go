@@ -19,6 +19,7 @@ func ProjectsRouter(router *gin.Engine) {
 		r.PUT("/:moldCode", controllers.UpdateMoldOperation)
 		r.DELETE("/:moldCode", controllers.DeleteMoldProject)
 		r.DELETE("/components/:componentID", controllers.DeleteComponent)
+		r.GET("/delayed", controllers.ListDelayedMoldProjects)
 		r.GET("/inactive_projects", controllers.ListInactiveMoldProjects)
 		r.GET("/inactive_components/:moldCode", controllers.ListInactiveComponentsByMold)
 	}

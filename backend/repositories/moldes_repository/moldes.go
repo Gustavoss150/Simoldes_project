@@ -2,6 +2,8 @@ package moldsrepo
 
 import (
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/Gustavoss150/simoldes-backend/config"
 	"github.com/Gustavoss150/simoldes-backend/models"
@@ -78,6 +80,33 @@ func (r *moldsRepository) CountByStatus(status string) (int64, error) {
 
 	if err != nil {
 		return 0, errors.New("error counting molds by status: " + err.Error())
+	}
+	return count, nil
+}
+
+func (r *moldsRepository) GetDelayed(limit int, offset int) ([]*models.Moldes, error) {
+	var molds []*models.Moldes
+	now := time.Now()
+	db := r.DB.
+		Where("is_active = ? AND status != ?", true, models.StatusConcluido)
+
+	db = db.Where("delivery_date IS NOT NULL AND delivery_date < ?", now)
+
+	if err := db.Limit(limit).Offset(offset).Find(&molds).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving delayed molds: %w", err)
+	}
+	return molds, nil
+}
+
+func (r *moldsRepository) CountDelayed() (int64, error) {
+	var count int64
+	now := time.Now()
+	db := r.DB.
+		Model(&models.Moldes{}).
+		Where("is_active = ? AND status != ?", true, models.StatusConcluido).
+		Where("delivery_date IS NOT NULL AND delivery_date < ?", now)
+	if err := db.Count(&count).Error; err != nil {
+		return 0, fmt.Errorf("error counting delayed molds: %w", err)
 	}
 	return count, nil
 }
