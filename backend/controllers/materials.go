@@ -126,6 +126,28 @@ func ListPendingMaterialsByMold(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"Pending materials": materials})
 }
 
+func ListInactiveMaterialsByMold(c *gin.Context) {
+	moldCode := c.Param("moldCode")
+	if moldCode == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "mold code is required"})
+		return
+	}
+
+	materialsRepo, err := materialsrepo.InitMaterialsDatabase()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error initializing materials database: " + err.Error()})
+		return
+	}
+
+	materials, err := usecases.ListInactiveMaterials(materialsRepo, moldCode)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error listing materials: " + err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"Inactive materials": materials})
+}
+
 func UpdateMaterial(c *gin.Context) {
 	materialID := c.Param("materialID")
 	if materialID == "" {

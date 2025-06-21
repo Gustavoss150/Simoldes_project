@@ -6,23 +6,18 @@ import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
 import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
+import { useNotification } from '../components/NotificationProvider';
 import api from '../utils/axios';
 import styles from '../styles/Materials.module.css';
 
 export default function MaterialForm({ material, visible, onHide, onSaved }) {
     const isEdit = Boolean(material);
-    const [form, setForm] = useState({
-        id: '', 
-        molde_codigo: '', 
-        componentes_id: '', 
-        type: '', 
-        quantity: 0, 
-        arrival_date: new Date(), 
-        is_arrived: false, 
-        supplier: ''
+      const [form, setForm] = useState({ id: '', molde_codigo: '', componentes_id: '', type: '', quantity: 0, 
+        arrival_date: new Date(), is_arrived: false, supplier: ''
     });
     const [molds, setMolds] = useState([]);
     const [components, setComponents] = useState([]);
+    const { show } = useNotification();
 
     useEffect(() => {
         if (!visible) return;
@@ -75,10 +70,23 @@ export default function MaterialForm({ material, visible, onHide, onSaved }) {
                     id: form.id 
                 });
             }
-            onSaved();
+            show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: isEdit
+                    ? 'Material atualizado com sucesso'
+                    : 'Material criado com sucesso'
+            });
+            onSaved();    // para recarregar lista, fechar diálogo na página-pai etc.
+            onHide();     // fechar o Dialog
         } catch (err) {
             console.error('Erro ao salvar material:', err);
-            alert('Falha ao salvar material: ' + err.message);
+            show({
+                severity: 'error',
+                summary: 'Erro ao salvar',
+                detail: 'Falha ao salvar material: ' + (err.response?.data?.message || err.message),
+                life: 5000
+            });
         }
     };
 

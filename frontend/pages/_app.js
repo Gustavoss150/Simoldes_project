@@ -1,5 +1,6 @@
-import 'primereact/resources/themes/lara-light-green/theme.css'; // ou outra theme
+import 'primereact/resources/themes/lara-light-green/theme.css';
 import 'primereact/resources/primereact.min.css';
+import { NotificationProvider } from '../components/NotificationProvider'
 import 'primeicons/primeicons.css';
 import '../styles/globals.css';  // Importando estilos globais
 import '../styles/index.css';    // Importando estilos principais
@@ -9,10 +10,10 @@ import '../styles/logout.css';
 import { useRouter } from 'next/router';
 
 function MyApp({ Component, pageProps }) {
-  const router = useRouter();
-  
   return (
-    <Component {...pageProps} />
+    <NotificationProvider>
+      <Component {...pageProps} />
+    </NotificationProvider>
   );
 }
 

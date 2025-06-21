@@ -47,7 +47,7 @@ func (r *materialsRepository) GetAcoByID(id string) (*models.ChegadaAcos, error)
 
 func (r *materialsRepository) GetAcosByMold(moldCode string) ([]*models.ChegadaAcos, error) {
 	var acos []*models.ChegadaAcos
-	if err := r.DB.Where("molde_codigo = ?", moldCode).Find(&acos).Error; err != nil {
+	if err := r.DB.Where("molde_codigo = ? AND is_active = ?", moldCode, true).Find(&acos).Error; err != nil {
 		return nil, err
 	}
 	return acos, nil
@@ -55,8 +55,16 @@ func (r *materialsRepository) GetAcosByMold(moldCode string) ([]*models.ChegadaA
 
 func (r *materialsRepository) GetAcoByComponent(componentCode string) ([]*models.ChegadaAcos, error) {
 	var aco []*models.ChegadaAcos
-	if err := r.DB.Where("componentes_id = ?", componentCode).Find(&aco).Error; err != nil {
+	if err := r.DB.Where("componentes_id = ? AND is_active = ?", componentCode, true).Find(&aco).Error; err != nil {
 		return nil, err
 	}
 	return aco, nil
+}
+
+func (r *materialsRepository) GetInactiveByMold(moldCode string) ([]*models.ChegadaAcos, error) {
+	var acos []*models.ChegadaAcos
+	if err := r.DB.Where("molde_codigo = ? AND is_active = ?", moldCode, false).Find(&acos).Error; err != nil {
+		return nil, err
+	}
+	return acos, nil
 }

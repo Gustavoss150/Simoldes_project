@@ -16,6 +16,7 @@ func MaterialsRouter(router *gin.Engine) {
 		r.GET("/components/:componentID", controllers.ListMaterialsByComponent)
 		r.GET("/arrived/:moldCode", controllers.ListArrivedMaterialsByMold)
 		r.GET("/pending/:moldCode", controllers.ListPendingMaterialsByMold)
+		r.GET("/inactive/:moldCode", controllers.ListInactiveMaterialsByMold)
 		r.PUT("/:materialID", controllers.UpdateMaterial)
 		r.DELETE("/:materialID", controllers.DeleteMaterial)
 	}

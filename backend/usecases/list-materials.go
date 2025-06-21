@@ -45,3 +45,7 @@ func ListPendingMaterials(materialsRepo materialsrepo.MaterialsRepository, moldC
 	}
 	return result, nil
 }
+
+func ListInactiveMaterials(materialsRepo materialsrepo.MaterialsRepository, moldCode string) ([]*models.ChegadaAcos, error) {
+	return materialsRepo.GetInactiveByMold(moldCode)
+}

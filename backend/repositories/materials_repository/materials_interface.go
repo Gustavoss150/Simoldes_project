@@ -8,4 +8,5 @@ type MaterialsRepository interface {
 	GetAcoByID(id string) (*models.ChegadaAcos, error)
 	GetAcosByMold(moldCode string) ([]*models.ChegadaAcos, error)
 	GetAcoByComponent(componentCode string) ([]*models.ChegadaAcos, error)
+	GetInactiveByMold(moldCode string) ([]*models.ChegadaAcos, error)
 }
