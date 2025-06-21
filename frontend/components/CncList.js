@@ -3,6 +3,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import api from '../utils/axios';
 import styles from '../styles/CncTable.module.css';
 import CNCForm from './CncForm';
@@ -126,17 +127,21 @@ export default function CNCList() {
         setMachineDialog(true);
     };
 
-    const deleteMachine = async (id) => {
-        const confirmed = window.confirm("Tem certeza que deseja excluir esta máquina?");
-        if (!confirmed) return;
-
-        try {
-            await api.delete(`/cnc/mach/${id}`);
-            fetchMachines();
-        } catch (error) {
-            console.error('Erro ao excluir máquina:', error);
-            alert('Erro ao excluir máquina: ' + error.message);
-        }
+    const deleteMachine = (id) => {
+        confirmDialog({
+            message: 'Deseja realmente excluir esta máquina?', header: 'Confirmar exclusão', icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim', rejectLabel: 'Não',
+            acceptClassName: 'p-button-danger',
+            accept: async () => {
+                try {
+                    await api.delete(`/cnc/mach/${id}`);
+                    fetchMachines();
+                } catch (error) {
+                    console.error('Erro ao excluir máquina:', error);
+                    alert('Erro ao excluir máquina: ' + (error.response?.data?.message || error.message));
+                }
+            }
+        });
     };
 
     const handleNCUpload = async (file) => {
@@ -177,24 +182,28 @@ export default function CNCList() {
         setProgramDialog(true);
     };
 
-    const deleteProgram = async (id) => {
-        const confirmed = window.confirm("Tem certeza que deseja excluir esta programação?");
-        if (!confirmed) return;
-
-        try {
-            await api.delete(`/cnc/program/${id}`);
-            
-            if (selectedComponent) {
-                const response = await api.get(`/cnc/program/${selectedComponent.id}`);
-                setPrograms(ensureArray(response.data));
-            } else if (selectedMold) {
-                const response = await api.get(`/cnc/program/mold/${selectedMold.codigo}`);
-                setPrograms(ensureArray(response.data));
+    const deleteProgram = (id) => {
+        confirmDialog({
+            message: 'Deseja realmente excluir esta programação CNC?', header: 'Confirmar exclusão',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim', rejectLabel: 'Não',
+            acceptClassName: 'p-button-danger',
+            accept: async () => {
+                try {
+                    await api.delete(`/cnc/program/${id}`);
+                    if (selectedComponent) {
+                        const response = await api.get(`/cnc/program/${selectedComponent.id}`);
+                        setPrograms(ensureArray(response.data));
+                    } else if (selectedMold) {
+                        const response = await api.get(`/cnc/program/mold/${selectedMold.codigo}`);
+                        setPrograms(ensureArray(response.data));
+                    }
+                } catch (error) {
+                    console.error('Erro ao excluir programação:', error);
+                    alert('Erro ao excluir programação: ' + (error.response?.data?.message || error.message));
+                }
             }
-        } catch (error) {
-            console.error('Erro ao excluir programação:', error);
-            alert('Erro ao excluir programação: ' + error.message);
-        }
+        });
     };
 
     const refreshMachines = () => {
@@ -203,6 +212,7 @@ export default function CNCList() {
 
     return (
         <div className={styles.cncContainer}>
+            <ConfirmDialog />
             <section>
                 <h2 className={styles.sectionHeader}>Máquinas CNC</h2>
                 <Button label="Nova Máquina" icon="pi pi-plus" onClick={openNewMachine} className="mr-3" />

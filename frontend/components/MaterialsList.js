@@ -14,8 +14,17 @@ import statusStyles from '../styles/Projects.module.css';
 export default function MaterialsList() {
     const [molds, setMolds] = useState([]);
     const [selectedMold, setSelectedMold] = useState(null);
+
     const [components, setComponents] = useState([]);
     const [selectedComponent, setSelectedComponent] = useState(null);
+
+    const statusOptions = [
+        { label: 'Todos', value: 'all' },
+        { label: 'Chegou', value: 'arrived' },
+        { label: 'Pendente', value: 'pending' },
+        { label: 'Inativos', value: 'inactive' }
+    ];
+    const [selectedStatus, setSelectedStatus] = useState('all');
 
     const [materials, setMaterials] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,52 +36,73 @@ export default function MaterialsList() {
 
     useEffect(() => {
         api.get('/projects/')
-            .then(res => {
-                setMolds(res.data.molds || []);
-            })
+            .then(res => setMolds(res.data.molds || []))
             .catch(err => {
                 console.error('Erro ao carregar moldes:', err);
-                setMolds([]);
                 show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar moldes.' });
             });
     }, []);
 
+    // Atualiza componentes e materiais quando molde ou status mudam
     useEffect(() => {
         if (!selectedMold) {
             setComponents([]);
             setMaterials([]);
             return;
         }
-        api.get(`/projects/components/${selectedMold.codigo}`)
-            .then(res => {
-                setComponents(res.data.components || []);
-            })
-            .catch(err => {
-                console.error('Erro ao carregar componentes:', err);
-                setComponents([]);
-                show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar componentes.' });
-            });
-        fetchMaterials();
-    }, [selectedMold]);
 
+        // Carrega componentes só se filtro for 'all'
+        if (selectedStatus === 'all') {
+            api.get(`/projects/components/${selectedMold.codigo}`)
+                .then(res => setComponents(res.data.components || []))
+                .catch(err => {
+                    console.error('Erro ao carregar componentes:', err);
+                    show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar componentes.' });
+                });
+        } else {
+            setComponents([]);
+            setSelectedComponent(null);
+        }
+
+        fetchMaterials();
+    }, [selectedMold, selectedStatus]);
+
+    // Quando muda o componente selecionado, recarrega apenas se filtro for 'all'
     useEffect(() => {
-        if (selectedMold) {
+        if (selectedMold && selectedStatus === 'all') {
             fetchMaterials();
         }
     }, [selectedComponent]);
 
     const fetchMaterials = async () => {
+        if (!selectedMold) return;
         setLoading(true);
+
         try {
-            let url = `/materials/${selectedMold.codigo}`;
-            if (selectedComponent) {
-                url = `/materials/components/${selectedComponent.id}`;
+            let url;
+            switch (selectedStatus) {
+                case 'arrived':
+                    url = `/materials/arrived/${selectedMold.codigo}`;
+                    break;
+                case 'pending':
+                    url = `/materials/pending/${selectedMold.codigo}`;
+                    break;
+                case 'inactive':
+                    url = `/materials/inactive/${selectedMold.codigo}`;
+                    break;
+                default:
+                    url = selectedComponent
+                        ? `/materials/components/${selectedComponent.id}`
+                        : `/materials/${selectedMold.codigo}`;
+                    break;
             }
+
             const res = await api.get(url);
-            setMaterials(res.data.materials || []);
+            const values = Object.values(res.data);
+            const list = values.find(v => Array.isArray(v)) || [];
+            setMaterials(list);
         } catch (err) {
             console.error('Erro ao carregar materiais:', err);
-            setMaterials([]);
             show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar materiais.' });
         } finally {
             setLoading(false);
@@ -84,8 +114,7 @@ export default function MaterialsList() {
             message: `Deseja realmente excluir o material ${id}?`,
             header: 'Confirmação',
             icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
+            acceptLabel: 'Sim', rejectLabel: 'Não',
             accept: async () => {
                 try {
                     await api.delete(`/materials/${id}`);
@@ -99,28 +128,31 @@ export default function MaterialsList() {
                         detail: 'Falha ao excluir material: ' + (err.response?.data?.message || err.message)
                     });
                 }
-            },
-            reject: () => {}
+            }
         });
     };
 
-    const actionBodyTemplate = row => (
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <Button
-                icon="pi pi-pencil"
-                className="p-button-text"
-                onClick={() => {
-                    setSelectedMaterial(row);
-                    setFormVisible(true);
-                }}
-            />
-            <Button
-                icon="pi pi-trash"
-                className="p-button-text p-button-danger"
-                onClick={() => handleDelete(row.id)}
-            />
-        </div>
-    );
+    const actionBodyTemplate = row => {
+        // Sem ações se for status "inativo"
+        if (selectedStatus === 'inactive') return null;
+        return (
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button
+                    icon="pi pi-pencil"
+                    className="p-button-text"
+                    onClick={() => {
+                        setSelectedMaterial(row);
+                        setFormVisible(true);
+                    }}
+                />
+                <Button
+                    icon="pi pi-trash"
+                    className="p-button-text p-button-danger"
+                    onClick={() => handleDelete(row.id)}
+                />
+            </div>
+        );
+    };
 
     return (
         <div>
@@ -134,6 +166,7 @@ export default function MaterialsList() {
                         setSelectedMaterial(null);
                         setFormVisible(true);
                     }}
+                    disabled={selectedStatus === 'inactive'}
                 />
                 <Dropdown
                     value={selectedMold}
@@ -144,22 +177,35 @@ export default function MaterialsList() {
                         setSelectedMold(e.value);
                         setSelectedComponent(null);
                     }}
+                    className={styles.filterDropdown}
                 />
                 <Dropdown
-                    value={selectedComponent}
-                    options={components}
-                    optionLabel="id"
-                    placeholder="Filtrar por Componente"
-                    onChange={e => setSelectedComponent(e.value)}
-                    disabled={!selectedMold}
+                    value={selectedStatus}
+                    options={statusOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Status"
+                    onChange={e => setSelectedStatus(e.value)}
                     className={styles.filterDropdown}
-                    itemTemplate={option => (
-                        <div>
-                            ({option.id}) {option.name}
-                        </div>
-                    )}
                 />
+                {selectedStatus === 'all' && (
+                    <Dropdown
+                        value={selectedComponent}
+                        options={components}
+                        optionLabel="id"
+                        placeholder="Filtrar por Componente"
+                        onChange={e => setSelectedComponent(e.value)}
+                        disabled={!selectedMold}
+                        className={styles.filterDropdown}
+                        itemTemplate={option => (
+                            <div>
+                                ({option.id}) {option.name}
+                            </div>
+                        )}
+                    />
+                )}
             </div>
+
             {loading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
                     <ProgressSpinner />
@@ -182,9 +228,7 @@ export default function MaterialsList() {
                         <Column
                             field="arrival_date"
                             header="Data Chegada"
-                            body={row =>
-                                new Date(row.arrival_date).toLocaleDateString('pt-BR')
-                            }
+                            body={row => new Date(row.arrival_date).toLocaleDateString('pt-BR')}
                         />
                         <Column
                             field="is_arrived"
@@ -206,6 +250,7 @@ export default function MaterialsList() {
                     </DataTable>
                 </div>
             )}
+
             {formVisible && (
                 <MaterialForm
                     material={selectedMaterial}

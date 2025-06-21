@@ -228,3 +228,67 @@ html, body {
 .upload-buttom {
     padding: 2px;
 }
+
+.p-confirm-dialog {
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    background: #ffffff;
+    max-width: 450px;
+}
+
+.p-confirm-dialog .p-dialog-header {
+    font-size: 1.25rem;
+    font-weight: 600;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+    padding: 1rem;
+    color: var(--text-dark);
+}
+
+.p-confirm-dialog .p-dialog-content {
+    font-size: 1rem;
+    padding: 1.5rem;
+    color: #555;
+}
+
+.p-confirm-dialog .p-dialog-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    background-color: #f9f9f9;
+    border-top: 1px solid #ddd;
+}
+
+.p-confirm-dialog-icon {
+    font-size: 2rem;
+    color: var(--warning);
+    margin-right: 0.5rem;
+}
+
+.p-confirm-dialog-message {
+    font-size: 1rem;
+    color: #444;
+}
+
+.p-confirm-dialog .p-button {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+}
+
+.p-confirm-dialog .p-button-danger {
+    background-color: var(--danger);
+    border: none;
+}
+
+.p-confirm-dialog .p-button-danger:hover {
+    background-color: #b91c1c;
+}
+
+.p-confirm-dialog .p-button-text {
+    color: var(--text-dark);
+}
+
+.p-confirm-dialog .p-button-text:hover {
+    background-color: #f3f4f6;
+}

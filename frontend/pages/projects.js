@@ -9,6 +9,8 @@ import { Column } from 'primereact/column';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { useNotification } from '../components/NotificationProvider';
 import StepsList from '../components/StepsList';
 import MoldForm from '../components/projects/MoldForm';
 import MoldEditForm from '../components/projects/MoldEditForm';
@@ -17,7 +19,7 @@ import ProcessList from '../components/projects/ProcessList';
 import styles from '../styles/Projects.module.css';
 
 export default function ProjectsPage() {
-    const [showStepsModal, setShowStepsModal] = useState(false); // Corrigido o nome do estado
+    const [showStepsModal, setShowStepsModal] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const [molds, setMolds] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -29,6 +31,8 @@ export default function ProjectsPage() {
     const [editingMold, setEditingMold] = useState(null);
     const [showGlobalInactive, setShowGlobalInactive] = useState(false);
 
+    const { show } = useNotification();
+
     const statusOptions = [
         { label: 'Todos', value: null },
         { label: 'Não iniciado', value: 'not started' },
@@ -39,29 +43,32 @@ export default function ProjectsPage() {
         { label: 'Inativos', value: 'inactive' }
     ];
 
-    useEffect(() => { fetchMolds(); }, [selectedStatus]);
+    useEffect(() => {
+        fetchMolds();
+    }, [selectedStatus]);
 
     const fetchMolds = async () => {
         setLoading(true);
-            try {
-                let res;
-                if (selectedStatus === 'delayed') {
-                    res = await api.get('/projects/delayed');
-                } else if (selectedStatus === 'inactive') {
-                    res = await api.get('/projects/inactive_projects');
-                } else {
-                    // padrão: lista ativa, filtrada por status
-                    const params = selectedStatus ? { status: selectedStatus } : {};
-                    res = await api.get('/projects/', { params });
-                }
-                setMolds(res.data.molds);
-            } catch (err) {
-                console.error(err);
-                setError('Erro ao carregar projetos');
-            } finally {
-                setLoading(false);
+        setError('');
+        try {
+            let res;
+            if (selectedStatus === 'delayed') {
+                res = await api.get('/projects/delayed');
+            } else if (selectedStatus === 'inactive') {
+                res = await api.get('/projects/inactive_projects');
+            } else {
+                const params = selectedStatus ? { status: selectedStatus } : {};
+                res = await api.get('/projects/', { params });
             }
-        };
+            setMolds(res.data.molds);
+        } catch (err) {
+            console.error(err);
+            setError('Erro ao carregar projetos');
+            show({ severity: 'error', summary: 'Erro', detail: 'Não foi possível carregar projetos.' });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleCreate = () => {
         setEditingMold(null);
@@ -73,11 +80,26 @@ export default function ProjectsPage() {
         setShowEditForm(true);
     };
 
-    const handleDelete = async (codigo) => {
-        if (confirm(`Confirma exclusão do molde ${codigo}?`)) {
-            await api.delete(`/projects/${codigo}`);
-            fetchMolds();
-        }
+    const handleDelete = (codigo) => {
+        confirmDialog({
+            message: `Confirma exclusão do molde ${codigo}?`, header: 'Confirmação', icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim', rejectLabel: 'Não',
+            acceptClassName: 'p-button-danger',
+            accept: async () => {
+                try {
+                    await api.delete(`/projects/${codigo}`);
+                    show({ severity: 'success', summary: 'Removido', detail: `Molde ${codigo} excluído.` });
+                    fetchMolds();
+                } catch (err) {
+                    console.error('Erro ao excluir projeto:', err);
+                    show({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Falha ao excluir molde: ' + (err.response?.data?.message || err.message)
+                    });
+                }
+            }
+        });
     };
 
     const rowExpansionTemplate = (data) => (
@@ -95,13 +117,10 @@ export default function ProjectsPage() {
 
     const formatDate = (dateString) => {
         if (!dateString) return '-';
-        
         try {
             const date = new Date(dateString);
             return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
+                day: '2-digit', month: '2-digit', year: 'numeric'
             });
         } catch {
             return dateString;
@@ -116,6 +135,7 @@ export default function ProjectsPage() {
             <div className={styles.container}>
                 <Sidebar />
                 <main className={styles.mainContent}>
+                    <ConfirmDialog />
                     <div className={styles.header}>
                         <h1 className={styles.title}>Projetos de Moldes</h1>
                         <div>
@@ -135,11 +155,26 @@ export default function ProjectsPage() {
                             placeholder="Buscar por código ou descrição"
                             className="p-inputtext-sm mr-4"
                         />
-                        <Dropdown value={selectedStatus} options={statusOptions} onChange={(e) => setSelectedStatus(e.value)} placeholder="Filtrar por status" className={styles.filterDropdown} />
+                        <Dropdown 
+                            value={selectedStatus} 
+                            options={statusOptions} 
+                            onChange={(e) => setSelectedStatus(e.value)} 
+                            placeholder="Filtrar por status" 
+                            className={styles.filterDropdown} 
+                        />
                     </div>
                     {loading ? <ProgressSpinner /> : (
                         <div className={styles.tableContainer}>
-                            <DataTable value={molds} paginator rows={1} expandedRows={expandedRows} onRowToggle={(e) => setExpandedRows(e.data)} rowExpansionTemplate={rowExpansionTemplate} dataKey="codigo" globalFilter={globalFilter}>
+                            <DataTable
+                                value={molds}
+                                paginator
+                                rows={1}
+                                expandedRows={expandedRows}
+                                onRowToggle={(e) => setExpandedRows(e.data)}
+                                rowExpansionTemplate={rowExpansionTemplate}
+                                dataKey="codigo"
+                                globalFilter={globalFilter}
+                            >
                                 <Column expander style={{ width: '3em' }} />
                                 <Column field="codigo" header="Código" sortable />
                                 <Column field="description" header="Descrição" />
@@ -148,7 +183,9 @@ export default function ProjectsPage() {
                                         rowData.status === 'not started' ? styles.notStarted :
                                         rowData.status === 'in process' ? styles.inProcess :
                                         rowData.status === 'paused' ? styles.paused : styles.completed
-                                    }`}>{statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}</span>
+                                    }`}>
+                                        {statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}
+                                    </span>
                                 )} />
                                 <Column field="current_step" header="Etapa Atual" />
                                 <Column field="steps" header="Total de Etapas" />
@@ -162,12 +199,19 @@ export default function ProjectsPage() {
                                     header="Entrega Prevista" 
                                     body={(rowData) => formatDate(rowData.delivery_date)} 
                                 />
-                                <Column header="Ações" body={(rowData) => (
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => handleEdit(rowData)} />
-                                        <Button icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" onClick={() => handleDelete(rowData.codigo)} />
-                                    </div>
-                                )} />
+                                <Column header="Ações" body={(rowData) => {
+                                    // Se inativo baseado em is_active ou status:
+                                    if (rowData.is_active === false /* ou rowData.status==='inactive' conforme inspecionado */) {
+                                        return null;
+                                    }
+                                    return (
+                                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => handleEdit(rowData)} />
+                                            <Button icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" onClick={() => handleDelete(rowData.codigo)} />
+                                        </div>
+                                    );
+                                }} />
+
                             </DataTable>
                         </div>
                     )}
