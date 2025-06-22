@@ -1,6 +1,7 @@
 import 'primereact/resources/themes/lara-light-green/theme.css';
 import 'primereact/resources/primereact.min.css';
 import { NotificationProvider } from '../components/NotificationProvider'
+import { Toast } from 'primereact/toast';
 import 'primeicons/primeicons.css';
 import '../styles/globals.css';  // Importando estilos globais
 import '../styles/index.css';    // Importando estilos principais
@@ -12,6 +13,7 @@ import { useRouter } from 'next/router';
 function MyApp({ Component, pageProps }) {
   return (
     <NotificationProvider>
+      <Toast />
       <Component {...pageProps} />
     </NotificationProvider>
   );

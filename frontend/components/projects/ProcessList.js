@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import api from '../../utils/axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -6,14 +6,18 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import AddProcessForm from './ProcessForm';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { useNotification } from '../../components/NotificationProvider';
 import styles from '../../styles/Projects.module.css';
 
-export default function ProcessList({ moldCode, componentID, isGlobalView }) {
+export default function ProcessList({ moldCode, componentID, isGlobalView, parentRefreshFlag }) {
     const [processes, setProcesses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState(null);
     const [expandedRows, setExpandedRows] = useState(null);
     const [displayAddForm, setDisplayAddForm] = useState(false);
+
+    const { show } = useNotification();
 
     const statusOptions = [
         { label: 'Todos', value: null },
@@ -25,14 +29,14 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
     ];
 
     const fetchProcesses = async () => {
+        if (!moldCode && !componentID) return;
         setLoading(true);
         try {
             let data = [];
-
             if (statusFilter === 'inactive') {
                 const res = await api.get(`/processes/inactive_processes/${moldCode}`);
                 data = (res.data.inactive_processes || []).map(p => ({
-                    id: p.id, // Adicionado campo único obrigatório
+                    id: p.id,
                     process_id: p.id,
                     component_id: p.componente_id,
                     step_name: p.description,
@@ -43,56 +47,62 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                 const res = componentID 
                     ? await api.get(`/processes/components/${componentID}`)
                     : await api.get(`/processes/${moldCode}`);
-
-                data = isGlobalView 
-                    ? (res.data.processes || []).flatMap(component => 
+                if (isGlobalView) {
+                    data = (res.data.processes || []).flatMap(component => 
                         component.processes.map(process => ({
-                            id: process.process_id, // Campo único obrigatório
+                            id: process.process_id,
                             ...process,
                             component_id: component.component_id
-                        })) 
-                      )
-                    : (res.data.processes || []).map(p => ({ ...p, id: p.process_id }));
-
+                        }))
+                    );
+                } else {
+                    data = (res.data.processes || []).map(p => ({ ...p, id: p.process_id }));
+                }
                 if (statusFilter) {
                     data = data.filter(p => p.status === statusFilter);
                 }
             }
-
             setProcesses(data);
         } catch (err) {
             console.error('Erro ao buscar processos:', err);
+            show({ severity: 'error', summary: 'Erro', detail: 'Falha ao buscar processos.' });
             setProcesses([]);
         } finally {
             setLoading(false);
         }
     };
 
+    // Ao montar e quando deps mudam: moldCode, componentID, statusFilter, parentRefreshFlag
     useEffect(() => { 
-        if (moldCode || componentID) {
-            fetchProcesses();
-        }
-    }, [moldCode, componentID, statusFilter]);
+        fetchProcesses();
+    }, [moldCode, componentID, statusFilter, parentRefreshFlag]);
 
     const handleDelete = async (id) => {
-        if (confirm(`Excluir processo ${id}?`)) {
-            try {
-                await api.delete(`/processes/${id}?moldCode=${moldCode}`);
-                fetchProcesses();
-            } catch (err) { 
-                console.error('Erro ao deletar processo:', err); 
-            }
-        }
+        confirmDialog({
+            message: `Excluir processo ${id}?`, header: 'Confirmação', icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim', rejectLabel: 'Não',
+            acceptClassName: 'p-button-danger',
+            accept: async () => {
+                try {
+                    await api.delete(`/processes/${id}?moldCode=${moldCode}`);
+                    show({ severity: 'success', summary: 'Removido', detail: `Processo ${id} excluído.` });
+                    fetchProcesses();
+                } catch (err) {
+                    console.error('Erro ao deletar processo:', err);
+                    show({ severity: 'error', summary: 'Erro', detail: 'Falha ao excluir processo.' });
+                }
+            },
+            reject: () => {}
+        });
     };
 
     return (
         <div>
+            <ConfirmDialog />
             <div className="flex gap-2 mb-2">
                 {componentID && (
                     <Button
-                        label="Adicionar Processo"
-                        icon="pi pi-plus"
-                        className="p-button-sm mr-3"
+                        label="Adicionar Processo" icon="pi pi-plus" className="p-button-sm mr-3"
                         onClick={() => setDisplayAddForm(true)}
                     />
                 )}
@@ -107,8 +117,9 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
 
             <DataTable paginator rows={10}
                 value={processes}
+                loading={loading}
                 responsiveLayout="scroll"
-                dataKey="id" // Campo único obrigatório
+                dataKey="id"
                 expandedRows={expandedRows}
                 onRowToggle={(e) => setExpandedRows(e.data)}
             >
@@ -120,7 +131,9 @@ export default function ProcessList({ moldCode, componentID, isGlobalView }) {
                         rowData.status === 'not started' ? styles.notStarted :
                         rowData.status === 'in process' ? styles.inProcess :
                         rowData.status === 'paused' ? styles.paused : styles.completed
-                    }`}>{statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}</span>
+                    }`}>
+                        {statusOptions.find(opt => opt.value === rowData.status)?.label || rowData.status}
+                    </span>
                 )} />
                 <Column field="maquina_id" header="Maq. ID" />
                 <Column field="maquina_name" header="Maq. Nome" />
